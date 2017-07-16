@@ -1,6 +1,6 @@
 .body{
 	/*design*/
-	background-color:#475568;
+	background-color:#364e68;
 
 	/*layout*/
 	position:absolute;
@@ -11,7 +11,7 @@
 
 .bodyPicture{
 	/*Design*/
-	border:0.5vmin double #313b49;
+	border:0.5vmin double #476789;
 	border-radius:25vmin; 
 
 	/*Layout*/
@@ -19,13 +19,6 @@
 	display:block;
 	width:35vmin;
 	height:35vmin;
-
-	transition: 0.25s filter ease;
-
-}
-
-.bodyPicture:hover{
-	filter:blur(2px);
 }
 
 .bodyBiography{

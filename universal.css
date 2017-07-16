@@ -7,7 +7,7 @@
 
 .header{
 	/*design*/
-	background-color:#313b49;
+	background-color:#476789;
 
 	/*layout*/
 	width: 100%;
@@ -53,7 +53,7 @@
 	margin: 0px 5vmin;
 	float: right;
 	height: 100%;
-	max-width: 10vw;
+	max-width: 10vmin;
 }
 
 .headerButton a{
@@ -64,4 +64,17 @@
 .headerButton:hover{
 	/*design*/
 	color:#aaaaaa;
+}
+
+.footer{
+	/*design*/
+	background-color:#476789;
+
+
+	/*layout*/
+	position: fixed;
+	top:95vh;
+	width:100%;
+	height:5vh;
+
 }
