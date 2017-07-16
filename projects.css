@@ -11,7 +11,7 @@
 
 .title{
 	/*Design*/
-	font-family: "Trebuchet MS". Helvetica, sans-serif;
+	font-family: "Trebuchet MS", Helvetica, sans-serif;
 	font-size:10vmin;
 	color:#cccccc;
 	text-align:center;
@@ -23,7 +23,7 @@
 
 .projectSection{
 	/*Design*/
-	font-family: "Trebuchet MS". Helvetica, sans-serif;
+	font-family: "Trebuchet MS", Helvetica, sans-serif;
 	font-size:5vmin;
 	color:#aaaaaa;
 	text-align:center;

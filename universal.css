@@ -27,7 +27,7 @@
 
 .headerName{
 	/*design*/
-	font-family: "Trebuchet MS". Helvetica, sans-serif;
+	font-family: "Trebuchet MS", Helvetica, sans-serif;
 	font-size: 7vmin;
 	font-weight: bold;
 	color:#cccccc;
@@ -42,7 +42,7 @@
 
 .headerButton{
 	/*design*/
-	font-family: "Trebuchet MS". Helvetica, sans-serif;
+	font-family: "Trebuchet MS", Helvetica, sans-serif;
 	font-size: 3vmin;
 	font-weight: bold;
 	color:#cccccc;

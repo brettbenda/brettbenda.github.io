@@ -1,0 +1,49 @@
+<!DOCTYPE>
+<html>
+	<head>
+		<title>Brett Benda</title>
+		<link href="voronoi.css" type="text/css" rel="stylesheet">
+		<link href="universal.css" type="text/css" rel="stylesheet">
+		<script type="text/javascript" src="processing.js"></script>
+	</head>
+
+	<body>
+		<!--Header-->
+		<div class="header">
+			<!--List to organize buttons-->
+			<p class="headerName">brett_benda</p>
+			<ul class="headerButtonContainer">
+				<!--Buttons-->
+				<li class="headerButton">Contact</li>
+				<li class="headerButton"><a href="projects.html">Projects</a></li>
+				<li class="headerButton"><a href="index.html">Home</a></li>
+			</ul>
+		</div>
+
+		<!--Body-->
+		<div class="body">
+			<p class="heading">Voronoi Diagram Generator</p>
+			<!--<img class="image" src="images/mandel.jpg"/>-->
+			<p class="subheading">
+				Below are two processing sketches that generate Voronoi diagrams. Every point is colored in the canvas according to which point it is closest to. The two sketches use different rules to determine distance. In both, you can click and drag points around as well as add new points.<br>
+			</p>
+
+			<p class="subheading">
+				Euclidean Distace: distance calculated by only taking a straight-line path
+			</p>
+
+			<canvas class="sketch" data-processing-sources="voronoiEuclidean.pde"></canvas>
+
+			<p class="subheading">
+				Manhattan Distace: distance calculated by only taking vertical or horizontal paths
+			</p>
+
+			<canvas class="sketch" data-processing-sources="voronoiManhattan.pde"></canvas>
+		</div>
+
+		<!--Footer-->
+		<div class="footer">
+
+		</div>
+	</body>
+</html>
