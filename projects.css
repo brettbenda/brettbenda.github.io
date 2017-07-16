@@ -1,0 +1,54 @@
+.body{
+	/*design*/
+	background-color:#475568;
+
+	/*layout*/
+	position:absolute;
+	top: 10vh;
+	width: 100%;
+	height: 85vh;
+}
+
+.title{
+	/*Design*/
+	font-family: "Trebuchet MS". Helvetica, sans-serif;
+	font-size:10vmin;
+	color:#cccccc;
+	text-align:center;
+
+	/*Layout*/
+	margin:5vmin auto;
+	display:block;
+}
+
+.projectSection{
+	/*Design*/
+	font-family: "Trebuchet MS". Helvetica, sans-serif;
+	font-size:5vmin;
+	color:#cccccc;
+	text-align:center;
+
+	/*Layout*/
+	height:4.5vmin;
+	width:100%;
+}
+
+.projectDisplay{
+	margin:0 auto;
+}
+
+.projectImage{
+	/*Design*/
+	filter:grayscale(90%) blur(0.5px);
+	transition: 0.25s filter linear;
+
+	/*Layout*/
+	width:24vmin;
+	height:13.5vmin;
+	margin:2vmin;
+}
+
+.projectImage:hover{
+	filter:grayscale(0%) blur(0px);
+
+}
