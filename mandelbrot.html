@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<title>Brett Benda</title>
-		<link href="mandelbrot.css" type="text/css" rel="stylesheet">
+		<link href="projects.css" type="text/css" rel="stylesheet">
 		<link href="universal.css" type="text/css" rel="stylesheet">
 		<script type="text/javascript" src="processing.js"></script>
 	</head>
@@ -11,7 +11,7 @@
 		<!--Header-->
 		<div class="header">
 			<!--List to organize buttons-->
-			<p class="headerName">brett_benda</p>
+			<p class="headerName">brett benda</p>
 			<ul class="headerButtonContainer">
 				<!--Buttons-->
 				<li class="headerButton">Contact</li>
@@ -21,28 +21,31 @@
 		</div>
 
 		<!--Body-->
-		<div class="body">
-			<p class="heading">Mandelbrot and Julia Set Viewers</p>
-			<!--<img class="image" src="images/mandel.jpg"/>-->
+		<div class="body" style="height:200vh">
+			<p class="title">Mandelbrot and Julia Set Viewers</p>
+			
 			<p class="subheading">
-				Below are two sketches originally written is the Processing programming language. The upper displays the Mandelbrot set, while the lower a Julia set. Each is only running 20 iterations, to be less CPU intensive.
+				<a href="https://github.com/brettbenda/mandelbrot"><u>Link to GitHub Repository</u></a>
 			</p>
+			
 			<p class="subheading">
-				You can use your mouse to navigate, the 'w' key to zoom in, and the 's' key to zoom out.
-			</p>		
-
-			<canvas class="sketch" data-processing-sources="mandelbrot.pde"></canvas>	
-			<canvas class="sketch" data-processing-sources="julia.pde"></canvas>
-
-			<p class="subheading">
-			Here is a video of a deep zoom into the same Julia set as above, except with more iterations.
+				The two sketches below display the Mandelbrot Set and a Julia set.
 			</p>
-			<iframe class="sketch" width="400" height="225" src="https://www.youtube.com/embed/c_3-xvPu0OI" frameborder="0" allowfullscreen></iframe>
-		</div>
+			
+			<br/>	
 
-		<!--Footer-->
-		<div class="footer">
+			<p class="subheading">
+				Controls: Mouse to pan, W to zoom in, S to zoom out 
+			</p>
 
+			<canvas class="sketch" data-processing-sources="sketches/mandelbrot.pde"></canvas>	
+			<canvas class="sketch" data-processing-sources="sketches/julia.pde"></canvas>
+
+			<br/>
+			<p class="subheading">
+			Here is a video of a deep zoom into the same Julia set as above.
+			</p>
+			<iframe class="sketch" width="800" height="450" src="https://www.youtube.com/embed/c_3-xvPu0OI" frameborder="0" allowfullscreen></iframe>
 		</div>
 	</body>
 </html>

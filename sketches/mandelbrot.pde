@@ -20,7 +20,7 @@ void setup() {
 void draw() {
   background(255);
   updateZoomAndTranslation();
-  drawJulia(zoom, xDisplacement, yDisplacement, 20);
+  drawMandelbrot(zoom, xDisplacement, yDisplacement, 100);
 }
 
 void keyPressed(){
@@ -54,35 +54,31 @@ void updateZoomAndTranslation() {
   }
 }
 
-void drawJulia(double xAxisLength, double xDisplacement, double yDisplacement, int iterations) {
+void drawMandelbrot(double xAxisLength, double xDisplacement, double yDisplacement, int iterations) {
   //load pixels so we can modify them
   loadPixels();
 
   //using HSB for coloring
   colorMode(HSB);
 
-  //constants
-  double realPart = -0.8;
-  double imaginaryPart = 0.156;
-
   //we want the y-axis to be proportional to the x-axis
-  double yAxisHeight = (xAxisLength * height)/(width);
+  double yAxisHeight = (xAxisLength * height)/width;
 
   //minimun (starting) values
   //and how much we need to increase them by each iterations
   double xMinimum = -xAxisLength/2 + xDisplacement;
-  double dX = (double)xAxisLength/width;
+  double dX = xAxisLength/width;
   double yMinimum = -yAxisHeight/2 + yDisplacement;
-  double dY = (double)yAxisHeight/height;
+  double dY = yAxisHeight/height;
 
   double y = yMinimum;//start at minumum x-value
 
-  //increment down to the next row
+  //increment across the row
   for (int i = 0; i<height; i++) {
 
     double x = xMinimum;//start at minimum y-value;
 
-    //increment across the row;
+    //increment down the column;
     for (int j = 0; j<width; j++) {
 
       double a = x;//real part is x
@@ -98,12 +94,11 @@ void drawJulia(double xAxisLength, double xDisplacement, double yDisplacement, i
 
         //new parts are determined by expansion 
         //(a+bi)^2 == a^2 - b^2 + 2ab
-        //we add the predefined constants, rather than the place we are
-        a = aSquared - bSquared + realPart;
-        b = twoAB + imaginaryPart;
+        a = aSquared - bSquared + x;
+        b = twoAB + y;
 
         //if value of new
-        if (Math.sqrt(a*a+b*b)>64) {
+        if (Math.sqrt(a*a+b*b)>4) {
           break;
         }
         n++;
@@ -112,7 +107,7 @@ void drawJulia(double xAxisLength, double xDisplacement, double yDisplacement, i
       if (n == iterations) {
         pixels[j+i*width] = #000000;
       } else {
-        float hue = 5*n;
+       float hue = 5*n;
         if (hue > 255) {
           hue = hue%255;
         }

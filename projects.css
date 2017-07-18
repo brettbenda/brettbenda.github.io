@@ -1,46 +1,37 @@
 .body{
-	/*design*/
-	background-color:#364e68;
-
-	/*layout*/
-	position:absolute;
-	top: 10vh;
-	width: 100%;
-	height: 85vh;
+	height: 90vh;
 }
 
+/*Page title*/
 .title{
 	/*Design*/
-	font-family: "Trebuchet MS", Helvetica, sans-serif;
 	font-size:10vmin;
-	color:#cccccc;
-	text-align:center;
 
 	/*Layout*/
 	margin:5vmin auto;
 	display:block;
 }
 
+/*text for differentiating projects*/
 .projectSection{
 	/*Design*/
-	font-family: "Trebuchet MS", Helvetica, sans-serif;
 	font-size:5vmin;
-	color:#aaaaaa;
-	text-align:center;
 
 	/*Layout*/
 	height:4.5vmin;
 	width:100%;
 }
 
+/*table containing projects*/
 .projectDisplay{
 	margin:0 auto;
 }
 
+/*image that links to project page*/
 .projectImage{
 	/*Design*/
 	filter:grayscale(90%) blur(0.5px);
-	transition: 0.25s filter linear;
+	transition: 0.25s filter linear, 0.25s width linear, 0.25s height linear;
 
 	/*Layout*/
 	width:24vmin;
@@ -48,7 +39,43 @@
 	margin:2vmin;
 }
 
+/*transition when image is moused over*/
 .projectImage:hover{
 	filter:grayscale(0%) blur(0px);
+
+}
+
+/*for descriptions*/
+.subheading{
+	/*Design*/
+	font-size:2.5vmin;
+	/*Layout*/
+	margin:2vmin 25vmin;
+}
+
+.sketch{
+	/*Design*/
+	width:64vmin;
+	height:36vmin;
+	/*Layout*/
+	margin:2vmin auto;
+	display: block;
+}
+
+.fixedSketch{
+	/*Layout*/
+	margin:2vmin auto;
+	display: block;
+	
+}
+
+.tileSliderImage{
+	/**/
+	transition: 0.5s width linear, 0.5s height linear;
+
+	/*Layout*/
+	margin:2vmin 2vmin;
+	width:24vmin;
+	height:36vmin;
 
 }

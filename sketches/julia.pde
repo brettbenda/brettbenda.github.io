@@ -20,7 +20,7 @@ void setup() {
 void draw() {
   background(255);
   updateZoomAndTranslation();
-  drawMandelbrot(zoom, xDisplacement, yDisplacement, 20);
+  drawJulia(zoom, xDisplacement, yDisplacement, 100);
 }
 
 void keyPressed(){
@@ -54,31 +54,35 @@ void updateZoomAndTranslation() {
   }
 }
 
-void drawMandelbrot(double xAxisLength, double xDisplacement, double yDisplacement, int iterations) {
+void drawJulia(double xAxisLength, double xDisplacement, double yDisplacement, int iterations) {
   //load pixels so we can modify them
   loadPixels();
 
   //using HSB for coloring
   colorMode(HSB);
 
+  //constants
+  double realPart = -0.8;
+  double imaginaryPart = 0.156;
+
   //we want the y-axis to be proportional to the x-axis
-  double yAxisHeight = (xAxisLength * height)/width;
+  double yAxisHeight = (xAxisLength * height)/(width);
 
   //minimun (starting) values
   //and how much we need to increase them by each iterations
   double xMinimum = -xAxisLength/2 + xDisplacement;
-  double dX = xAxisLength/width;
+  double dX = (double)xAxisLength/width;
   double yMinimum = -yAxisHeight/2 + yDisplacement;
-  double dY = yAxisHeight/height;
+  double dY = (double)yAxisHeight/height;
 
   double y = yMinimum;//start at minumum x-value
 
-  //increment across the row
+  //increment down to the next row
   for (int i = 0; i<height; i++) {
 
     double x = xMinimum;//start at minimum y-value;
 
-    //increment down the column;
+    //increment across the row;
     for (int j = 0; j<width; j++) {
 
       double a = x;//real part is x
@@ -94,11 +98,12 @@ void drawMandelbrot(double xAxisLength, double xDisplacement, double yDisplaceme
 
         //new parts are determined by expansion 
         //(a+bi)^2 == a^2 - b^2 + 2ab
-        a = aSquared - bSquared + x;
-        b = twoAB + y;
+        //we add the predefined constants, rather than the place we are
+        a = aSquared - bSquared + realPart;
+        b = twoAB + imaginaryPart;
 
         //if value of new
-        if (Math.sqrt(a*a+b*b)>16) {
+        if (Math.sqrt(a*a+b*b)>4) {
           break;
         }
         n++;
@@ -107,7 +112,7 @@ void drawMandelbrot(double xAxisLength, double xDisplacement, double yDisplaceme
       if (n == iterations) {
         pixels[j+i*width] = #000000;
       } else {
-       float hue = 5*n;
+        float hue = 5*n;
         if (hue > 255) {
           hue = hue%255;
         }
