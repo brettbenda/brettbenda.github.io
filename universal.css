@@ -76,7 +76,7 @@ a:hover{
 	/*layout*/
 	position:relative;
 	display: inline-block;
-	margin: 0px 5vmin;
+	margin: 0 2vmin;
 	float: right;
 	height: 100%;
 	max-width: 10vmin;

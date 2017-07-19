@@ -2,8 +2,8 @@
 	height: 90vh;
 }
 
-/*Page title*/
-.title{
+/*big text*/
+.bigText{
 	/*Design*/
 	font-size:10vmin;
 
@@ -12,8 +12,8 @@
 	display:block;
 }
 
-/*text for differentiating projects*/
-.projectSection{
+/*mid sized text*/
+.midText{
 	/*Design*/
 	font-size:5vmin;
 
@@ -22,20 +22,20 @@
 	width:100%;
 }
 
-/*table containing projects*/
-.projectDisplay{
+/*table that will be in middle of page*/
+.centeredTable{
 	margin:0 auto;
 }
 
 /*image that links to project page*/
 .projectImage{
 	/*Design*/
-	filter:grayscale(90%) blur(0.5px);
+	filter:grayscale(90%) blur(0.8px);
 	transition: 0.25s filter linear, 0.25s width linear, 0.25s height linear;
 
 	/*Layout*/
-	width:24vmin;
-	height:13.5vmin;
+	width:24vw;
+	height:13.5vw;
 	margin:2vmin;
 }
 
@@ -49,8 +49,10 @@
 .subheading{
 	/*Design*/
 	font-size:2.5vmin;
+	text-align: center;
 	/*Layout*/
-	margin:2vmin 25vmin;
+	margin:2vmin auto;
+	max-width: 75%;
 }
 
 .sketch{
@@ -70,12 +72,56 @@
 }
 
 .tileSliderImage{
-	/**/
+	/*Design*/
 	transition: 0.5s width linear, 0.5s height linear;
-
+	border:0.5vmin double #476789;
 	/*Layout*/
-	margin:2vmin 2vmin;
+	margin:2vmin auto 0 auto;
 	width:24vmin;
 	height:36vmin;
+}
 
+.particleImage{
+	/*Design*/
+	transition: 0.5s width linear, 0.5s height linear;
+	border:0.5vmin double #476789;
+	/*Layout*/
+	margin:2vmin auto 0 auto;
+	width:29.44vmin;
+	height:36.8vmin;
+
+}
+
+.particleImage:hover{
+	width:60vmin;
+	height:75vmin;
+}
+
+.animationVideo{
+	/*Design*/
+	transition: 0.5s width linear, 0.5s height linear;
+	/*Layout*/
+	display:block;
+	margin:2vmin auto;
+	width:72vmin;
+	height:40.5vmin;
+
+}
+
+.handImage{
+	/*Design*/
+	border:0.5vmin double #476789;
+	/*Layout*/
+	display: block;
+	margin: 0 auto;
+	width:30vmin;
+}
+
+.roomImage{
+	/*Design*/
+	border:0.5vmin double #476789;
+	/*Layout*/
+	display: block;
+	margin: 2vmin auto;
+	height:50vmin;
 }
