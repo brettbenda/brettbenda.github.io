@@ -2,9 +2,10 @@
 <html>
 <head>
 	<title>Brett Benda</title>
-	<link href="projects.css" type="text/css" rel="stylesheet">
-	<link href="universal.css" type="text/css" rel="stylesheet">
-	<script type="text/javascript" src="processing.js"></script>
+	<link href="../css/projects.css" type="text/css" rel="stylesheet">
+	<link href="../css/universal.css" type="text/css" rel="stylesheet">
+	<script type="text/javascript" src="../scripts/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="../scripts/processing.js"></script>
 </head>
 
 <body>
@@ -16,12 +17,12 @@
 			<!--Buttons-->
 			<li class="headerButton"><a href="projects.html">Projects</a></li>
 			<li class="headerButton"><a href="about.html">About</a></li>
-			<li class="headerButton"><a href="index.html">Home</a></li>
+			<li class="headerButton"><a href="../index.html">Home</a></li>
 		</ul>
 	</div>
 
 	<!--Body-->
-	<div class="body" style="height:200vh">
+	<div class="body">
 		<p class="bigText">Mandelbrot and Julia Set Viewers</p>
 
 		<p class="subheading">
@@ -39,8 +40,8 @@
 			Controls: Mouse to pan, W to zoom in, S to zoom out 
 		</p>
 
-		<canvas class="sketch" data-processing-sources="sketches/mandelbrot.pde"></canvas>	
-		<canvas class="sketch" data-processing-sources="sketches/julia.pde"></canvas>
+		<canvas class="sketch" data-processing-sources="../sketches/mandelbrot.pde"></canvas>	
+		<canvas class="sketch" data-processing-sources="../sketches/julia.pde"></canvas>
 		<br/>
 		<p class="subheading">
 			Here is a video of a deep zoom into the same Julia set as above.

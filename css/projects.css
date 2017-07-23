@@ -1,5 +1,10 @@
+img:hover{
+cursor: pointer;
+}
+
 .body{
-	height: 90vh;
+	display: inline-block;
+	min-height: 90vh;
 }
 
 /*big text*/
@@ -27,6 +32,17 @@
 	margin:0 auto;
 }
 
+/*when an element is clicked, script will make it take whole screen*/
+.tableElementClicked{
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0,0,0,0.7);
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 15;
+}
+
 /*image that links to project page*/
 .projectImage{
 	/*Design*/
@@ -42,7 +58,7 @@
 /*transition when image is moused over*/
 .projectImage:hover{
 	filter:grayscale(0%) blur(0px);
-
+	cursor:pointer;
 }
 
 /*for descriptions*/
@@ -55,6 +71,7 @@
 	max-width: 75%;
 }
 
+/*sketch that changes size*/
 .sketch{
 	/*Design*/
 	width:64vmin;
@@ -64,6 +81,7 @@
 	display: block;
 }
 
+/*sketch that must stay same size*/
 .fixedSketch{
 	/*Layout*/
 	margin:2vmin auto;
@@ -71,35 +89,48 @@
 	
 }
 
+/*image in table for tile slider*/
 .tileSliderImage{
 	/*Design*/
-	transition: 0.5s width linear, 0.5s height linear;
 	border:0.5vmin double #476789;
 	/*Layout*/
-	margin:2vmin auto 0 auto;
+	display: block;
+	margin:5vmin auto 0 auto;
 	width:24vmin;
 	height:36vmin;
 }
 
+/*used by script when image is expanded*/
+.tileSliderImageExpanded{
+	top:50%;
+	left:50%;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	width: 48vmin;
+	height: 72vmin;
+}
+
+/*image in table for particle simulator*/
 .particleImage{
 	/*Design*/
-	transition: 0.5s width linear, 0.5s height linear;
 	border:0.5vmin double #476789;
 	/*Layout*/
 	margin:2vmin auto 0 auto;
-	width:29.44vmin;
-	height:36.8vmin;
-
+	width:30vmin;
 }
 
-.particleImage:hover{
-	width:60vmin;
-	height:75vmin;
+/*used by script when image is expanded*/
+.particleImageExpanded{
+	top:50%;
+	left:50%;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	width:70vmin;
 }
 
+/*video size used for animations*/
 .animationVideo{
 	/*Design*/
-	transition: 0.5s width linear, 0.5s height linear;
 	/*Layout*/
 	display:block;
 	margin:2vmin auto;
@@ -108,6 +139,7 @@
 
 }
 
+/*image in table for hand animation*/
 .handImage{
 	/*Design*/
 	border:0.5vmin double #476789;
@@ -117,11 +149,30 @@
 	width:30vmin;
 }
 
+/*used by script when image is expanded*/
+.handImageExpanded{
+	top:50%;
+	left:50%;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	width:60vmin;
+}
+
+/*image in table for room*/
 .roomImage{
 	/*Design*/
 	border:0.5vmin double #476789;
 	/*Layout*/
 	display: block;
 	margin: 2vmin auto;
-	height:50vmin;
+	width:88.8vmin;
+}
+
+/*used by script when image is expanded*/
+.roomImageExpanded{
+	top:50%;
+	left:50%;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	width:90vw;
 }

@@ -2,9 +2,10 @@
 <html>
 	<head>
 		<title>Brett Benda</title>
-		<link href="projects.css" type="text/css" rel="stylesheet">
-		<link href="universal.css" type="text/css" rel="stylesheet">
-		<script type="text/javascript" src="processing.js"></script>
+		<link href="../css/projects.css" type="text/css" rel="stylesheet">
+		<link href="../css/universal.css" type="text/css" rel="stylesheet">
+		<script type="text/javascript" src="../scripts/jquery-3.2.1.min.js"></script>
+		<script type="text/javascript" src="../scripts/processing.js"></script>
 	</head>
 
 	<body>
@@ -16,12 +17,12 @@
 				<!--Buttons-->
 				<li class="headerButton"><a href="projects.html">Projects</a></li>
 				<li class="headerButton"><a href="about.html">About</a></li>
-				<li class="headerButton"><a href="index.html">Home</a></li>
+				<li class="headerButton"><a href="../index.html">Home</a></li>
 			</ul>
 		</div>
 
 		<!--Body-->
-		<div class="body" style="height:200vh">
+		<div class="body">
 			<p class="bigText">Voronoi Diagram Generator</p>
 
 			<p class="subheading">
@@ -38,13 +39,13 @@
 				Euclidean Distace: distance calculated by only taking a straight-line path
 			</p>
 
-			<canvas class="fixedSketch" data-processing-sources="sketches/voronoiEuclidean.pde"></canvas>
+			<canvas class="fixedSketch" data-processing-sources="../sketches/voronoiEuclidean.pde"></canvas>
 
 			<p class="subheading">
 				Manhattan Distace: distance calculated by only taking vertical or horizontal paths
 			</p>
 
-			<canvas class="fixedSketch" data-processing-sources="sketches/voronoiManhattan.pde"></canvas>
+			<canvas class="fixedSketch" data-processing-sources="../sketches/voronoiManhattan.pde"></canvas>
 
 		</div>
 

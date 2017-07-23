@@ -86,7 +86,7 @@ a:hover{
 .body{
 	/*design*/
 	background-color:#364e68;
-	background-image: url(images/background.png);
+	background-image: url(../images/background.png);
 	/*layout*/
 	position:absolute;
 	top: 10vh;
