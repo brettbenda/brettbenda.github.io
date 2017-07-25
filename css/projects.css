@@ -1,19 +1,13 @@
 img:hover{
-cursor: pointer;
-}
-
-.body{
-	display: inline-block;
-	min-height: 90vh;
+	cursor: pointer;
 }
 
 /*big text*/
 .bigText{
 	/*Design*/
 	font-size:10vmin;
-
 	/*Layout*/
-	margin:5vmin auto;
+	margin:2vmin auto;
 	display:block;
 }
 
@@ -29,7 +23,7 @@ cursor: pointer;
 
 /*table that will be in middle of page*/
 .centeredTable{
-	margin:0 auto;
+	margin:1vmin auto;
 }
 
 /*when an element is clicked, script will make it take whole screen*/
@@ -46,18 +40,17 @@ cursor: pointer;
 /*image that links to project page*/
 .projectImage{
 	/*Design*/
-	filter:grayscale(90%) blur(0.8px);
+	filter:grayscale(90%);
 	transition: 0.25s filter linear, 0.25s width linear, 0.25s height linear;
 
 	/*Layout*/
-	width:24vw;
-	height:13.5vw;
-	margin:2vmin;
+	width:30vw;
+	margin:1vmin;
 }
 
 /*transition when image is moused over*/
 .projectImage:hover{
-	filter:grayscale(0%) blur(0px);
+	filter:grayscale(0%) drop-shadow(0 0 2vmin #111111);;
 	cursor:pointer;
 }
 
@@ -68,14 +61,13 @@ cursor: pointer;
 	text-align: center;
 	/*Layout*/
 	margin:2vmin auto;
-	max-width: 75%;
+	max-width: 50%;
 }
 
 /*sketch that changes size*/
 .sketch{
 	/*Design*/
-	width:64vmin;
-	height:36vmin;
+	width:80%;
 	/*Layout*/
 	margin:2vmin auto;
 	display: block;
@@ -96,8 +88,7 @@ cursor: pointer;
 	/*Layout*/
 	display: block;
 	margin:5vmin auto 0 auto;
-	width:24vmin;
-	height:36vmin;
+	height:40vmin;
 }
 
 /*used by script when image is expanded*/
@@ -106,8 +97,7 @@ cursor: pointer;
 	left:50%;
 	position: absolute;
 	transform: translate(-50%,-50%);
-	width: 48vmin;
-	height: 72vmin;
+	height: 80vmin;
 }
 
 /*image in table for particle simulator*/
@@ -115,6 +105,7 @@ cursor: pointer;
 	/*Design*/
 	border:0.5vmin double #476789;
 	/*Layout*/
+	display: block;
 	margin:2vmin auto 0 auto;
 	width:30vmin;
 }

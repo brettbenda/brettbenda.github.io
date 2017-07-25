@@ -1,4 +1,4 @@
-$(document).ready(function(){
+$(function(){
 	var largeImageFlag = true;
 
 
@@ -15,6 +15,8 @@ $(document).ready(function(){
 
 			$(this).children(".particleImage").addClass("particleImageExpanded");
 
+			$(this).children("p").toggle();
+
 		}else{
 
 			$(this).removeClass("tableElementClicked");
@@ -26,6 +28,8 @@ $(document).ready(function(){
 			$(this).children(".handImage").removeClass("handImageExpanded");
 
 			$(this).children(".particleImage").removeClass("particleImageExpanded");
+			
+			$(this).children("p").toggle();
 		}
 		largeImageFlag = !largeImageFlag;
 	});
