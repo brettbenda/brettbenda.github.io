@@ -15,6 +15,10 @@ $(function(){
 
 			$(this).children(".particleImage").addClass("particleImageExpanded");
 
+			$(this).children(".tropicalImage").addClass("tropicalImageExpanded");
+
+			$(this).children(".boatImage").addClass("boatImageExpanded");
+
 			$(this).children("p").toggle();
 
 		}else{
@@ -28,6 +32,10 @@ $(function(){
 			$(this).children(".handImage").removeClass("handImageExpanded");
 
 			$(this).children(".particleImage").removeClass("particleImageExpanded");
+
+			$(this).children(".tropicalImage").removeClass("tropicalImageExpanded");
+
+			$(this).children(".boatImage").removeClass("boatImageExpanded");
 			
 			$(this).children("p").toggle();
 		}

@@ -69,7 +69,7 @@ img:hover{
 	transition: 0.25s filter linear, 0.25s width linear, 0.25s height linear;
 
 	/*Layout*/
-	width:30vw;
+	width:30vmin;
 	margin:1vmin;
 }
 
@@ -101,7 +101,7 @@ img:hover{
 	border:0.5vmin double #476789;
 	/*Layout*/
 	display: block;
-	margin:5vmin auto 0 auto;
+	margin:1vmin auto 0 auto;
 	height:40vmin;
 }
 
@@ -167,6 +167,50 @@ img:hover{
 }
 
 .roomImageExpanded{
+	top:50%;
+	left:50%;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	width:90vw;
+}
+
+.tropicalImage{
+	/*Design*/
+	border:0.5vmin double #476789;
+	/*Layout*/
+	display: block;
+	margin:0 auto;
+	width:30vmin;
+}
+
+.tropicalImageExpanded{
+	top:50%;
+	left:50%;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	width:90vw;
+}
+
+.boatImage{
+	/*Design*/
+	border:0.5vmin double #476789;
+	/*Layout*/
+	display: block;
+	margin:0 auto;
+	width:45vmin;
+}
+
+.boatVideo{
+	/*Design*/
+	border:0.5vmin double #476789;
+	/*Layout*/
+	display: block;
+	margin:0 auto 2vmin auto;
+	width:90vmin;
+	height: 50.63vmin;
+}
+
+.boatImageExpanded{
 	top:50%;
 	left:50%;
 	position: absolute;
