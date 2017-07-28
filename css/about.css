@@ -3,3 +3,69 @@
 	display: inline;
 	width:50%;
 }
+
+.columnContainer{
+	display: inline-block;
+	width:100%;
+	margin:1vmin 0 ;
+}
+
+.sectionName{
+	/*Design*/
+	font-size:7.5vmin;
+	background: rgba(0,0,0,0.2);
+	/*Layout*/
+	margin:0 auto 0 auto;
+	display:block;
+}
+
+.heading{
+	/*Design*/
+	font-size:5vmin;
+	display: block;
+	/*Layout*/
+	width:80%;
+	margin:auto;
+}
+
+.detailText{
+	/*Design*/
+	font-size:2vmin;
+	background: rgba(0,0,0,0.2);
+	/*Layout*/
+	margin:0 auto 0 auto;
+	display:block;
+}
+
+.subheading{
+	/*Design*/
+	font-size:2.5vmin;
+	text-align: center;
+	/*Layout*/
+	margin:0 auto;
+	max-width:100%;
+}
+
+.bioText{
+	max-width:66%;
+	text-align: left;
+}
+
+/*table that will be in middle of page*/
+.centeredTable{
+	margin:1vmin auto;
+}
+
+.skillsTableIcon{
+	width:15vmin;
+}
+
+.sectionContainer{
+	border-bottom:2vmin double #476789;
+}
+
+.gatorPic{
+	height:20vmin;
+	margin:2vmin auto;
+	display: block;
+}

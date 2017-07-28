@@ -2,17 +2,16 @@ img:hover{
 	cursor: pointer;
 }
 
-/*big text*/
-.bigText{
+.sectionName{
 	/*Design*/
-	font-size:10vmin;
+	font-size:7.5vmin;
+	background: rgba(0,0,0,0.2);
 	/*Layout*/
-	margin:2vmin auto;
+	margin:0 auto;
 	display:block;
 }
 
-/*mid sized text*/
-.midText{
+.heading{
 	/*Design*/
 	font-size:5vmin;
 
@@ -21,12 +20,39 @@ img:hover{
 	width:100%;
 }
 
-/*table that will be in middle of page*/
+.subheading{
+	/*Design*/
+	font-size:2.5vmin;s
+	text-align: center;
+	/*Layout*/
+	margin:2vmin auto;
+	max-width: 50%;
+}
+
+.detailText{
+	/*Design*/
+	font-size:2vmin;
+	/*Layout*/
+	margin:0 auto 0 auto;
+	display:block;
+}
+
+.halfCol{
+	float:left;
+	display: inline;
+	width:50%;
+}
+
+.columnContainer{
+	display: inline-block;
+	width:100%;
+	margin:1vmin 0 ;
+}
+
 .centeredTable{
 	margin:1vmin auto;
 }
 
-/*when an element is clicked, script will make it take whole screen*/
 .tableElementClicked{
 	width: 100vw;
 	height: 100vh;
@@ -37,7 +63,6 @@ img:hover{
 	z-index: 15;
 }
 
-/*image that links to project page*/
 .projectImage{
 	/*Design*/
 	filter:grayscale(90%);
@@ -48,40 +73,29 @@ img:hover{
 	margin:1vmin;
 }
 
-/*transition when image is moused over*/
 .projectImage:hover{
 	filter:grayscale(0%) drop-shadow(0 0 2vmin #111111);;
 	cursor:pointer;
 }
 
-/*for descriptions*/
-.subheading{
-	/*Design*/
-	font-size:2.5vmin;
-	text-align: center;
-	/*Layout*/
-	margin:2vmin auto;
-	max-width: 50%;
-}
-
-/*sketch that changes size*/
 .sketch{
 	/*Design*/
-	width:80%;
+	width:60vmin;
+	height:33.75vmin;
+	border:0.5vmin double #476789;
 	/*Layout*/
 	margin:2vmin auto;
 	display: block;
 }
 
-/*sketch that must stay same size*/
 .fixedSketch{
 	/*Layout*/
+	border:0.5vmin double #476789;
 	margin:2vmin auto;
 	display: block;
 	
 }
 
-/*image in table for tile slider*/
 .tileSliderImage{
 	/*Design*/
 	border:0.5vmin double #476789;
@@ -91,7 +105,6 @@ img:hover{
 	height:40vmin;
 }
 
-/*used by script when image is expanded*/
 .tileSliderImageExpanded{
 	top:50%;
 	left:50%;
@@ -100,7 +113,6 @@ img:hover{
 	height: 80vmin;
 }
 
-/*image in table for particle simulator*/
 .particleImage{
 	/*Design*/
 	border:0.5vmin double #476789;
@@ -110,7 +122,6 @@ img:hover{
 	width:30vmin;
 }
 
-/*used by script when image is expanded*/
 .particleImageExpanded{
 	top:50%;
 	left:50%;
@@ -119,7 +130,6 @@ img:hover{
 	width:70vmin;
 }
 
-/*video size used for animations*/
 .animationVideo{
 	/*Design*/
 	/*Layout*/
@@ -130,7 +140,6 @@ img:hover{
 
 }
 
-/*image in table for hand animation*/
 .handImage{
 	/*Design*/
 	border:0.5vmin double #476789;
@@ -140,7 +149,6 @@ img:hover{
 	width:30vmin;
 }
 
-/*used by script when image is expanded*/
 .handImageExpanded{
 	top:50%;
 	left:50%;
@@ -149,7 +157,6 @@ img:hover{
 	width:60vmin;
 }
 
-/*image in table for room*/
 .roomImage{
 	/*Design*/
 	border:0.5vmin double #476789;
@@ -159,7 +166,6 @@ img:hover{
 	width:88.8vmin;
 }
 
-/*used by script when image is expanded*/
 .roomImageExpanded{
 	top:50%;
 	left:50%;

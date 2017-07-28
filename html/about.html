@@ -1,30 +1,185 @@
 <!DOCTYPE>
 <html>
-	<head>
-		<title>Brett Benda</title>
-		<link href="../css/universal.css" type="text/css" rel="stylesheet">
-		<link href="../css/about.css" type="text/css" rel="stylesheet">
+<head>
+	<title>Brett Benda</title>
+	<link href="../css/universal.css" type="text/css" rel="stylesheet">
+	<link href="../css/about.css" type="text/css" rel="stylesheet">
+	<script type="text/javascript" src="../scripts/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="../scripts/effects.js"></script>
+</head>
 
-		<script type="text/javascript" src="../scripts/jquery-3.2.1.min.js"></script>
-	</head>
-
-	<body>
-		<!--Header-->
-		<div class="header">
-			<!--List to organize buttons-->
-			<p class="headerName">brett benda</p>
-			<ul class="headerButtonContainer">
-				<!--Buttons-->
-				<li class="headerButton"><a href="projects.html">Projects</a></li>
+<body>
+	<!--Header-->
+	<div class="header">
+		<!--List to organize buttons-->
+		<p class="headerName">brett benda</p>
+		<ul class="headerButtonContainer">
+			<!--Buttons-->
+			<li class="headerButton"><a href="projects.html">Projects</a></li>
 			<li class="headerButton"><a href="about.html">About</a></li>
 			<li class="headerButton"><a href="../index.html">Home</a></li>
-			</ul>
+		</ul>
+	</div>
+
+	<!--Body-->
+	<div class="body">
+		<!--Bio-->
+		<div class="sectionContainer">
+			<div class="sectionBar">
+				<p class="sectionName">
+					Biography
+				</p>
+				<p class="detailText">
+				(Click to Hide)
+				</p>
+			</div>
+			<div class="columnContainer">
+				<!--Half for text-->
+				<div class="halfCol">
+					<p class="subheading bioText">I am originally from Orange Park, Florida. I lived in Orange Park my whole life before moving to Gainesville. I graduated from Oakleaf High School in 2015, and started at the Univeristy of Florida in Fall 2015. 
+					</p>
+					<br/>
+					<p class="subheading bioText">
+						I am currently in my third year at the University of Florida's Herbert Wertheim College of Engineering in Gainesville, Florida. I am pursuing a Bachelor of Science degree in Digital Arts and Sciences.
+					</p>
+				</div>
+				<!--half for image-->
+				<div class="halfCol">
+					<img src="../images/about/gators.png" class="gatorPic"/>
+				</div>
+			</div>
 		</div>
-
-		<!--Body-->
-		<div class="body">
-
+		<!--Skills-->
+		<div class="sectionContainer">
+			<div class="sectionBar">
+				<p class="sectionName">
+					Skills and Abilities
+				</p>
+				<p class="detailText">
+					(Click to Hide)
+				</p>
+			</div>
+			<div class="columnContainer">
+				<!--Half for text-->
+				<div class="halfCol">
+					<p class="heading">
+						<u>Software</u>
+					</p>
+					<!--Split for certs and exp-->
+					<div class="columnContainer">
+						<!--certs-->
+						<div class="halfCol">
+							<p class="subheading">
+								Certifications:
+							</p>
+							<ul>
+								<li class="subheading"">Autodesk 3ds Max
+								</li>
+								<li class="subheading">Adobe Photoshop CS5
+								</li>
+								<li class="subheading">Adobe Premiere CS6
+								</li>
+								<li class="subheading">Adobe Flash CS6
+								</li>
+							</ul>
+						</div>
+						<!--exp-->
+						<div class="halfCol">
+							<p class="subheading">
+								Experience:
+							</p>
+							<ul>
+								<li class="subheading">Autodesk Maya
+								</li>
+								<li class="subheading">Adobe Illustrator
+								</li>
+								<li class="subheading">Adobe Audition
+								</li>
+								<li class="subheading">Adobe After Effects
+								</li>
+							</ul>
+						</div>
+					</div>
+					<p class="heading">
+						<u>Programming Languages</u>
+					</p>
+					<!--Split for langs-->
+					<div class="columnContainer">	<!--first half of langs-->
+						<div class="halfCol">
+							<ul>
+								<li class="subheading">
+									Java
+								</li>
+								<li class="subheading">
+									C++
+								</li>
+								<li class="subheading">
+									Processing
+								</li>
+							</ul>
+						</div>
+						<!--second half of langs-->
+						<div class="halfCol">
+							<ul>
+								<li class="subheading">
+									HTML/CSS
+								</li>
+								<li class="subheading">
+									JavaScript
+								</li>
+								<li class="subheading">
+									jQuery
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<!--half for icons-->
+				<div class="halfCol">
+					<table class="centeredTable">
+						<tr>
+							<td>
+								<img class="skillsTableIcon" src="../images/about/MayaIcon.png"/>
+							</td>
+							<td>
+								<img class="skillsTableIcon" src="../images/about/3dsMaxIcon.jpg"/>
+							</td>
+							<td>
+								<img class="skillsTableIcon" src="../images/about/PhotoshopIcon.png"/>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<img class="skillsTableIcon" src="../images/about/PremiereIcon.png"/>
+							</td>
+							<td>
+								<img class="skillsTableIcon" src="../images/about/FlashIcon.png"/>
+							</td>
+							<td>
+								<img class="skillsTableIcon" src="../images/about/AuditionIcon.png"/>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<img class="skillsTableIcon" src="../images/about/AfterEffectsIcon.jpg"/>
+							</td>
+							<td>
+								<img class="skillsTableIcon" style="background: #dddddd" src="../images/about/JavaIcon.png"/>
+							</td>
+							<td>
+								<img class="skillsTableIcon" style="background: #dddddd" src="../images/about/C++Icon.png"/>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<p class="subheading">
+					<a href="github.com/brettbenda">
+						<u>Link to Github Profile</u>
+					</a>
+				</p>
+			</div>
 		</div>
+	</div>
 
-	</body>
+</body>
 </html>
