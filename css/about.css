@@ -24,7 +24,7 @@
 	font-size:5vmin;
 	display: block;
 	/*Layout*/
-	width:80%;
+	max-width:60%;
 	margin:auto;
 }
 
@@ -44,6 +44,11 @@
 	/*Layout*/
 	margin:0 auto;
 	max-width:100%;
+}
+
+.left{
+	text-align: left;
+	margin:1vmin 20vmin;
 }
 
 .bioText{
