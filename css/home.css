@@ -3,10 +3,9 @@
 	/*Design*/
 	border:0.5vmin double #476789;
 	border-radius:25vmin; 
-	transition: 0.25s width linear, 0.25s height linear;
 
 	/*Layout*/
-	margin:5vmin auto;
+	margin:2vmin auto;
 	display:block;
 	width:50vmin;
 }
@@ -17,4 +16,15 @@
 	font-size:3vmin;
 	/*Layout*/
 	margin:auto 25vw;
+}
+
+.projectImage{
+	width:30vmin;
+	margin:1vmin;
+	transition: 0.25s filter linear, 0.25s width linear, 0.25s height linear;
+}
+
+.projectImage:hover{
+	filter:drop-shadow(0 0 2vmin #111111);;
+	cursor:pointer;
 }

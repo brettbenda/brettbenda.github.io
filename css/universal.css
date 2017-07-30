@@ -94,3 +94,8 @@ a:hover{
 	display: inline-block;
 	min-height: 90vh;
 }
+
+/*table that will be in middle of page*/
+.centeredTable{
+	margin:1vmin auto;
+}

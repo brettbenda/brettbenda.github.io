@@ -10,6 +10,11 @@
 	margin:1vmin 0 ;
 }
 
+.centeredThird{
+	width:33%;
+	margin:0 auto;
+}
+
 .sectionName{
 	/*Design*/
 	font-size:7.5vmin;
@@ -51,14 +56,14 @@
 	margin:1vmin 20vmin;
 }
 
+.noMargin{
+	margin:1vmin 0;
+}
+
+
 .bioText{
 	max-width:66%;
 	text-align: left;
-}
-
-/*table that will be in middle of page*/
-.centeredTable{
-	margin:1vmin auto;
 }
 
 .skillsTableIcon{
@@ -71,6 +76,16 @@
 
 .gatorPic{
 	height:20vmin;
+	margin:2vmin auto;
+	display: block;
+}
+
+.mePic{
+	/*Design*/
+	border:0.5vmin double #476789;
+	border-radius:25vmin; 
+	/*Layout*/
+	height:30vmin;
 	margin:2vmin auto;
 	display: block;
 }
