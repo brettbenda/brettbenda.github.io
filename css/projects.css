@@ -2,39 +2,19 @@ img:hover{
 	cursor: pointer;
 }
 
-.sectionName{
-	/*Design*/
-	font-size:7.5vmin;
-	background: rgba(0,0,0,0.2);
-	/*Layout*/
-	margin:0 auto;
-	display:block;
+.tableElementClicked{
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0,0,0,0.7);
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 15;
 }
 
-.heading{
-	/*Design*/
-	font-size:5vmin;
-
-	/*Layout*/
-	height:4.5vmin;
-	width:100%;
-}
-
-.subheading{
-	/*Design*/
-	font-size:2.5vmin;s
-	text-align: center;
-	/*Layout*/
-	margin:2vmin auto;
-	max-width: 50%;
-}
-
-.detailText{
-	/*Design*/
-	font-size:2vmin;
-	/*Layout*/
-	margin:0 auto 0 auto;
-	display:block;
+.projectImage:hover{
+	filter:grayscale(0%) drop-shadow(0 0 2vmin #111111);;
+	cursor:pointer;
 }
 
 .halfCol{
@@ -53,167 +33,382 @@ img:hover{
 	margin:1vmin auto;
 }
 
-.tableElementClicked{
-	width: 100vw;
-	height: 100vh;
-	background: rgba(0,0,0,0.7);
-	position: fixed;
-	top: 0;
-	left: 0;
-	z-index: 15;
+
+/*width>height*/
+@media screen and (orientation:landscape){
+	.sectionName{
+		/*Design*/
+		font-size:7.5vmin;
+		background: rgba(0,0,0,0.2);
+		/*Layout*/
+		margin:0 auto;
+		display:block;
+	}
+
+	.heading{
+		/*Design*/
+		font-size:5vmin;
+
+		/*Layout*/
+		margin:1vmin auto;
+		width:100%;
+	}
+
+	.subheading{
+		/*Design*/
+		font-size:2.5vmin;
+		text-align: center;
+		/*Layout*/
+		margin:2vmin auto;
+		max-width: 50%;
+	}
+
+	.detailText{
+		/*Design*/
+		font-size:2vmin;
+		/*Layout*/
+		margin:0 auto 0 auto;
+		display:block;
+	}
+
+	.projectImage{
+		/*Design*/
+		filter:grayscale(90%);
+		transition: 0.25s filter linear, 0.25s width linear, 0.25s height linear;
+
+		/*Layout*/
+		width:30vmin;
+		margin:1vmin;
+	}
+
+	.sketch{
+		/*Design*/
+		width:60vmin;
+		height:33.75vmin;
+		border:0.5vmin double #476789;
+		/*Layout*/
+		margin:2vmin auto;
+		display: block;
+	}
+
+	.fixedSketch{
+		/*Layout*/
+		border:0.5vmin double #476789;
+		margin:2vmin auto;
+		display: block;
+
+	}
+
+	.tileSliderImage{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin:1vmin auto 0 auto;
+		height:40vmin;
+	}
+
+	.tileSliderImageExpanded{
+		top:50%;
+		left:50%;
+		position: absolute;
+		transform: translate(-50%,-50%);
+		height: 80vmin;
+	}
+
+	.particleImage{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin:2vmin auto 0 auto;
+		width:30vmin;
+	}
+
+	.particleImageExpanded{
+		top:50%;
+		left:50%;
+		position: absolute;
+		transform: translate(-50%,-50%);
+		width:70vmin;
+	}
+
+	.animationVideo{
+		/*Design*/
+		/*Layout*/
+		display:block;
+		margin:2vmin auto;
+		width:72vmin;
+		height:40.5vmin;
+
+	}
+
+	.handImage{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin: 0 auto;
+		width:30vmin;
+	}
+
+	.handImageExpanded{
+		top:50%;
+		left:50%;
+		position: absolute;
+		transform: translate(-50%,-50%);
+		width:60vmin;
+	}
+
+	.roomImage{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin: 2vmin auto;
+		width:50vmin;
+	}
+
+	.roomImageExpanded{
+		top:50%;
+		left:50%;
+		position: absolute;
+		transform: translate(-50%,-50%);
+		width:90vw;
+	}
+
+	.tropicalImage{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin:0 auto;
+		width:30vmin;
+	}
+
+	.tropicalImageExpanded{
+		top:50%;
+		left:50%;
+		position: absolute;
+		transform: translate(-50%,-50%);
+		width:90vw;
+	}
+
+	.boatImage{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin:0 auto;
+		width:45vmin;
+	}
+
+	.boatVideo{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin:0 auto 2vmin auto;
+		width:90vmin;
+		height: 50.63vmin;
+	}
+
+	.boatImageExpanded{
+		top:50%;
+		left:50%;
+		position: absolute;
+		transform: translate(-50%,-50%);
+		width:90vw;
+	}
+
 }
 
-.projectImage{
-	/*Design*/
-	filter:grayscale(90%);
-	transition: 0.25s filter linear, 0.25s width linear, 0.25s height linear;
+/*height>width*/
+@media only screen and (orientation:portrait ){
+	.sectionName{
+		/*Design*/
+		font-size:12.5vmin;
+		background: rgba(0,0,0,0.2);
+		/*Layout*/
+		margin:0 auto;
+		display:block;
+	}
 
-	/*Layout*/
-	width:30vmin;
-	margin:1vmin;
-}
+	.heading{
+		/*Design*/
+		font-size:7.5vmin;
 
-.projectImage:hover{
-	filter:grayscale(0%) drop-shadow(0 0 2vmin #111111);;
-	cursor:pointer;
-}
+		/*Layout*/
+		margin:1vmin auto;
+		width:100%;
+	}
 
-.sketch{
-	/*Design*/
-	width:60vmin;
-	height:33.75vmin;
-	border:0.5vmin double #476789;
-	/*Layout*/
-	margin:2vmin auto;
-	display: block;
-}
+	.subheading{
+		/*Design*/
+		font-size:3vmin;
+		text-align: center;
+		/*Layout*/
+		margin:2vmin auto;
+		max-width: 75%;
+	}
 
-.fixedSketch{
-	/*Layout*/
-	border:0.5vmin double #476789;
-	margin:2vmin auto;
-	display: block;
-	
-}
+	.detailText{
+		/*Design*/
+		font-size:2vmin;
+		/*Layout*/
+		margin:0 auto 0 auto;
+		display:block;
+	}
 
-.tileSliderImage{
-	/*Design*/
-	border:0.5vmin double #476789;
-	/*Layout*/
-	display: block;
-	margin:1vmin auto 0 auto;
-	height:40vmin;
-}
+	.tableElement{
+		display: block;
+	}
 
-.tileSliderImageExpanded{
-	top:50%;
-	left:50%;
-	position: absolute;
-	transform: translate(-50%,-50%);
-	height: 80vmin;
-}
+	.projectImage{
+		filter:grayscale(90%);
+		transition: 0.25s filter linear, 0.25s width linear, 0.25s height linear;
 
-.particleImage{
-	/*Design*/
-	border:0.5vmin double #476789;
-	/*Layout*/
-	display: block;
-	margin:2vmin auto 0 auto;
-	width:30vmin;
-}
+		width:60vmin;
+		margin:1vmin;
+	}
 
-.particleImageExpanded{
-	top:50%;
-	left:50%;
-	position: absolute;
-	transform: translate(-50%,-50%);
-	width:70vmin;
-}
+	.sketch{
+		/*Design*/
+		width:60vmin;
+		height:33.75vmin;
+		border:0.5vmin double #476789;
+		/*Layout*/
+		margin:2vmin auto;
+		display: block;
+	}
 
-.animationVideo{
-	/*Design*/
-	/*Layout*/
-	display:block;
-	margin:2vmin auto;
-	width:72vmin;
-	height:40.5vmin;
+	.fixedSketch{
+		/*Layout*/
+		border:0.5vmin double #476789;
+		margin:2vmin auto;
+		display: block;
 
-}
+	}
 
-.handImage{
-	/*Design*/
-	border:0.5vmin double #476789;
-	/*Layout*/
-	display: block;
-	margin: 0 auto;
-	width:30vmin;
-}
+	.tileSliderImage{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin:1vmin auto 0 auto;
+		height:70vmin;
+	}
 
-.handImageExpanded{
-	top:50%;
-	left:50%;
-	position: absolute;
-	transform: translate(-50%,-50%);
-	width:60vmin;
-}
+	.tileSliderImageExpanded{
+		top:50%;
+		left:50%;
+		position: absolute;
+		transform: translate(-50%,-50%);
+		height: 100vmin;
+	}
 
-.roomImage{
-	/*Design*/
-	border:0.5vmin double #476789;
-	/*Layout*/
-	display: block;
-	margin: 2vmin auto;
-	width:88.8vmin;
-}
+	.particleImage{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin:2vmin auto 0 auto;
+		width:60vmin;
+	}
 
-.roomImageExpanded{
-	top:50%;
-	left:50%;
-	position: absolute;
-	transform: translate(-50%,-50%);
-	width:90vw;
-}
+	.particleImageExpanded{
+		top:50%;
+		left:50%;
+		position: absolute;
+		transform: translate(-50%,-50%);
+		width:90vmin;
+	}
 
-.tropicalImage{
-	/*Design*/
-	border:0.5vmin double #476789;
-	/*Layout*/
-	display: block;
-	margin:0 auto;
-	width:30vmin;
-}
+	.animationVideo{
+		/*Design*/
+		/*Layout*/
+		display:block;
+		margin:2vmin auto;
+		width:60vmin;
+		height:33.75vmin;
 
-.tropicalImageExpanded{
-	top:50%;
-	left:50%;
-	position: absolute;
-	transform: translate(-50%,-50%);
-	width:90vw;
-}
+	}
 
-.boatImage{
-	/*Design*/
-	border:0.5vmin double #476789;
-	/*Layout*/
-	display: block;
-	margin:0 auto;
-	width:45vmin;
-}
+	.handImage{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin: 0 auto;
+		width:60vmin;
+	}
 
-.boatVideo{
-	/*Design*/
-	border:0.5vmin double #476789;
-	/*Layout*/
-	display: block;
-	margin:0 auto 2vmin auto;
-	width:90vmin;
-	height: 50.63vmin;
-}
+	.handImageExpanded{
+		top:50%;
+		left:50%;
+		position: absolute;
+		transform: translate(-50%,-50%);
+		width:60vmin;
+	}
 
-.boatImageExpanded{
-	top:50%;
-	left:50%;
-	position: absolute;
-	transform: translate(-50%,-50%);
-	width:90vw;
+	.roomImage{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin: 2vmin auto;
+		width:60vmin;
+	}
+
+	.roomImageExpanded{
+		top:50%;
+		left:50%;
+		position: absolute;
+		transform: translate(-50%,-50%);
+		width:90vw;
+	}
+
+	.tropicalImage{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin:0 auto;
+		width:60vmin;
+	}
+
+	.tropicalImageExpanded{
+		top:50%;
+		left:50%;
+		position: absolute;
+		transform: translate(-50%,-50%);
+		width:90vw;
+	}
+
+	.boatImage{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin:0 auto;
+		width:60vmin;
+	}
+
+	.boatVideo{
+		/*Design*/
+		border:0.5vmin double #476789;
+		/*Layout*/
+		display: block;
+		margin:0 auto 2vmin auto;
+		width:60vmin;
+		height: 33.75vmin;
+	}
+
+	.boatImageExpanded{
+		top:50%;
+		left:50%;
+		position: absolute;
+		transform: translate(-50%,-50%);
+		width:90vw;
+	}
 }
