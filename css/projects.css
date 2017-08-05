@@ -35,7 +35,7 @@ img:hover{
 
 
 /*width>height*/
-@media screen and (min-width: 800px){
+@media screen and (min-width: 1200px){
 	.sectionName{
 		/*Design*/
 		font-size:7.5vmin;
@@ -224,7 +224,7 @@ img:hover{
 }
 
 /*height>width*/
-@media only screen and (max-width: 800px){
+@media only screen and (max-width: 1200px){
 	.sectionName{
 		/*Design*/
 		font-size:12.5vmin;
