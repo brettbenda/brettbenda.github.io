@@ -23,199 +23,182 @@ img:hover{
 	width:50%;
 }
 
-.columnContainer{
-	display: inline-block;
-	width:100%;
-	margin:1vmin 0 ;
+.sectionName{
+	/*Design*/
+	font-size:7.5vmin;
+	font-family: 'Century Gothic',sans-serif;
+	background: rgba(0,0,0,0.2);
+	/*Layout*/
+	margin:0 auto;
+	display:block;
 }
 
-.centeredTable{
+.heading{
+	/*Design*/
+	font-size:5vmin;
+
+	/*Layout*/
 	margin:1vmin auto;
+	width:100%;
 }
 
+.subheading{
+	/*Design*/
+	font-size:2.5vmin;
+	text-align: center;
+	/*Layout*/
+	margin:2vmin auto;
+	max-width: 50%;
+}
 
-	.sectionName{
-		/*Design*/
-		font-size:7.5vmin;
-		background: rgba(0,0,0,0.2);
-		/*Layout*/
-		margin:0 auto;
-		display:block;
-	}
+li.subheading{
+ margin:0 auto;
+}
 
-	.heading{
-		/*Design*/
-		font-size:5vmin;
+.detailText{
+	/*Design*/
+	font-size:2vmin;
+	/*Layout*/
+	margin:0 auto 0 auto;
+	display:block;
+}
 
-		/*Layout*/
-		margin:1vmin auto;
-		width:100%;
-	}
+.projectImage{
+	/*Design*/
+	filter:grayscale(90%);
+	transition: 0.25s filter linear, 0.25s width linear, 0.25s height linear;
 
-	.subheading{
-		/*Design*/
-		font-size:2.5vmin;
-		text-align: center;
-		/*Layout*/
-		margin:2vmin auto;
-		max-width: 50%;
-	}
+	/*Layout*/
+	width:30vmin;
+	margin:1vmin;
+}
 
-	.detailText{
-		/*Design*/
-		font-size:2vmin;
-		/*Layout*/
-		margin:0 auto 0 auto;
-		display:block;
-	}
+.sketch{
+	/*Design*/
+	width:60vmin;
+	height:33.75vmin;
+	border:0.5vmin double #476789;
+	/*Layout*/
+	margin:2vmin auto;
+	display: block;
+}
 
-	.projectImage{
-		/*Design*/
-		filter:grayscale(90%);
-		transition: 0.25s filter linear, 0.25s width linear, 0.25s height linear;
+.fixedSketch{
+	/*Layout*/
+	border:0.5vmin double #476789;
+	margin:2vmin auto;
+	display: block;
 
-		/*Layout*/
-		width:30vmin;
-		margin:1vmin;
-	}
+}
 
-	.sketch{
-		/*Design*/
-		width:60vmin;
-		height:33.75vmin;
-		border:0.5vmin double #476789;
-		/*Layout*/
-		margin:2vmin auto;
-		display: block;
-	}
+.tileSliderImage{
+	/*Design*/
+	border:0.5vmin double #476789;
+	/*Layout*/
+	display: block;
+	margin:1vmin auto 0 auto;
+	height:40vmin;
+}
 
-	.fixedSketch{
-		/*Layout*/
-		border:0.5vmin double #476789;
-		margin:2vmin auto;
-		display: block;
+.tileSliderImageExpanded{
+	top:50%;
+	left:50%;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	height: 80vmin;
+}
 
-	}
+.particleImage{
+	/*Design*/
+	border:0.5vmin double #476789;
+	/*Layout*/
+	display: block;
+	margin:0 auto 0 auto;
+	width:30vmin;
+}
 
-	.tileSliderImage{
-		/*Design*/
-		border:0.5vmin double #476789;
-		/*Layout*/
-		display: block;
-		margin:1vmin auto 0 auto;
-		height:40vmin;
-	}
+.particleImageExpanded{
+	top:50%;
+	left:50%;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	width:70vmin;
+}
 
-	.tileSliderImageExpanded{
-		top:50%;
-		left:50%;
-		position: absolute;
-		transform: translate(-50%,-50%);
-		height: 80vmin;
-	}
+.animationVideo{
+	/*Design*/
+	/*Layout*/
+	display:block;
+	margin:2vmin auto;
+	width:72vmin;
+	height:40.5vmin;
+}
 
-	.particleImage{
-		/*Design*/
-		border:0.5vmin double #476789;
-		/*Layout*/
-		display: block;
-		margin:2vmin auto 0 auto;
-		width:30vmin;
-	}
+.handImage{
+	/*Design*/
+	border:0.5vmin double #476789;
+	/*Layout*/
+	display: block;
+	margin: 0 auto;
+	width:30vmin;
+}
 
-	.particleImageExpanded{
-		top:50%;
-		left:50%;
-		position: absolute;
-		transform: translate(-50%,-50%);
-		width:70vmin;
-	}
+.handImageExpanded{
+	top:50%;
+	left:50%;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	width:60vmin;
+}
 
-	.animationVideo{
-		/*Design*/
-		/*Layout*/
-		display:block;
-		margin:2vmin auto;
-		width:72vmin;
-		height:40.5vmin;
+.roomImage{
+	/*Design*/
+	border:0.5vmin double #476789;
+	/*Layout*/
+	display: block;
+	margin: 0 auto;
+	width:30vmin;
+}
 
-	}
+.roomImageExpanded{
+	top:50%;
+	left:50%;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	width:90vw;
+}
 
-	.handImage{
-		/*Design*/
-		border:0.5vmin double #476789;
-		/*Layout*/
-		display: block;
-		margin: 0 auto;
-		width:30vmin;
-	}
+.tropicalImage{
+	/*Design*/
+	border:0.5vmin double #476789;
+	/*Layout*/
+	display: block;
+	margin:0 auto;
+	width:30vmin;
+}
 
-	.handImageExpanded{
-		top:50%;
-		left:50%;
-		position: absolute;
-		transform: translate(-50%,-50%);
-		width:60vmin;
-	}
+.tropicalImageExpanded{
+	top:50%;
+	left:50%;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	width:90vw;
+}
 
-	.roomImage{
-		/*Design*/
-		border:0.5vmin double #476789;
-		/*Layout*/
-		display: block;
-		margin: 2vmin auto;
-		width:50vmin;
-	}
+.boatImage{
+	/*Design*/
+	border:0.5vmin double #476789;
+	/*Layout*/
+	display: block;
+	margin:0 auto;
+	width:45vmin;
+}
 
-	.roomImageExpanded{
-		top:50%;
-		left:50%;
-		position: absolute;
-		transform: translate(-50%,-50%);
-		width:90vw;
-	}
-
-	.tropicalImage{
-		/*Design*/
-		border:0.5vmin double #476789;
-		/*Layout*/
-		display: block;
-		margin:0 auto;
-		width:30vmin;
-	}
-
-	.tropicalImageExpanded{
-		top:50%;
-		left:50%;
-		position: absolute;
-		transform: translate(-50%,-50%);
-		width:90vw;
-	}
-
-	.boatImage{
-		/*Design*/
-		border:0.5vmin double #476789;
-		/*Layout*/
-		display: block;
-		margin:0 auto;
-		width:45vmin;
-	}
-
-	.boatVideo{
-		/*Design*/
-		border:0.5vmin double #476789;
-		/*Layout*/
-		display: block;
-		margin:0 auto 2vmin auto;
-		width:90vmin;
-		height: 50.63vmin;
-	}
-
-	.boatImageExpanded{
-		top:50%;
-		left:50%;
-		position: absolute;
-		transform: translate(-50%,-50%);
-		width:90vw;
-	}
+.boatImageExpanded{
+	top:50%;
+	left:50%;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	width:90vw;
+}
 
