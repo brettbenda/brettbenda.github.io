@@ -20,6 +20,7 @@ li{
 	color:#dddddd;
 	text-align:center;
 	transition: 0.5s font-size linear;
+	list-style-position: inside;
 }
 
 /*links do not change look based on use*/
