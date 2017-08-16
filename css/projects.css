@@ -26,7 +26,7 @@ img:hover{
 .sectionName{
 	/*Design*/
 	font-size:7.5vmin;
-	font-family: 'Century Gothic',sans-serif;
+	font-family: "Century Gothic","Trebuchet MS", Helvetica, sans-serif;
 	background: rgba(0,0,0,0.2);
 	/*Layout*/
 	margin:0 auto;
