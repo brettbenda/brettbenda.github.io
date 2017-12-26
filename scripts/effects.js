@@ -19,6 +19,8 @@ $(function(){
 
 			$(this).children(".boatImage").addClass("boatImageExpanded");
 
+			$(this).children(".mapImage").addClass("mapImageExpanded");
+
 			$(this).children("p").toggle();
 
 		}else{
@@ -36,6 +38,8 @@ $(function(){
 			$(this).children(".tropicalImage").removeClass("tropicalImageExpanded");
 
 			$(this).children(".boatImage").removeClass("boatImageExpanded");
+
+			$(this).children(".mapImage").removeClass("mapImageExpanded");
 			
 			$(this).children("p").toggle();
 		}

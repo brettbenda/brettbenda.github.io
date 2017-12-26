@@ -202,3 +202,19 @@ li.subheading{
 	width:90vw;
 }
 
+.mapImage{
+	/*Design*/
+	border:0.5vmin double #476789;
+	/*Layout*/
+	display: block;
+	margin:0 auto;
+	height:35vmin;
+}
+
+.mapImageExpanded{
+	top:50%;
+	left:50%;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	height:90vmin;
+}
