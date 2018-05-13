@@ -12,11 +12,6 @@ img:hover{
 	z-index: 15;
 }
 
-.projectImage:hover{
-	filter:grayscale(0%) drop-shadow(0 0 2vmin #111111);;
-	cursor:pointer;
-}
-
 .halfCol{
 	float:left;
 	display: inline;
@@ -71,6 +66,11 @@ li.subheading{
 	/*Layout*/
 	width:30vmin;
 	margin:1vmin;
+}
+
+.projectImage:hover{
+	filter:grayscale(0%) drop-shadow(0 0 2vmin #111111);;
+	cursor:pointer;
 }
 
 .sketch{
