@@ -33,6 +33,10 @@
 	margin:auto;
 }
 
+.sectionBar:hover{
+	background: rgba(0,0,0,0.4);
+}
+
 .detailText{
 	/*Design*/
 	font-size:2vmin;
