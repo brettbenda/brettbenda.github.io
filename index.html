@@ -1,58 +1,18 @@
-<!DOCTYPE>
-<html>
+<!DOCTYPE html>
+<meta charset="utf-8">
 <head>
-	<title>Brett Benda</title>
-	<link href="css/home.css" type="text/css" rel="stylesheet">
-	<link href="css/universal.css" type="text/css" rel="stylesheet">
-	<script type="text/javascript" src="scripts/jquery-3.2.1.min.js"></script>
+<title>Information Visualization Project</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <link rel="stylesheet" href="./styles/simple-style.css">
 </head>
 
 <body>
-	<!--Header-->
-	<div class="header">
-		<!--List to organize buttons-->
-		<p class="headerName">brett benda</p>
-		<ul class="headerButtonContainer">
-			<!--Buttons-->
-			<li class="headerButton"><a href="html/projects.html">Projects</a></li>
-			<li class="headerButton"><a href="html/about.html">About</a></li>
-			<li class="headerButton"><a href="index.html">Home</a></li>
-		</ul>
-	</div>
+  <div id="chartDiv" style="width:75%;float:left;overflow:hidden"></div>
+  <div id="buttonDiv" style="margin:auto;overflow:hidden"></div>
+  <div id="otherDiv"></div>
 
-	<!--Body-->
-	<div class="body">
-		<!--Image of me-->
-		<img class="bodyPicture" src = "images/about/me.jpg"/>
-		<!--Bio-->
-		<p class="bodyBiography">
-			Welcome to my website! Take a look around to learn a bit about me and see some cool projects I have worked on.
-		</p>
-		<br/>
-		<p class="bodyBiography">
-			Here are some of my favorites:
-		</p>
-		<table class="centeredTable">
-			<tr>
-				<td>
-					<a href="html/particle.html">
-						<img class="projectImage" src="images/particle/particle.jpg"/>
-					</a>
-				</td>
-				<td>
-					<a href="html/lizards.html">
-						<img class="projectImage" src="images/lizards/lizards.jpg"/>
-					</a>
-				</td>
-
-				<td>
-					<a href="html/hand.html">
-						<img class="projectImage" src="images/hand/hand.jpg"/>
-					</a>
-				</td>
-			</tr>
-		</table>
-	</div>
+  <script src="./libraries/d3.v5.min.js"></script>
+  <script src="./src/main.js"></script>
 
 </body>
 </html>
