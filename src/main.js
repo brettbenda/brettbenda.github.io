@@ -2,14 +2,14 @@
 {
 	//Chart area variables
 	var margin = { top: 10, right: 10, bottom: 100, left: 50 };
-	var width = window.innerWidth*0.75;
+	var width = window.innerWidth;
 	var height = window.innerHeight;
 
 	//Data-specific variables
 	var dataXRange = { min: -10, max: 10 }; //Should make it auto-generated, not hard-coded
 	var dataYRange = { min: -10, max: 10 }; //Should make it auto-generated, not hard-coded
-	var xAxisLabelHeader = "X Header";
-	var yAxisLabelHeader = "Y Header";
+	var xAxisLabelHeader = "X Location (meters)";
+	var yAxisLabelHeader = "Y Location (meters)";
 	var numPoints = 100; //number of points
 
 	var h1, h2, h3, h4;
@@ -81,7 +81,7 @@
 			])
 		.then(function(json)
 			{
-				var n = 100 // Resampling to n number of points
+				var n = 25 // Resampling to n number of points
 
 				var clean = [];
 				//Resample all of the data (except the marker data)
@@ -476,7 +476,7 @@
 						else
 						{
 							d3.selectAll("#"+lineIds[i])
-								.style("opacity", 0.0)
+								.style("opacity", 0.25)
 							;
 						}
 					}
@@ -493,7 +493,7 @@
 						else
 						{
 							d3.selectAll("#"+triIds[i])
-								.style("opacity", 0.0)
+								.style("opacity", 0.25)
 							;
 						}
 					}
@@ -585,7 +585,7 @@
 							else
 							{
 								d3.selectAll("#"+lineIds[i])
-									.style("opacity", 0.0)
+									.style("opacity", 0.25)
 								;
 							}
 						}
@@ -601,7 +601,7 @@
 							else
 							{
 								d3.selectAll("#"+triIds[i])
-									.style("opacity", 0.0)
+									.style("opacity", 0.25)
 								;
 							}
 						}
