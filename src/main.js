@@ -692,6 +692,12 @@
 					redraw()
 					console.log(colorStyle)
 				})
+				.on("mouseover",function(){
+					d3.select(this).attr("fill", "hsl(0,50%,75%)")
+				})
+				.on("mouseout",function(){
+					d3.select(this).attr("fill", "hsl(0,100%,75%)")
+				})
 
 		chart.colorStyleButtonText = chart.colorStyleButton.append("text")
 				.text("Change Color")
@@ -719,6 +725,12 @@
 					redraw()
 					console.log(widthStyle)
 				})
+				.on("mouseover",function(){
+					d3.select(this).attr("fill", "hsl(90,50%,75%)")
+				})
+				.on("mouseout",function(){
+					d3.select(this).attr("fill", "hsl(90,100%,75%)")
+				})
 
 		chart.widthStyleButtonText = chart.widthStyleButton.append("text")
 				.text("Change Width")
@@ -743,6 +755,12 @@
 					redraw()
 					console.log(drawLinesReset)
 				})
+				.on("mouseover",function(){
+					d3.select(this).attr("fill", "hsl(180,50%,75%)")
+				})
+				.on("mouseout",function(){
+					d3.select(this).attr("fill", "hsl(180,100%,75%)")
+				})
 
 		chart.lineToggleText = chart.lineToggleButton.append("text")
 				.text("Toggle Paths")
@@ -766,6 +784,12 @@
 					drawTrisReset = !drawTrisReset
 					redraw()
 					console.log(drawTrisReset)
+				})
+				.on("mouseover",function(){
+					d3.select(this).attr("fill", "hsl(270,50%,75%)")
+				})
+				.on("mouseout",function(){
+					d3.select(this).attr("fill", "hsl(270,100%,75%)")
 				})
 
 		chart.triToggleButtonText = chart.triToggleButton.append("text")
