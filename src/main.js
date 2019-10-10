@@ -677,7 +677,8 @@
 		chart.colorStyleButton = d3.select("#buttonDiv").append("svg")
 			.attr("width",150)
 			.attr("height",150)
-			.append("rect")
+
+		chart.colorStyleButton.append("rect")
 				.attr("x",0)
 				.attr("y",0)
 				.attr("width",150)
@@ -692,11 +693,19 @@
 					console.log(colorStyle)
 				})
 
+		chart.colorStyleButtonText = chart.colorStyleButton.append("text")
+				.text("Change Color")
+				.attr("x",30)
+				.attr("y",75)
+				.attr("font-family","sans-serif")
+				.attr("font-size",12)
+
 		//Button that when clicked cycles between width styles --Brett
 		chart.widthStyleButton = d3.select("#buttonDiv").append("svg")
 			.attr("width",150)
 			.attr("height",150)
-			.append("rect")
+
+		chart.widthStyleButton.append("rect")
 				.attr("x",0)
 				.attr("y",0)
 				.attr("width",150)
@@ -711,11 +720,19 @@
 					console.log(widthStyle)
 				})
 
+		chart.widthStyleButtonText = chart.widthStyleButton.append("text")
+				.text("Change Width")
+				.attr("x",30)
+				.attr("y",75)
+				.attr("font-family","sans-serif")
+				.attr("font-size",12)
+
 		//Button that when clicked cycles between width styles --Brett
 		chart.lineToggleButton = d3.select("#buttonDiv").append("svg")
 			.attr("width",150)
 			.attr("height",150)
-			.append("rect")
+
+		chart.lineToggleButton.append("rect")
 				.attr("x",0)
 				.attr("y",0)
 				.attr("width",150)
@@ -727,11 +744,19 @@
 					console.log(drawLinesReset)
 				})
 
+		chart.lineToggleText = chart.lineToggleButton.append("text")
+				.text("Toggle Paths")
+				.attr("x",30)
+				.attr("y",75)
+				.attr("font-family","sans-serif")
+				.attr("font-size",12)
+
 		//Button that when clicked cycles between width styles --Brett
 		chart.triToggleButton = d3.select("#buttonDiv").append("svg")
 			.attr("width",150)
 			.attr("height",150)
-			.append("rect")
+
+		chart.triToggleButton.append("rect")
 				.attr("x",0)
 				.attr("y",0)
 				.attr("width",150)
@@ -742,6 +767,13 @@
 					redraw()
 					console.log(drawTrisReset)
 				})
+
+		chart.triToggleButtonText = chart.triToggleButton.append("text")
+				.text("Toggle Drones")
+				.attr("x",30)
+				.attr("y",75)
+				.attr("font-family","sans-serif")
+				.attr("font-size",12)
 	}
 
 	function redraw(){
