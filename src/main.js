@@ -40,7 +40,7 @@
 	var colorStyles = ["colorArray", "rainbow-time", "rainbow-height", "greyscale-time", "greyscale-height", "redscale-time", "redscale-height"]
 	var colorStyle = colorStyles[0]
 	var colorStyleIndex = 0
-	var widthStyles = ["constant", "height"]
+	var widthStyles = ["constant", "bigger-time", "bigger-height"]
 	var widthStyle = widthStyles[0]
 	var widthStyleIndex = 0
 	var drawLinesReset = true;
@@ -418,7 +418,9 @@
 						switch(widthStyle){
 							case "constant":
 								return lineWidth;
-							case "height":
+              case "bigger-time":
+                return 1 + 5*(i/len)
+							case "bigger-height":
 								//needs some adjustment due to negative z values?
 								return 1 + Math.abs(d.z);
 						}
