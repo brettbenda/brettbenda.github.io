@@ -3,6 +3,17 @@ body {
   font-weight: bold;
 }
 
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
 .chart {
     /* background-color: #efefef; */
     background-color: white;
@@ -50,4 +61,24 @@ body {
 .link {
   stroke: #999;
   stroke-opacity: .6;
+}
+
+input[type="range"] {
+   width: 100%;
+   margin: 0;
+   box-sizing: border-box;
+}
+datalist {
+   display: flex;
+   width: 100%;
+   justify-content: space-between;
+   margin-top: 0px;
+   padding-top: 0px;
+}
+
+.legend {
+   padding: 5px;
+   font: 10px sans-serif;
+   background: yellow;
+   box-shadow: 2px 2px 1px #888;
 }

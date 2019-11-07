@@ -6,9 +6,143 @@
   <link rel="stylesheet" href="./styles/simple-style.css">
 </head>
 
+<style>
+.chart {
+	/*background-color: #F1F7ED;*/
+	background-color: #FCFCFC;
+	border-style: none;
+}
+.navbar {
+  overflow: hidden;
+  background-color: #000501;
+  height: auto;
+  padding: none;
+}
+
+.navbar a {
+  float: left;
+  font-size: 12px;
+  color: white;
+  text-align: center;
+  padding: 3.5px 4px;
+  text-decoration: none;
+}
+
+.dropdown {
+  float: left;
+  overflow: hidden;
+}
+
+.dropdown .dropbtn {
+  font-size: 12px;
+  border: none;
+  outline: none;
+  color: white;
+  padding: 3.5px 4px;
+  background-color: inherit;
+  font-family: inherit;
+  margin: 0;
+}
+
+.navbar a:hover, .dropdown:hover .dropbtn {
+  background-color: #88B7B5;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  float: none;
+  color: black;
+  padding: 3px 4px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+</style>
+
 <body>
-  <h1 style="text-align:center">Drone Flight Visualization</h1>
-  <div id="chartDiv"></div>
+  <div class="navbar">
+    <div class="dropdown">
+      <button class="dropbtn">
+    	Background
+      </button>
+      <div class="dropdown-content">
+        <a href= "/" id="tracedImage" onclick="console.log('image');return false;">Change Traced Background</a>
+        <a href= "/" id="realImage" onclick="console.log('image');return false;">Change To Real Background </a>
+        <a href= "/" id="noImage" onclick="console.log('image');return false;">Change To No Background </a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">
+    	Edit
+      </button>
+      <div class="dropdown-content">
+        <a href= "/" id="changeColor" onclick="console.log('color');return false;">Change Line Color (Pilot Color)</a>
+        <a href= "/" id="changeWidth" onclick="console.log('width');return false;">Change Line Width (Constant)</a>
+        <a href= "/" id="changeHeat" onclick="console.log('heat');return false;">Change Heatmap Color (Grey -> Black)</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">
+    	View
+      </button>
+      <div class="dropdown-content">
+        <a href= "/" id="togglePaths" onclick="console.log('paths');return false;">Toggle Paths (Visible)</a>
+        <a href= "/" id="toggleDrones" onclick="console.log('drones');return false;">Toggle Drones (Visible)</a>
+        <a href= "/" id="toggleHeat" onclick="console.log('heat');return false;">Toggle Speed Heatmap (Visible)</a>
+        <a href= "/" id="toggleStart" onclick="console.log('startpoints');return false">Toggle Start Points(Visible)</a>
+        <a href= "/" id="toggleEnd" onclick="console.log('endpoints');return false">Toggle End Points(Visible)</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">
+      Data
+      </button>
+      <div class="dropdown-content">
+        <a href= "/" id="allData" onclick="console.log('all');return false;">All Data X</a>
+        <a href= "/" id="u1" onclick="console.log('u1');return false;">Pilot #1</a>
+        <a href= "/" id="u2" onclick="console.log('u2');return false;">Pilot #2</a>
+        <a href= "/" id="u3" onclick="console.log('u3');return false;">Pilot #3</a>
+        <a href= "/" id="u4" onclick="console.log('u4');return false;">Pilot #4</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">
+        Number of Triangles
+      </button>
+      <div class="dropdown-content">
+          <input type="range" min="20" max="40" value="30" class="slider" id="nTriangle">
+          <datalist id="ticks">
+              <option>20</option>
+              <option>25</option>
+              <option>30</option>
+              <option>35</option>
+              <option>40</option>
+          </datalist>
+
+      </div>
+    </div>
+    </div>
+  </div>
+  </div>
+  </div>
+  <div id="chartDiv" class="chart"></div>
   <div id="buttonDiv"></div>
   <div id="otherDiv"></div>
 

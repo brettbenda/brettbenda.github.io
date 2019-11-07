@@ -5,6 +5,12 @@
 	var width = window.innerWidth;
 	var height = window.innerHeight;
 
+	// Define the div for the tooltip
+	var div = d3.select("body").append("div")
+	    .attr("class", "tooltip")
+	    .style("opacity", 0);
+
+
 	//Data-specific variables
 	var dataXRange = { min: -10, max: 10 }; //Should make it auto-generated, not hard-coded
 	var dataYRange = { min: -10, max: 10 }; //Should make it auto-generated, not hard-coded
@@ -17,13 +23,14 @@
 	var everyOther = 500;
 
 	//Drawing variables
-	var circleRadius     = 6;
 	var circleStartColor = "green";
 	var circleEndColor   = "red";
 	var lineWidth = 2;
 	var ts = 50; //triangle size
 	var triangleSize = [2,6,8,12];
 	var triangleRange = [1.5, 3, 4.5, 6];
+	var n = 20 // Resampling to n number of points
+	var heat_resolution = 75;
 
 	//These are the values of the 'Paired' color map. Each pair are of
 	//similar color to easily match different runs of the same subject
@@ -34,20 +41,31 @@
 							"#ffff99","#b15928"];
 	var lineIds = [];
 	var triIds  = [];
-	
+	var dotIds = [];
+
 
 	//Used by the style-switching buttons to determine style for various line elements, more styles should just be added to the array
-	var colorStyles = ["colorArray", "rainbow-time", "rainbow-height", "greyscale-time", "greyscale-height", "redscale-time", "redscale-height"]
+	var colorStyles = ["User Color", "Bluescale Time", "Bluescale Height", "Bluescale Velocity"]
 	var colorStyle = colorStyles[0]
 	var colorStyleIndex = 0
-	var widthStyles = ["constant", "bigger-time", "bigger-height"]
+	var widthStyles = ["Constant", "Time", "Height"]
 	var widthStyle = widthStyles[0]
 	var widthStyleIndex = 0
 	var drawLinesReset = true;
 	var drawTrisReset = true;
+	var drawStartReset = true;
+	var drawEndReset = true;
+	var heatmapVisible = true;
+	var heat_bw = true;
+	var activeDatasets = [];
+	var layer0, layer1, layer2, layer3;
 
 	//Global references
-	var data = [];
+	var jdata = [];
+	var jdatastart = [];
+	var jdataend =[];
+	var markers_d = [];
+	var tri_data, lin_data;
 	var mysql;
 	var chart;
 	var chartWidth;
@@ -55,11 +73,184 @@
 
 	var p1;
 
+	d3.select(window).on("load", register_buttons);
+
 	init();
 
 	// -------------------------------------------------------------------------------------
 	// Main() ------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------
+
+	function register_buttons()
+	{
+		//Style
+		d3.select("#tracedImage")
+			.on("click",function()
+			{
+				drawImage("Map_Traced.jpg","Legend.jpg")
+				return false;
+			});
+		d3.select("#realImage")
+			.on("click",function()
+			{
+				drawImage("Map_Cut.jpg","Legend.jpg")
+				return false;
+			});
+		d3.select("#noImage")
+			.on("click",function()
+			{
+				drawImage("No_Image.jpg","Legend.jpg")
+				return false;
+			});
+		d3.select("#changeColor")
+			.on("click",function()
+			{
+				colorStyleIndex++
+				if(colorStyleIndex >= colorStyles.length)
+					colorStyleIndex = 0;
+				colorStyle = colorStyles[colorStyleIndex]
+				redraw()
+				console.log(colorStyle)
+				d3.select(this).text("Change Line Color (" + colorStyle + ")")
+				return false;
+			});
+		d3.select("#changeWidth")
+			.on("click",function()
+			{
+				widthStyleIndex++
+				if(widthStyleIndex >= widthStyles.length)
+					widthStyleIndex = 0;
+				widthStyle = widthStyles[widthStyleIndex]
+				redraw()
+				console.log(widthStyle)
+				d3.select(this).text("Change Line Width (" + widthStyle + ")")
+				return false;
+			});
+		d3.select("#changeHeat")
+			.on("click",function()
+			{
+				heat_bw = !heat_bw;
+				redraw()
+				console.log(heat_bw)
+				d3.select(this).text("Toggle Heatmap " + (heat_bw?"(Grey -> Black)":"(Red -> LightRed)"))
+				return false;
+			});
+		d3.select("#togglePaths")
+			.on("click",function()
+			{
+				drawLinesReset = !drawLinesReset
+				redraw()
+				console.log(drawLinesReset)
+				d3.select(this).text("Toggle Paths " + (drawLinesReset?"(Visible)":"(Hidden)"))
+				return false;
+			});
+		d3.select("#toggleHeat")
+			.on("click",function()
+			{
+				heatmapVisible = !heatmapVisible
+				redraw()
+				console.log(heatmapVisible)
+				d3.select(this).text("Toggle Speed Heatmap " + (heatmapVisible?"(Visible)":"(Hidden)"))
+				return false;
+			});
+		d3.select("#toggleDrones")
+			.on("click",function()
+			{
+				drawTrisReset = !drawTrisReset
+				redraw()
+				console.log(drawTrisReset)
+				d3.select(this).text("Toggle Drones " + (drawLinesReset?"(Visible)":"(Hidden)"))
+				return false;
+			});
+		d3.select("#nTriangle")
+			.on("input",function(){
+				updateTriangleNumber(this.value)
+				redraw()
+				return false;
+			});
+		d3.select("#toggleEnd")
+			.on("click",function(){
+				drawEndReset = !drawEndReset
+				redraw()
+				d3.select(this).text("Toggle End Points" + (drawEndReset?"(Visible)":"(Hidden)"))
+				return false;
+			});
+		d3.select("#toggleStart")
+			.on("click",function(){
+				drawStartReset = !drawStartReset
+				redraw()
+				d3.select(this).text("Toggle Start Points" + (drawStartReset?"(Visible)":"(Hidden)"))
+				return false;
+			})
+
+		//Filters
+		d3.select("#allData")
+			.on("click",function()
+			{
+				activeDatasets=[0,1,2,3,4,5,6,7]
+				redraw()
+				console.log("All selected")
+				d3.select(this).text("All Data X")
+				d3.select("#u1").text("Pilot #1");
+				d3.select("#u2").text("Pilot #2");
+				d3.select("#u3").text("Pilot #3");
+				d3.select("#u4").text("Pilot #4");
+				return false;
+			});
+		d3.select("#u1")
+			.on("click",function()
+			{
+				activeDatasets=[0,1]
+				redraw()
+				console.log("Pilot1 selected")
+				d3.select(this).text("Pilot #1 X")
+				d3.select("#allData").text("All Data");
+				d3.select("#u2").text("Pilot #2");
+				d3.select("#u3").text("Pilot #3");
+				d3.select("#u4").text("Pilot #4");
+				return false;
+			});
+		d3.select("#u2")
+			.on("click",function()
+			{
+				activeDatasets=[2,3]
+				redraw()
+				console.log("Pilot2 selected")
+				d3.select(this).text("Pilot #2 X")
+				d3.select("#allData").text("All Data");
+				d3.select("#u1").text("Pilot #1");
+				d3.select("#u3").text("Pilot #3");
+				d3.select("#u4").text("Pilot #4");
+				return false;
+			});
+		d3.select("#u3")
+			.on("click",function()
+			{
+				activeDatasets=[4,5]
+				redraw()
+				console.log("Pilot3 selected")
+				d3.select(this).text("Pilot #3 X")
+				d3.select("#allData").text("All Data");
+				d3.select("#u1").text("Pilot #1");
+				d3.select("#u2").text("Pilot #2");
+				d3.select("#u4").text("Pilot #4");
+				return false;
+			});
+		d3.select("#u4")
+			.on("click",function()
+			{
+				activeDatasets=[6,7]
+				redraw()
+				console.log("Pilot4 selected")
+				d3.select(this).text("Pilot #4 X")
+				d3.select("#allData").text("All Data");
+				d3.select("#u1").text("Pilot #1");
+				d3.select("#u2").text("Pilot #2");
+				d3.select("#u3").text("Pilot #3");
+
+				return false;
+			});
+	}
 
 	function init()
 	{
@@ -81,58 +272,73 @@
 			])
 		.then(function(json)
 			{
-				var n = 25 // Resampling to n number of points
 
-				var clean = [];
+				// var n = 20 // Resampling to n number of points
+				var m = Math.round(json[0].length / 100); // Resampling to n number of points
+				// console.log(m);
+
+				var clean_tri = [];
+				var clean_lin = [];
 				//Resample all of the data (except the marker data)
-				for (var i = 0; i < json.length-1; i++) 
+				for (var i = 0; i < json.length-1; i++)
 				{
+					jdata.push(json[i]);
+					jdatastart.push(json[i][0]);
+					jdataend.push(json[i][json[i].length-1]);
+					dotIds.push("circle"+i);
+
 					//console.log("resampling");
-					clean.push(Resample(json[i],n));
+					clean_tri.push(Resample(json[i],n));
+					clean_lin.push(Resample(json[i],m));
+					activeDatasets.push(i);
 				}
 				//Try to combine points (when dist <= 3.5)
-				new_data = reducePaths(clean, 0.05);
+				// tri_data = reducePaths(clean_tri, 0.05);
+				// lin_data = reducePaths(clean_lin, 0.05);
+				tri_data = clean_tri;
+				lin_data = clean_lin;
+				// console.log("created data");
 				//console.log("done");
 
 
-				var mean_path = [];
-				// compute mean of paths, per each tick
-				for (i =0 ; i < new_data[0].length ;i++)
-				{
-					var sum = {x:0, y:0, z:0};
-					var point;
-					for (var j = 0; j < new_data.length; j++) 
-					{
-						point = new_data[j];
-						sum.x += point.x;
-						sum.y += point.y;
-						sum.z += point.z;
-					}
-					sum.x += sum.x / new_data.length;
-					sum.y += sum.y / new_data.length;
-					sum.z += sum.z / new_data.length;
-					mean_path.push(sum);
-				}
+				// var mean_path = getMean(tri_data);
 
 				initializeChart();
+				createLayers();
+				heatMap(lin_data, heat_resolution);
 				createAxes();
 
-				drawImage();
+				drawImage("Map_Traced.png","Legend.jpg");
+				//drawLegend("Legend.jpg");
 
 				var starting = [];
 				var ending   = [];
-				for (var i = 0; i < new_data.length; i++) 
+				// console.log("starting loop");
+				for (var i = 0; i < tri_data.length; i++)
 				{
-					starting.push(new_data[i][0]);
-					ending.push(new_data[i][new_data.length-1]);
+					// starting.push(lin_data[i][0]);
+					// ending.push(lin_data[i][lin_data[i].length-1]);
 
 					lineIds.push("line"+i);
 					triIds.push("tri"+i);
 
-					drawLines(new_data[i],lineColors[i], "line"+i);
-					drawTriangles(new_data[i],lineColors[i],"tri"+i);
+					drawLines(lin_data[i],lineColors[i], "line"+i);
+					// console.log("Line done");
+					drawTriangles(tri_data[i],lineColors[i],"tri"+i);
+					// console.log("Tri done");
 				}
-				drawDots(json[8], "red", "markers");
+				// console.log("Loop done");
+				markers_d = json[8]
+
+				drawDots(markers_d, "red", "markers");
+
+				for (var i = 0; i < dotIds.length; i++ ){
+
+					drawDotsEnds([jdataend[i]], "yellow", dotIds[i]);
+					drawDotsEnds([jdatastart[i]], "blue", dotIds[i]);
+				}
+				//drawDotsEnds(jdataend, "yellow", dotIds);
+				// console.log("Dots done");
 				// drawDots(starting, "green", "start");
 				// drawDots(ending, "black", "end");
 
@@ -142,9 +348,204 @@
 				console.warn(error);
 			})
 	}
+
+	function avgSpeed(item)
+	{
+		var speed = (Math.abs(item.vX) + Math.abs(item.vY) + Math.abs(item.vZ)) / 3;
+		return speed;
+	}
+
+	function heatMap(my_data, resolution)
+	{
+		var heatData = heatMapArray(my_data, resolution);
+		// var heatChart = d3.select("#chartDiv").select("svg")
+		// 	.attr("width", width)
+		// 	.attr("height", height)
+		var linearData = [];
+
+		for (var i = 0; i < heatData.length; i++)
+		{
+			for (var j = 0; j < heatData[i].length; j++)
+			{
+				linearData.push({"value" : heatData[i][j], "x" : i, "y" : j});
+			}
+		}
+
+		var domainData = [];
+		for (var i = 0; i < linearData.length; i++)
+		{
+			if(linearData[i].value != 0)
+				domainData.push(linearData[i]);
+		}
+
+		var colorDomain = d3.extent(domainData, function(d)
+		{
+			return d.value;
+		});
+
+		if (heat_bw)
+		{
+			var colorScale = d3.scaleLog()
+				.base(2)
+				.domain(colorDomain)
+				// .range(["#E53D00","#515052"]);
+				// .range(["#E53D00","#4E5340"]);
+				.range(["#E53D00","#0A1128"]);
+		}
+		else
+		{
+			var colorScale = d3.scaleLog()
+				.base(2)
+				.domain(colorDomain)
+				.range(["black","grey"]);
+		}
+
+
+		var opacityScale = d3.scaleLog()
+			.base(2)
+			.domain(colorDomain)
+			.range([1.0,0]);
+
+		var rectangles = layer1.selectAll("rect")
+			.data(linearData)
+			.enter()
+			.append("rect");
+
+		var legend = layer3.selectAll("heatLegend")
+			.data(colorScale.ticks())
+			.enter()
+			.append("g")
+			.attr("class", "legend");
+
+
+		legend.append("rect")
+			.attr("x", function(d, i){ return 60 * i;})
+			.attr("y", chartHeight - 30)
+			.attr("width", 60)
+			.attr("height", 30)
+			.style("fill", function(d, i) {return colorScale(d); })
+			.style("opacity", function(d, i) {return opacityScale(d); });
+
+			legend.append("text")
+						.attr("class","heatmapTitle")
+						// .attr("text-anchor", "middle")
+						.attr("x",225)
+						.attr("y",chartHeight-55)
+						.attr("stroke","black")
+						// .attr("stroke-width","0.5")
+						.style("font","calibri")
+						.style("font-size","22px")
+						.text("Average Drone Speed");
+
+		legend.append("text")
+			.attr("x", function(d, i){ return (60 * i) + 60;})
+			.attr("y", chartHeight - 40)
+			.attr("dy", ".35em")
+			.style("stroke", "black")
+			.text(function(d) { return d; });
+
+
+
+		rectangles
+			.attr("x", function(d)
+			{
+				return (d.x + 2) * width/resolution;
+			})
+			.attr("y", function(d)
+			{
+				return (resolution - d.y - 5) * height/resolution;
+			})
+			.attr("width", width/resolution)
+			.attr("height", height/resolution)
+			.style("opacity", function(d)
+			{
+				if(d.value != 0)
+					return opacityScale(d.value);
+				else
+					return 0;
+			})
+			.style("fill", function(d)
+			{
+				return colorScale(d.value);
+			});
+	}
+
+	function heatMapArray(my_data, resolution)
+	{
+		let arr = Array(resolution).fill().map(() => Array(resolution).fill(0));
+		let num = Array(resolution).fill().map(() => Array(resolution).fill(0));
+		let avg = Array(resolution).fill().map(() => Array(resolution).fill(0));
+
+
+		var scale = new Array(resolution);
+
+		for (var i = 0; i < scale.length; i++)
+		{
+			scale[i] = i;
+		}
+
+		var x_quant = d3.scaleQuantize()
+						.domain([dataXRange.min, dataXRange.max])
+						.range(scale);
+		var y_quant = d3.scaleQuantize()
+						.domain([dataYRange.min, dataYRange.max])
+						.range(scale);
+
+		for (var i = 0; i < my_data.length; i++)
+		{
+			for (var j = 0; j < my_data[i].length; j++)
+			{
+				arr_x = x_quant(my_data[i][j].x);
+				// console.log("x_val " + my_data[i][j].x + " x_idx: " + arr_x);
+				arr_y = y_quant(my_data[i][j].z);
+				// console.log("z_val " + my_data[i][j].z + " y_idx: " + arr_y);
+				arr_val = avgSpeed(my_data[i][j]);
+
+				arr[arr_x][arr_y] = arr[arr_x][arr_y] + arr_val;
+				num[arr_x][arr_y] = num[arr_x][arr_y] + 1;
+			}
+		}
+
+		for (var i = 0; i < arr.length; i++)
+		{
+			for (var j = 0; j < arr[0].length; j++)
+			{
+				if (num[i][j] != 0)
+				{
+					avg[i][j] = arr[i][j] / num[i][j];
+				}
+			}
+		}
+		// console.log(avg);
+		return avg;
+	}
+
+	function getMean(new_data)
+	{
+		var mean_path = [];
+		// compute mean of paths, per each tick
+		for (i =0 ; i < new_data[0].length ;i++)
+		{
+			var sum = {x:0, y:0, z:0};
+			var point;
+			for (var j = 0; j < new_data.length; j++)
+			{
+				point = new_data[j];
+				sum.x += point.x;
+				sum.y += point.y;
+				sum.z += point.z;
+			}
+			sum.x += sum.x / new_data.length;
+			sum.y += sum.y / new_data.length;
+			sum.z += sum.z / new_data.length;
+			mean_path.push(sum);
+		}
+		return mean_path;
+	}
+
 	function removeAllNaNs(my_data)
 	{
-		for (var i = 0; i < my_data.length; i++) 
+		for (var i = 0; i < my_data.length; i++)
 		{
 			my_data[i] = removeNaNs(my_data[i]);
 		}
@@ -154,7 +555,7 @@
 	function removeNaNs(list)
 	{
 		var new_list = []
-		for (var i = 0; i < list.length; i++) 
+		for (var i = 0; i < list.length; i++)
 		{
 			if(list[i].x != NaN && list[i].y != NaN && list[i].z != NaN)
 			{
@@ -222,11 +623,18 @@
 				var qy = parseFloat(my_data[i-1].y) + ((I - D) / d) * (my_data[i].y - my_data[i-1].y);
 				var qz = parseFloat(my_data[i-1].z) + ((I - D) / d) * (my_data[i].z - my_data[i-1].z);
 				var tr = parseFloat(my_data[i-1].t) + ((I - D) / d) * (my_data[i].t - my_data[i-1].t);
-				var yr = parseFloat(my_data[i-1].yaw)
+				var yr = parseFloat(my_data[i-1].yaw);
 				//console.log(data[i-1].yaw,data[i].yaw)
+			  //added these for completeness, but we may want to do some calculations here
+				var vxr = parseFloat(my_data[i-1].vX);
+				var vyr = parseFloat(my_data[i-1].vY);
+				var vzr = parseFloat(my_data[i-1].vZ);
+				var pr = parseFloat(my_data[i-1].pitch);
+				var rr = parseFloat(my_data[i-1].roll);
+
 
 				// var q = {x:qx, y:0, z:qz};
-				var q = {x:qx, y:qy, z:qz, yaw:yr, t:tr};
+				var q = {x:qx, y:qy, z:qz, vX:vxr, vY:vyr, vZ:vzr, pitch:pr, roll:rr, yaw:yr, t:tr};
 				//var special_q = {x:qx,y:qy,z:qz}
 				// console.log(q);
 				newdata.push(q); // append new point 'q'
@@ -243,9 +651,16 @@
 
 		if (newdata.length == n - 1)
 		{
-			newdata[newdata.length] = {x:my_data[my_data.length - 1].x, 
-									   y:my_data[my_data.length - 1].y, 
+			//RWF - added speed, pitch, & roll values so we have something, butt
+			//we may want to do something in the resampling of these values
+			newdata[newdata.length] = {x:my_data[my_data.length - 1].x,
+									   y:my_data[my_data.length - 1].y,
 									   z:my_data[my_data.length - 1].z,
+										 vX:my_data[my_data.length-1].vX,
+										 vY:my_data[my_data.length-1].vY,
+										 vZ:my_data[my_data.length-1].vZ,
+										 pitch:my_data[my_data.length-1].pitch,
+										 roll:my_data[my_data.length-1].roll,
 									   yaw:my_data[my_data.length - 1].yaw,
 									   t:my_data[my_data.length - 1].t
 									}; // somtimes we fall a rounding-error short of adding the last point, so add it if so
@@ -259,7 +674,7 @@
 		var sum = {x:0,y:0,z:0};
 		var cur;
 
-		for (var i = 0; i < list.length; i++) 
+		for (var i = 0; i < list.length; i++)
 		{
 			cur = list[i];
 			sum.x = sum.x + cur.x;
@@ -282,17 +697,17 @@
 		var replace_map  = new Map();
 		var dist;
 
-		for (var i = 0; i < my_data.length; i++) 
+		for (var i = 0; i < my_data.length; i++)
 		{
 			var cur_path = my_data[i];
-			for (var j = 0; j < cur_path.length; j++) 
+			for (var j = 0; j < cur_path.length; j++)
 			{
 				var cur_point = cur_path[j];
 				var group     = [cur_point];
-				for (var k = 0; k < my_data.length; k++) 
+				for (var k = 0; k < my_data.length; k++)
 				{
 					var other_path = my_data[k];
-					for (var l = 0; l < other_path.length; l++) 
+					for (var l = 0; l < other_path.length; l++)
 					{
 						var other_point = other_path[l];
 						dist = DistanceXZ(cur_point,other_point);
@@ -310,7 +725,7 @@
 					if(!isNaN(avg.x) && !isNaN(avg.y) && !isNaN(avg.z))
 					{
 						//Update the point to value map for easy replacement in the data later.
-						for (var l = 0; l < group.length; l++) 
+						for (var l = 0; l < group.length; l++)
 						{
 							if(DistanceXZ(group[l], avg) <= threshold/2)
 							{
@@ -337,10 +752,10 @@
 		//We have created a list of replacements for each tick now.
 		// console.log(replace_map);
 		//Post-processing to replace old values with the average values.
-		for (var i = 0; i < my_data.length; i++) 
+		for (var i = 0; i < my_data.length; i++)
 		{
 			var path = my_data[i];
-			for (var j = 0; j < path.length; j++) 
+			for (var j = 0; j < path.length; j++)
 			{
 				var point = path[j];
 				if(replace_map.has(point))
@@ -362,7 +777,7 @@
 			return false;
 		}
 
-		for (var i = 0; i < list.length; i++) 
+		for (var i = 0; i < list.length; i++)
 		{
 			var sub = list[i];
 			if(item in sub)
@@ -373,6 +788,28 @@
 		return false;
 	}
 
+	function updateTriangleNumber(numberoftriangles){
+
+		// adjust the text on the range slider
+		d3.select("#nTriangle-value").text(numberoftriangles)
+		d3.select("#nTriangle").property("value",numberoftriangles)
+
+		// update the resampling value
+		//console.log(jdata);
+
+		var clean_tri = [];
+		//Resample all of the data (except the marker data)
+		for (var i = 0; i < jdata.length; i++)
+		{
+			//console.log(jdata[i])
+			clean_tri.push(Resample(jdata[i],numberoftriangles));
+		}
+
+		tri_data = clean_tri;
+		//console.log(clean_tri)
+
+	};
+
 	// -------------------------------------------------------------------------------------
 	// D3 Line Drawing  --------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------
@@ -381,48 +818,51 @@
 		//console.log(my_data)
 		// plot dots
 
-		var lines = chart.plotArea.selectAll(label).data(my_data);
+		var lines = layer3.selectAll(label).data(my_data);
 		var len   = my_data.length;
 		var next;
 
 		lines.enter()
 			.append("line")
-				.style("stroke", 
+				.style("stroke",
 					//Function has a switch that takes current style and gives a value --Brett
 					//Structured like this since some variables are only in the scopre of the drawLines function --Brett
 					//More styles are just a case --Brett
 					function(d,i){
 						switch(colorStyle){
-							case "colorArray":
+							case "User Color":
 								return color;
-							case "rainbow-time":
+							case "Rainbow Time":
 								return d3.hsl(360*(i/len),1.0,0.5)
-							case "rainbow-height":
-								return d3.hsl(360*Math.abs(d.z)/10,1.0,0.5)
-							case "greyscale-time":
+							case "Rainbow Height":
+								return d3.hsl(360*d.y/6,1.0,0.5)
+							case "Greyscale Time":
 								return d3.hsl(0,0.0,0.75*i/len)
-							case "greyscale-height":
-								return d3.hsl(0,0.0,Math.abs(d.z)/10)
-							case "redscale-time":
-								return d3.hsl(0,1.0,0.75*i/len)
-							case "redscale-height":
-								return d3.hsl(0,1.0,Math.abs(d.z)/10)
+							case "Greyscale Height":
+								return d3.hsl(0,0.0,d.y/10)
+							case "Bluescale Time":
+								return d3.hsl(180,1.0,0.75*i/len)
+							case "Bluescale Height":
+								return d3.hsl(180,1.0,d.y/10)
+              case "Bluescale Velocity":
+                var velocity = Math.sqrt(Math.pow(d.vX,2)+Math.pow(d.vY,2)+Math.pow(d.vZ,2))
+                return d3.hsl(180,1.0, velocity/5)
 						}
 				})
 				.attr("id", label)
-				.attr("stroke-width", 
+				.attr("stroke-width",
 					//Function has a switch that takes current style and gives a value --Brett
 					//Structured like this since some variables are only in the scopre of the drawLines function --Brett
 					//More styles are just a case --Brett
 					function(d,i){
 						switch(widthStyle){
-							case "constant":
+							case "Constant":
 								return lineWidth;
-              case "bigger-time":
+              case "Time":
                 return 1 + 5*(i/len)
-							case "bigger-height":
+							case "Height":
 								//needs some adjustment due to negative z values?
-								return 1 + Math.abs(d.z);
+								return d.y;
 						}
 				})
 				.attr("x1",
@@ -467,7 +907,7 @@
 					//console.log('Clicking line')
 					// var clicked_line = this;
 					// console.log(clicked_line.id)
-					for (var i = 0; i < lineIds.length; i++) 
+					for (var i = 0; i < lineIds.length; i++)
 					{
 						if(this.id == lineIds[i])
 						{
@@ -484,7 +924,7 @@
 					}
 					var triId = this.id.replace("line","tri");
 					// console.log(triId);
-					for (var i = 0; i < triIds.length; i++) 
+					for (var i = 0; i < triIds.length; i++)
 					{
 						if(triId == triIds[i])
 						{
@@ -499,20 +939,44 @@
 							;
 						}
 					}
+					var dotId = this.id.replace("line","circle");
+					for (var i = 0; i < dotIds.length; i++)
+						{
+							//console.log(this.id)
+							if(dotId == dotIds[i])
+							{
+								d3.selectAll("#"+dotIds[i])
+									.style("opacity", 1.0)
+								;
+							}
+							else
+							{
+								d3.selectAll("#"+dotIds[i])
+									.style("opacity", 0.25)
+								;
+							}
+						}
 				})
+				//.attr("preserveAspectRatio", "xMinYMin meet")
+  				//.attr("viewBox", "0 0 1000 1000")
 				.on("mouseout", function(d,i){
 					//console.log('Clicking line')
 					// var clicked_line = this;
 					// console.log(clicked_line.id)
-						for (var i = 0; i < lineIds.length; i++) 
+						for (var i = 0; i < lineIds.length; i++)
 						{
 								d3.selectAll("#"+lineIds[i])
 									.style("opacity", 1.0);
 						}
 						// console.log(triId);
-						for (var i = 0; i < triIds.length; i++) 
+						for (var i = 0; i < triIds.length; i++)
 						{
 							d3.selectAll("#"+triIds[i])
+								.style("opacity", 1.0);
+						}
+						for (var i = 0; i < dotIds.length; i++)
+						{
+							d3.selectAll("#"+dotIds[i])
 								.style("opacity", 1.0);
 						}
 					}
@@ -531,8 +995,8 @@
 		var triangle = d3.symbol()
 		            .type(d3.symbolTriangle)
 		            .size(ts);
-
-		var tris = chart.plotArea.selectAll(label).data(my_data);
+		var len   = my_data.length;
+		var tris = layer3.selectAll(label).data(my_data);
 		// var len  = my_data.length;
 		var rx;
 		var ry;
@@ -540,8 +1004,8 @@
 		tris.enter()
 			.append("path")
 				    .attr("id", label)
-					//Calculate size of triangle based upon height. 
-					.attr("d", function(d) 
+					//Calculate size of triangle based upon height.
+					.attr("d", function(d)
 					{
 						//console.log(d);
 					    if (d.y < triangleRange[0]) ry = triangleSize[0]
@@ -565,18 +1029,51 @@
 					})
 					.attr("stroke","black")
 					.attr("stroke-width","0.5")
-					.attr("fill" ,color)
+					.attr("fill" ,function(d,i){
+						switch(colorStyle){
+							case "User Color":
+								return color;
+							case "Rainbow Time":
+								return d3.hsl(360*(i/len),1.0,0.5)
+							case "Rainbow Height":
+								return d3.hsl(360*d.y/6,1.0,0.5)
+							case "Greyscale Time":
+								return d3.hsl(0,0.0,0.75*i/len)
+							case "Greyscale Height":
+								return d3.hsl(0,0.0,d.y/10)
+							case "Bluescale Time":
+                return d3.hsl(180,1.0,0.75*i/len)
+              case "Bluescale Height":
+                return d3.hsl(180,1.0,d.y/10)
+              case "Bluescale Velocity":
+                var velocity = Math.sqrt(Math.pow(d.vX,2)+Math.pow(d.vY,2)+Math.pow(d.vZ,2))
+                return d3.hsl(180,1.0, velocity/5)
+						}
+				})
 					.attr('transform' , function(d,i)
 					{
 						return "rotate(" + d.yaw + " " + chart.xScale(d.x) + " " + chart.yScale(d.z) + ")";
-					})  //this doesn't work
+					})
 					.on("mouseover", function(d,i)
 					{
-						//console.log('Clicking line')
-						// var clicked_line = this;
-						// console.log(clicked_line.id)
+
+						console.log("mouseover");
+			            div.transition()
+			                .duration(100)
+			                .style("opacity", .9);
+											div	.html("Location: {" + twoDecimals(d.x) + ", " + twoDecimals(d.z) + "}<br/>"
+											+ "Height: " + twoDecimals(d.y)+ "<br/>"
+											+ "Speed: {" + twoDecimals(d.vX) +", " + twoDecimals(d.vY) + ", " + twoDecimals(d.vZ) + "}<br/>"
+											// + "Pitch: " + twoDecimals(d.pitch) + "<br/>"
+											// + "Roll: " + twoDecimals(d.roll) + "<br/>"
+											+ "Yaw: " + twoDecimals(d.yaw) + "<br/>"
+											+ "Time: " + twoDecimals(d.t))
+			                .style("left", (d3.event.pageX) + "px")
+			                .style("top", (d3.event.pageY - 50) + "px");
+
+
 						var lineId = this.id.replace("tri","line");
-						for (var i = 0; i < lineIds.length; i++) 
+						for (var i = 0; i < lineIds.length; i++)
 						{
 							if(lineId == lineIds[i])
 							{
@@ -592,7 +1089,7 @@
 							}
 						}
 						// console.log(triId);
-						for (var i = 0; i < triIds.length; i++) 
+						for (var i = 0; i < triIds.length; i++)
 						{
 							if(this.id == triIds[i])
 							{
@@ -607,37 +1104,72 @@
 								;
 							}
 						}
+						var dotId = this.id.replace("tri","circle");
+						for (var i = 0; i < dotIds.length; i++)
+						{
+							//console.log(this.id)
+							if(dotId == dotIds[i])
+							{
+								d3.selectAll("#"+dotIds[i])
+									.style("opacity", 1.0)
+								;
+							}
+							else
+							{
+								d3.selectAll("#"+dotIds[i])
+									.style("opacity", 0.25)
+								;
+							}
+						}
+
+
 					})
-					.on("mouseout", function(d,i){
-					//console.log('Clicking line')
-					// var clicked_line = this;
-					// console.log(clicked_line.id)
-						for (var i = 0; i < lineIds.length; i++) 
+					.on("mouseout", function(d,i)
+					{
+			            div.transition()
+			                .duration(100)
+			                .style("opacity", 0);
+
+
+						for (var i = 0; i < lineIds.length; i++)
 						{
 								d3.selectAll("#"+lineIds[i])
 									.style("opacity", 1.0);
 						}
 						// console.log(triId);
-						for (var i = 0; i < triIds.length; i++) 
+						for (var i = 0; i < triIds.length; i++)
 						{
 							d3.selectAll("#"+triIds[i])
 								.style("opacity", 1.0);
 						}
-					})	
-					.on("click", function(d) 
+						for (var i = 0; i < dotIds.length; i++)
+						{
+							d3.selectAll("#"+dotIds[i])
+								.style("opacity", 1.0);
+						}
+					})
+					.on("click", function(d)
 					{
 						console.log("triangle selected: ", d.x, ", ", d.y, ",",d.z);
 					});
 	}
 
+	function twoDecimals(num)
+	{
+		return Math.round(num * 100) / 100;
+	}
 	// -------------------------------------------------------------------------------------
 	// D3 Dot Drawing  ---------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------
 	function drawDots(my_data, color, label)
 	{
+		//var circleRadius     = 6;
+		var cr;
+		var circleRadius = [3,4.5,6,7.5];
+		var heightRange = [1.5, 3, 4.5, 6];
 		// console.log("Drawing dots")
 		// plot dots
-		var dots = chart.plotArea.selectAll(label).data(my_data);
+		var dots = layer3.selectAll(label).data(my_data);
 		var len  = my_data.length;
 
 		dots.enter()
@@ -645,23 +1177,184 @@
  				.attr("class", "dot")
 				.attr("cx", function(d) { return chart.xScale(d.x); })
 				.attr("cy", function(d) { return chart.yScale(d.z); })
-				.attr("r", circleRadius)
-				.attr("fill", color) 
+				// .attr("r", circleRadius)
+				.attr("r", function(d) {
+					//console.log(d);
+						if (d.y < heightRange[0]) cr = circleRadius[0]
+						else if (d.y < heightRange[1]) cr = circleRadius[1]
+						else if (d.y < heightRange[2]) cr = circleRadius[2]
+						else cr = circleRadius[3];
+						return cr;
+
+				})
+				.attr("fill", color)
 				.attr("stroke","black")
 				.attr("stroke-width","0.5")
-		;
+				.on("mouseover", function(d,i)
+				{
+
+					console.log("mouseover");
+						div.transition()
+								.duration(100)
+								.style("opacity", .9);
+						div	.html("Location: {" + twoDecimals(d.x) + ", " + twoDecimals(d.z) + "}<br/>"
+									 + "Height: " + twoDecimals(d.y))
+								.style("left", (d3.event.pageX) + "px")
+								.style("top", (d3.event.pageY - 50) + "px");
+
+
+				})
+				.on("mouseout", function(d,i)
+				{
+								div.transition()
+										.duration(100)
+										.style("opacity", 0);
+
+				});
+	}
+	function drawDotsEnds(my_data, color, label)
+	{
+		//var circleRadius     = 6;
+		var cr;
+		var circleRadius = [3,4.5,6,7.5];
+		var heightRange = [1.5, 3, 4.5, 6];
+		// console.log("Drawing dots")
+		// plot dots
+		var dots = layer3.selectAll(label).data(my_data);
+		var len  = my_data.length;
+
+		dots.enter()
+			.append("circle")
+				.attr("class", "circle")
+				.attr("id", label)
+				.attr("cx", function(d) { return chart.xScale(d.x); })
+				.attr("cy", function(d) { return chart.yScale(d.z); })
+				// .attr("r", circleRadius)
+				.attr("r", function(d) {
+					//console.log(d);
+						if (d.y < heightRange[0]) cr = circleRadius[0]
+						else if (d.y < heightRange[1]) cr = circleRadius[1]
+						else if (d.y < heightRange[2]) cr = circleRadius[2]
+						else cr = circleRadius[3];
+						return cr;
+
+				})
+				.attr("fill", color)
+				.attr("stroke","black")
+				.attr("stroke-width","0.5")
+				.on("mouseover", function(d,i)
+				{
+
+					console.log("mouseover");
+						div.transition()
+								.duration(100)
+								.style("opacity", .9);
+						div	.html("Location: {" + twoDecimals(d.x) + ", " + twoDecimals(d.z) + "}<br/>"
+									 + "Height: " + twoDecimals(d.y))
+								.style("left", (d3.event.pageX) + "px")
+								.style("top", (d3.event.pageY - 50) + "px");
+
+
+						var lineId = this.id.replace("circle","line");
+						for (var i = 0; i < lineIds.length; i++)
+							{
+							if(lineId == lineIds[i])
+							{
+								d3.selectAll("#"+lineIds[i])
+								//console.log(d3.selectAll("#"+lineIds[i]))
+									.style("opacity", 1.0)
+								;
+							}
+							else
+							{
+								d3.selectAll("#"+lineIds[i])
+									.style("opacity", 0.25)
+								;
+							}
+						}
+						var triId = this.id.replace("circle","tri");
+						for (var i = 0; i < triIds.length; i++)
+						{
+							if(triId == triIds[i])
+							{
+								//console.log(this.id)
+								d3.selectAll("#"+triIds[i])
+									.style("opacity", 1.0)
+								;
+							}
+							else
+							{
+								d3.selectAll("#"+triIds[i])
+									.style("opacity", 0.25)
+								;
+							}
+						}
+
+						for (var i = 0; i < dotIds.length; i++)
+						{
+							//console.log(this.id)
+							if(this.id == dotIds[i])
+							{
+								d3.selectAll("#"+dotIds[i])
+									.style("opacity", 1.0)
+								;
+							}
+							else
+							{
+								d3.selectAll("#"+dotIds[i])
+									.style("opacity", 0.25)
+								;
+							}
+						}
+
+				})
+				.on("mouseout", function(d,i)
+				{
+								div.transition()
+										.duration(100)
+										.style("opacity", 0);
+
+
+								for (var i = 0; i < lineIds.length; i++)
+								{
+										d3.selectAll("#"+lineIds[i])
+											.style("opacity", 1.0);
+								}
+								// console.log(triId);
+								for (var i = 0; i < triIds.length; i++)
+								{
+									d3.selectAll("#"+triIds[i])
+										.style("opacity", 1.0);
+								}
+								for (var i = 0; i < dotIds.length; i++)
+								{
+									d3.selectAll("#"+dotIds[i])
+										.style("opacity", 1.0);
+								}
+				});
+
 	}
 
 	// -------------------------------------------------------------------------------------
 	// Image Loader for Background  --------------------------------------------------------
 	// -------------------------------------------------------------------------------------
-	function drawImage()
+	function drawImage(string1,string2)
 	{
+		//var string = "Map_Traced.jpg"
 		d3.select("svg")
-			.style("background","url(/data/Maps/Map1.png) no-repeat center")
-			.style("background-size", "80% 80%")
-		;
+			.style("background","url(/data/Maps/"+string1+") no-repeat center, url(/data/Maps/"+string2+") no-repeat top center")
+			.style("background-size", "75% 45%, 20% 22%");
+
 	}
+
+	// function drawLegend(string)
+	// {
+
+	// 	d3.select("svg")
+	// 		.style("background","url(/data/Maps/"+string+") no-repeat top center")
+	// 		.style("background-size", "12% 12%")
+	// 	;
+	// }
 
 	// -------------------------------------------------------------------------------------
 	// D3 Chart Drawing  -------------------------------------------------------------------
@@ -670,157 +1363,80 @@
 	{
 		chart = d3.select("#chartDiv").append("svg")
 			.attr("width", width)
-			.attr("height", height);
+			.attr("height", height)
+
+			// this controls the size of the viewbox, however im not sure how it plays with the background image
+
+			// .attr("preserveAspectRatio", "xMinYMin meet")
+  			// .attr("viewBox", "0 0 1000 1000")
+  			//.classed("svg-content", true);
 
 		chart.plotArea = chart.append("g")
 			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-		//Button that when clicked cycles between color styles --Brett
-		chart.colorStyleButton = d3.select("#buttonDiv").append("svg")
-			.attr("width",150)
-			.attr("height",150)
-
-		chart.colorStyleButton.append("rect")
-				.attr("x",0)
-				.attr("y",0)
-				.attr("width",150)
-				.attr("height",150)
-				.attr("fill","hsl(0,100%,75%)")
-				.on("click",function(){
-					colorStyleIndex++
-					if(colorStyleIndex >= colorStyles.length)
-						colorStyleIndex = 0;
-					colorStyle = colorStyles[colorStyleIndex]
-					redraw()
-					console.log(colorStyle)
-				})
-				.on("mouseover",function(){
-					d3.select(this).attr("fill", "hsl(0,50%,75%)")
-				})
-				.on("mouseout",function(){
-					d3.select(this).attr("fill", "hsl(0,100%,75%)")
-				})
-
-		chart.colorStyleButtonText = chart.colorStyleButton.append("text")
-				.text("Change Color")
-				.attr("x",30)
-				.attr("y",75)
-				.attr("font-family","sans-serif")
-				.attr("font-size",12)
-
-		//Button that when clicked cycles between width styles --Brett
-		chart.widthStyleButton = d3.select("#buttonDiv").append("svg")
-			.attr("width",150)
-			.attr("height",150)
-
-		chart.widthStyleButton.append("rect")
-				.attr("x",0)
-				.attr("y",0)
-				.attr("width",150)
-				.attr("height",150)
-				.attr("fill","hsl(90,100%,75%)")
-				.on("click",function(){
-					widthStyleIndex++
-					if(widthStyleIndex >= widthStyles.length)
-						widthStyleIndex = 0;
-					widthStyle = widthStyles[widthStyleIndex]
-					redraw()
-					console.log(widthStyle)
-				})
-				.on("mouseover",function(){
-					d3.select(this).attr("fill", "hsl(90,50%,75%)")
-				})
-				.on("mouseout",function(){
-					d3.select(this).attr("fill", "hsl(90,100%,75%)")
-				})
-
-		chart.widthStyleButtonText = chart.widthStyleButton.append("text")
-				.text("Change Width")
-				.attr("x",30)
-				.attr("y",75)
-				.attr("font-family","sans-serif")
-				.attr("font-size",12)
-
-		//Button that when clicked cycles between width styles --Brett
-		chart.lineToggleButton = d3.select("#buttonDiv").append("svg")
-			.attr("width",150)
-			.attr("height",150)
-
-		chart.lineToggleButton.append("rect")
-				.attr("x",0)
-				.attr("y",0)
-				.attr("width",150)
-				.attr("height",150)
-				.attr("fill","hsl(180,100%,75%)")
-				.on("click",function(){
-					drawLinesReset = !drawLinesReset
-					redraw()
-					console.log(drawLinesReset)
-				})
-				.on("mouseover",function(){
-					d3.select(this).attr("fill", "hsl(180,50%,75%)")
-				})
-				.on("mouseout",function(){
-					d3.select(this).attr("fill", "hsl(180,100%,75%)")
-				})
-
-		chart.lineToggleText = chart.lineToggleButton.append("text")
-				.text("Toggle Paths")
-				.attr("x",30)
-				.attr("y",75)
-				.attr("font-family","sans-serif")
-				.attr("font-size",12)
-
-		//Button that when clicked cycles between width styles --Brett
-		chart.triToggleButton = d3.select("#buttonDiv").append("svg")
-			.attr("width",150)
-			.attr("height",150)
-
-		chart.triToggleButton.append("rect")
-				.attr("x",0)
-				.attr("y",0)
-				.attr("width",150)
-				.attr("height",150)
-				.attr("fill","hsl(270,100%,75%)")
-				.on("click",function(){
-					drawTrisReset = !drawTrisReset
-					redraw()
-					console.log(drawTrisReset)
-				})
-				.on("mouseover",function(){
-					d3.select(this).attr("fill", "hsl(270,50%,75%)")
-				})
-				.on("mouseout",function(){
-					d3.select(this).attr("fill", "hsl(270,100%,75%)")
-				})
-
-		chart.triToggleButtonText = chart.triToggleButton.append("text")
-				.text("Toggle Drones")
-				.attr("x",30)
-				.attr("y",75)
-				.attr("font-family","sans-serif")
-				.attr("font-size",12)
 	}
 
-	function redraw(){
-		
-		for(var i = 0; i<lineIds.length; i++){
-			//console.log("#"+lineIds[i])
-			d3.selectAll("#"+lineIds[i]).remove();
-			if(drawLinesReset){
-				drawLines(new_data[i],lineColors[i], "line"+i);
-			}
-		}
-		
-		
+	function redraw()
+	{
+		var heat_data = [];
+		d3.selectAll("circle").remove();
+
 		for(var i = 0; i< triIds.length; i++){
-			//console.log("#"+triIds[i])
 			d3.selectAll("#"+triIds[i]).remove();
-			if(drawTrisReset){
-				drawTriangles(new_data[i],lineColors[i], "tri"+i);
+			if(drawTrisReset  && activeDatasets.includes(i)){
+				drawTriangles(tri_data[i],lineColors[i], "tri"+i);
 			}
 		}
-		
+
+		for(var i = 0; i<lineIds.length; i++){
+			d3.selectAll("#"+lineIds[i]).remove();
+
+			if(drawLinesReset && activeDatasets.includes(i))
+			{
+
+				if (drawEndReset == true){
+					drawDotsEnds([jdataend[i]],"yellow",dotIds[i])
+					drawDots(markers_d,"red","marker")
+					//console.log("dots are on")
+
+				}
+				else if (drawEndReset == false){
+					//console.log("dots are off")
+					drawDots(markers_d,"red","marker")
+
+				}
+
+				if (drawStartReset == true){
+					drawDotsEnds(jdatastart,"blue",dotIds[i])
+					drawDots(markers_d,"red","marker")
+					//console.log("dots are on")
+				}
+				else if (drawStartReset == false){
+					//console.log("dots are off")
+					drawDots(markers_d,"red","marker")
+
+				}
+
+				drawLines(lin_data[i],lineColors[i], "line"+i);
+				heat_data.push(lin_data[i]);
+			}
+		}
+
+		layer1.selectAll("rect").remove();
+		layer3.selectAll("rect").remove();
+		layer3.selectAll("text").remove();
+		if(heatmapVisible)
+			heatMap(heat_data, heat_resolution);
+
+
+
+	}
+
+	function createLayers()
+	{
+		layer0 = chart.append("g");
+		layer1 = chart.append("g");
+		layer2 = chart.append("g");
+		layer3 = chart.append("g");
 	}
 
 	function createAxes()
@@ -835,7 +1451,7 @@
 			.tickSizeOuter(0)
 			.scale(chart.xScale);
 
-		chart.xAxisContainer = chart.append("g")
+		chart.xAxisContainer = layer2
 			.attr("class", "x axis scatter-xaxis")
 			.attr("transform", "translate(" + (margin.left) + ", " + (chartHeight + margin.top) + ")")
 			.call(chart.xAxis);
@@ -856,7 +1472,7 @@
 		chart.yAxis = d3.axisLeft()
 			.scale(chart.yScale);
 
-		chart.yAxisContainer = chart.append("g")
+		chart.yAxisContainer = layer3
 			.attr("class", "y axis scatter-yaxis")
 			.attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
 			.call(chart.yAxis);
@@ -869,6 +1485,24 @@
 			.attr("transform", "translate(" + (margin.left / 2.0) + ", " + (chartHeight / 2.0) + ") rotate(-90)")
 			.text(yAxisLabelHeader);
 	}
+
+	// function createLegend(data){
+	// 	var legend = chart.append("g")
+	// 		.attr("class","legend")
+	// 		.attr("height",100)
+	// 		.attr("width",100)
+	// 		//.attr("transform","translate(-20,50)")
+
+	// 	legend.selectAll('dots')
+	// 		.data(data)
+	// 		.enter()
+	// 		.append("dots")
+	// 		.attr("x", 65)
+    //   		.attr("y", function(d, i){ return i *  20;})
+	//   		.attr("width", 10)
+	//   		.attr("height", 10)
+	//   		.style("fill", "red")
+	// }
 
 
 })();
