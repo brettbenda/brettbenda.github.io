@@ -2,8 +2,10 @@
 {
 	//Chart area variables
 	var margin = { top: 10, right: 10, bottom: 100, left: 50 };
-	var width = window.innerWidth;
-	var height = window.innerHeight;
+	var width = window.innerWidth*0.75;
+  console.log(width)
+  console.log(window.innerWidth)
+	var height = window.innerHeight*0.925;
 
 	// Define the div for the tooltip
 	var div = d3.select("body").append("div")
@@ -25,16 +27,20 @@
 	//Drawing variables
 	var circleStartColor = "green";
 	var circleEndColor   = "red";
-	var lineWidth = 2;
+	var lineWidth = 4;
 	var ts = 50; //triangle size
-	var triangleSize = [2,6,8,12];
-	var triangleRange = [1.5, 3, 4.5, 6];
-	var n = 20 // Resampling to n number of points
-	var heat_resolution = 75;
+	var circleRadius = ["0.5%","0.65%","0.8%","0.95%","1.1%"];
+	// var circleRadius = [4,6.5,8,9.5];
+	var heightRange = [1.5,3,4.5, 6];
+	// var triangleSize = [2,6,8,12];
+	var triangleSize = [6,8,10,12];
+//	var triangleRange = [1.5, 3, 4.5, 6];
+	var n = 25 // Resampling to n number of points
+	var heat_threshold = 98; //Display top 2% of data
 
 	//These are the values of the 'Paired' color map. Each pair are of
 	//similar color to easily match different runs of the same subject
-	var lineColors       = ["#a6cee3","#1f78b4",
+	var lineColors  = ["#a6cee3","#1f78b4",
 							"#b2df8a","#33a02c",
 							"#fdbf6f","#ff7f00",
 							"#cab2d6","#6a3d9a",
@@ -45,20 +51,20 @@
 
 
 	//Used by the style-switching buttons to determine style for various line elements, more styles should just be added to the array
-	var colorStyles = ["User Color", "Bluescale Time", "Bluescale Height", "Bluescale Velocity"]
+	var colorStyles = ["Pilot Color", "Bluescale Time", "Bluescale Height", "Bluescale Velocity"]
 	var colorStyle = colorStyles[0]
 	var colorStyleIndex = 0
 	var widthStyles = ["Constant", "Time", "Height"]
 	var widthStyle = widthStyles[0]
 	var widthStyleIndex = 0
 	var drawLinesReset = true;
-	var drawTrisReset = true;
+	var drawTrisReset = false;
 	var drawStartReset = true;
 	var drawEndReset = true;
-	var heatmapVisible = true;
+	var heatmapVisible = false;
 	var heat_bw = true;
-	var activeDatasets = [];
-	var layer0, layer1, layer2, layer3;
+	var activeDatasets = [0,2,4,6];
+	var layer0, layer1, layer2, layer3, layer4;
 
 	//Global references
 	var jdata = [];
@@ -83,173 +89,114 @@
 
 	function register_buttons()
 	{
-		//Style
-		d3.select("#tracedImage")
-			.on("click",function()
-			{
-				drawImage("Map_Traced.jpg","Legend.jpg")
-				return false;
-			});
-		d3.select("#realImage")
-			.on("click",function()
-			{
-				drawImage("Map_Cut.jpg","Legend.jpg")
-				return false;
-			});
-		d3.select("#noImage")
-			.on("click",function()
-			{
-				drawImage("No_Image.jpg","Legend.jpg")
-				return false;
-			});
-		d3.select("#changeColor")
-			.on("click",function()
-			{
-				colorStyleIndex++
-				if(colorStyleIndex >= colorStyles.length)
-					colorStyleIndex = 0;
-				colorStyle = colorStyles[colorStyleIndex]
+		//Select paths
+		d3.selectAll(".Pgroup")
+			.on("change", function(d) {
+				// console.log("Pilot checkbox that changed: " + this.value);
+				activeDatasets=[]
+				// Check all check boxes to update the active drone paths
+	 			d3.selectAll(".Pgroup").each(function(d){
+					var cb = d3.select(this);
+		 			if(cb.property("checked")){
+			 			activeDatasets.push(+cb.property("value"));
+		 			}
+	 			});  //each pgroup
+				redraw();
+		});   //on change
+
+		//Show/hide flight Paths
+		d3.selectAll(".Vgroup")
+			.on("change", function(d) {
+				drawLinesReset = this.checked;
+				redraw();
+		});
+    //Start Markers
+		d3.selectAll(".Sgroup")
+			.on("change",function(d){
+				drawStartReset = this.checked;
 				redraw()
-				console.log(colorStyle)
-				d3.select(this).text("Change Line Color (" + colorStyle + ")")
-				return false;
 			});
-		d3.select("#changeWidth")
-			.on("click",function()
-			{
-				widthStyleIndex++
-				if(widthStyleIndex >= widthStyles.length)
-					widthStyleIndex = 0;
-				widthStyle = widthStyles[widthStyleIndex]
+	  //End Markers
+		d3.selectAll(".Egroup")
+			.on("change",function(d){
+				drawEndReset = this.checked;
 				redraw()
-				console.log(widthStyle)
-				d3.select(this).text("Change Line Width (" + widthStyle + ")")
-				return false;
-			});
-		d3.select("#changeHeat")
-			.on("click",function()
-			{
-				heat_bw = !heat_bw;
+			})
+    //Drone markers
+		d3.selectAll(".Dgroup")
+			.on("change",function(d){
+				drawTrisReset = this.checked;
 				redraw()
-				console.log(heat_bw)
-				d3.select(this).text("Toggle Heatmap " + (heat_bw?"(Grey -> Black)":"(Red -> LightRed)"))
-				return false;
 			});
-		d3.select("#togglePaths")
-			.on("click",function()
-			{
-				drawLinesReset = !drawLinesReset
-				redraw()
-				console.log(drawLinesReset)
-				d3.select(this).text("Toggle Paths " + (drawLinesReset?"(Visible)":"(Hidden)"))
-				return false;
-			});
-		d3.select("#toggleHeat")
-			.on("click",function()
-			{
-				heatmapVisible = !heatmapVisible
-				redraw()
-				console.log(heatmapVisible)
-				d3.select(this).text("Toggle Speed Heatmap " + (heatmapVisible?"(Visible)":"(Hidden)"))
-				return false;
-			});
-		d3.select("#toggleDrones")
-			.on("click",function()
-			{
-				drawTrisReset = !drawTrisReset
-				redraw()
-				console.log(drawTrisReset)
-				d3.select(this).text("Toggle Drones " + (drawLinesReset?"(Visible)":"(Hidden)"))
-				return false;
-			});
+		//Number of triangle
 		d3.select("#nTriangle")
-			.on("input",function(){
+			.on("input",function(d){
 				updateTriangleNumber(this.value)
 				redraw()
-				return false;
 			});
-		d3.select("#toggleEnd")
-			.on("click",function(){
-				drawEndReset = !drawEndReset
-				redraw()
-				d3.select(this).text("Toggle End Points" + (drawEndReset?"(Visible)":"(Hidden)"))
-				return false;
-			});
-		d3.select("#toggleStart")
-			.on("click",function(){
-				drawStartReset = !drawStartReset
-				redraw()
-				d3.select(this).text("Toggle Start Points" + (drawStartReset?"(Visible)":"(Hidden)"))
-				return false;
-			})
 
-		//Filters
-		d3.select("#allData")
-			.on("click",function()
-			{
-				activeDatasets=[0,1,2,3,4,5,6,7]
+    //Heat circle
+		d3.selectAll(".Hgroup")
+			.on("change",function(d){
+				heatmapVisible = this.checked;
+				console.log("Heatmap "+heatmapVisible)
 				redraw()
-				console.log("All selected")
-				d3.select(this).text("All Data X")
-				d3.select("#u1").text("Pilot #1");
-				d3.select("#u2").text("Pilot #2");
-				d3.select("#u3").text("Pilot #3");
-				d3.select("#u4").text("Pilot #4");
-				return false;
 			});
-		d3.select("#u1")
-			.on("click",function()
-			{
-				activeDatasets=[0,1]
+    //Heat Threshold
+		d3.selectAll("#nThreshold")
+			.on("input",function(d){
+				heat_threshold = 100-this.value;
+				console.log("heat threshold = "+heat_threshold);
 				redraw()
-				console.log("Pilot1 selected")
-				d3.select(this).text("Pilot #1 X")
-				d3.select("#allData").text("All Data");
-				d3.select("#u2").text("Pilot #2");
-				d3.select("#u3").text("Pilot #3");
-				d3.select("#u4").text("Pilot #4");
-				return false;
 			});
-		d3.select("#u2")
-			.on("click",function()
-			{
-				activeDatasets=[2,3]
-				redraw()
-				console.log("Pilot2 selected")
-				d3.select(this).text("Pilot #2 X")
-				d3.select("#allData").text("All Data");
-				d3.select("#u1").text("Pilot #1");
-				d3.select("#u3").text("Pilot #3");
-				d3.select("#u4").text("Pilot #4");
-				return false;
-			});
-		d3.select("#u3")
-			.on("click",function()
-			{
-				activeDatasets=[4,5]
-				redraw()
-				console.log("Pilot3 selected")
-				d3.select(this).text("Pilot #3 X")
-				d3.select("#allData").text("All Data");
-				d3.select("#u1").text("Pilot #1");
-				d3.select("#u2").text("Pilot #2");
-				d3.select("#u4").text("Pilot #4");
-				return false;
-			});
-		d3.select("#u4")
-			.on("click",function()
-			{
-				activeDatasets=[6,7]
-				redraw()
-				console.log("Pilot4 selected")
-				d3.select(this).text("Pilot #4 X")
-				d3.select("#allData").text("All Data");
-				d3.select("#u1").text("Pilot #1");
-				d3.select("#u2").text("Pilot #2");
-				d3.select("#u3").text("Pilot #3");
 
-				return false;
+		//background
+		d3.selectAll(".Bgroup")
+			.on("change",function(d){
+				console.log("change bg",+this.value);
+				drawImage(this.value ,"Legend.jpg");
 			});
+
+
+		// d3.select("#changeColor")
+		// 	.on("click",function()
+		// 	{
+		// 		colorStyleIndex++
+		// 		if(colorStyleIndex >= colorStyles.length)
+		// 			colorStyleIndex = 0;
+		// 		colorStyle = colorStyles[colorStyleIndex]
+		// 		redraw()
+		// 		console.log(colorStyle)
+		// 		d3.select(this).text("Change Line Color (" + colorStyle + ")")
+		// 		return false;
+		// 	});
+		// d3.select("#changeWidth")
+		// 	.on("click",function()
+		// 	{
+		// 		widthStyleIndex++
+		// 		if(widthStyleIndex >= widthStyles.length)
+		// 			widthStyleIndex = 0;
+		// 		widthStyle = widthStyles[widthStyleIndex]
+		// 		redraw()
+		// 		console.log(widthStyle)
+		// 		d3.select(this).text("Change Line Width (" + widthStyle + ")")
+		// 		return false;
+		// 	});
+
+		// d3.select("#togglePaths")
+		// 	.on("click",function()
+		// 	{
+		// 		drawLinesReset = !drawLinesReset
+		// 		redraw()
+		// 		console.log(drawLinesReset)
+		// 		d3.select(this).text("Toggle Paths " + (drawLinesReset?"(Visible)":"(Hidden)"))
+		// 		return false;
+		// 	});
+
+
+
+
+
 	}
 
 	function init()
@@ -290,7 +237,7 @@
 					//console.log("resampling");
 					clean_tri.push(Resample(json[i],n));
 					clean_lin.push(Resample(json[i],m));
-					activeDatasets.push(i);
+					// activeDatasets.push(i);
 				}
 				//Try to combine points (when dist <= 3.5)
 				// tri_data = reducePaths(clean_tri, 0.05);
@@ -305,8 +252,9 @@
 
 				initializeChart();
 				createLayers();
-				heatMap(lin_data, heat_resolution);
+				// heatMap(lin_data, heat_resolution);
 				createAxes();
+				// heatMap(lin_data, heat_threshold);
 
 				drawImage("Map_Traced.png","Legend.jpg");
 				//drawLegend("Legend.jpg");
@@ -322,9 +270,13 @@
 					lineIds.push("line"+i);
 					triIds.push("tri"+i);
 
-					drawLines(lin_data[i],lineColors[i], "line"+i);
+					if(activeDatasets.includes(i)) {
+						drawLines(lin_data[i],lineColors[i], "line"+i);
+					}
 					// console.log("Line done");
-					drawTriangles(tri_data[i],lineColors[i],"tri"+i);
+					if(activeDatasets.includes(i)) {
+						drawTriangles(tri_data[i],lineColors[i],"tri"+i);
+					}
 					// console.log("Tri done");
 				}
 				// console.log("Loop done");
@@ -355,169 +307,97 @@
 		return speed;
 	}
 
-	function heatMap(my_data, resolution)
+	function maxSpeed(item)
 	{
-		var heatData = heatMapArray(my_data, resolution);
-		// var heatChart = d3.select("#chartDiv").select("svg")
-		// 	.attr("width", width)
-		// 	.attr("height", height)
-		var linearData = [];
-
-		for (var i = 0; i < heatData.length; i++)
-		{
-			for (var j = 0; j < heatData[i].length; j++)
-			{
-				linearData.push({"value" : heatData[i][j], "x" : i, "y" : j});
-			}
-		}
-
-		var domainData = [];
-		for (var i = 0; i < linearData.length; i++)
-		{
-			if(linearData[i].value != 0)
-				domainData.push(linearData[i]);
-		}
-
-		var colorDomain = d3.extent(domainData, function(d)
-		{
-			return d.value;
-		});
-
-		if (heat_bw)
-		{
-			var colorScale = d3.scaleLog()
-				.base(2)
-				.domain(colorDomain)
-				// .range(["#E53D00","#515052"]);
-				// .range(["#E53D00","#4E5340"]);
-				.range(["#E53D00","#0A1128"]);
-		}
-		else
-		{
-			var colorScale = d3.scaleLog()
-				.base(2)
-				.domain(colorDomain)
-				.range(["black","grey"]);
-		}
-
-
-		var opacityScale = d3.scaleLog()
-			.base(2)
-			.domain(colorDomain)
-			.range([1.0,0]);
-
-		var rectangles = layer1.selectAll("rect")
-			.data(linearData)
-			.enter()
-			.append("rect");
-
-		var legend = layer3.selectAll("heatLegend")
-			.data(colorScale.ticks())
-			.enter()
-			.append("g")
-			.attr("class", "legend");
-
-
-		legend.append("rect")
-			.attr("x", function(d, i){ return 60 * i;})
-			.attr("y", chartHeight - 30)
-			.attr("width", 60)
-			.attr("height", 30)
-			.style("fill", function(d, i) {return colorScale(d); })
-			.style("opacity", function(d, i) {return opacityScale(d); });
-
-			legend.append("text")
-						.attr("class","heatmapTitle")
-						// .attr("text-anchor", "middle")
-						.attr("x",225)
-						.attr("y",chartHeight-55)
-						.attr("stroke","black")
-						// .attr("stroke-width","0.5")
-						.style("font","calibri")
-						.style("font-size","22px")
-						.text("Average Drone Speed");
-
-		legend.append("text")
-			.attr("x", function(d, i){ return (60 * i) + 60;})
-			.attr("y", chartHeight - 40)
-			.attr("dy", ".35em")
-			.style("stroke", "black")
-			.text(function(d) { return d; });
-
-
-
-		rectangles
-			.attr("x", function(d)
-			{
-				return (d.x + 2) * width/resolution;
-			})
-			.attr("y", function(d)
-			{
-				return (resolution - d.y - 5) * height/resolution;
-			})
-			.attr("width", width/resolution)
-			.attr("height", height/resolution)
-			.style("opacity", function(d)
-			{
-				if(d.value != 0)
-					return opacityScale(d.value);
-				else
-					return 0;
-			})
-			.style("fill", function(d)
-			{
-				return colorScale(d.value);
-			});
+		var speed = Math.max(Math.abs(item.vX) + Math.abs(item.vY) + Math.abs(item.vZ));
+		return speed;
 	}
 
-	function heatMapArray(my_data, resolution)
+	function heatMap(my_data, threshold)
 	{
-		let arr = Array(resolution).fill().map(() => Array(resolution).fill(0));
-		let num = Array(resolution).fill().map(() => Array(resolution).fill(0));
-		let avg = Array(resolution).fill().map(() => Array(resolution).fill(0));
+		var heatData,heatScale;
+		var values = heatMapArray(my_data, threshold);
+		var gradColor = "#FF00FF"//"#FF6E63"//"#E80C7A"//"#0FAEBA"//"#6A36D9"//"#8836BF" //"F2387C" //"#FE5F55"  
+		heatData   = values[0];
+		heatScale  = values[1];
 
+		var radialGradient = layer1.append("defs")
+			.append("radialGradient")
+			.attr("id", "radial-gradient");
 
-		var scale = new Array(resolution);
+		radialGradient.append("stop")
+			.attr("offset", "0%")
+			.attr("stop-color", gradColor)
+			.attr("stop-opacity", 1.0);
 
-		for (var i = 0; i < scale.length; i++)
-		{
-			scale[i] = i;
-		}
+		radialGradient.append("stop")
+			.attr("offset", "65%")
+			.attr("stop-color", gradColor)
+			.attr("stop-opacity", 0.50);
 
-		var x_quant = d3.scaleQuantize()
-						.domain([dataXRange.min, dataXRange.max])
-						.range(scale);
-		var y_quant = d3.scaleQuantize()
-						.domain([dataYRange.min, dataYRange.max])
-						.range(scale);
+		radialGradient.append("stop")
+			.attr("offset", "100%")
+			.attr("stop-color", gradColor)
+			.attr("stop-opacity", 0.0);
 
+		var circles = layer1.selectAll("heatCircles")
+			.data(heatData)
+			.enter()
+			.append("circle");
+
+		circles
+			.attr("class", "dot")
+			.attr("cx", function(d)
+			{
+				return chart.xScale(d.x) + margin.left;
+			})
+			.attr("cy", function(d)
+			{
+				return chart.yScale(d.y) + margin.top;
+			})
+			.attr("r", 10)
+			.style("opacity", 0.50)
+			.style("fill", "url(#radial-gradient)");
+			// .style("fill", "#FE5F55");
+	}
+
+	function heatMapArray(my_data, threshold)
+	{
+		var linearData = [];
+		var curData;
 		for (var i = 0; i < my_data.length; i++)
 		{
 			for (var j = 0; j < my_data[i].length; j++)
 			{
-				arr_x = x_quant(my_data[i][j].x);
-				// console.log("x_val " + my_data[i][j].x + " x_idx: " + arr_x);
-				arr_y = y_quant(my_data[i][j].z);
-				// console.log("z_val " + my_data[i][j].z + " y_idx: " + arr_y);
-				arr_val = avgSpeed(my_data[i][j]);
-
-				arr[arr_x][arr_y] = arr[arr_x][arr_y] + arr_val;
-				num[arr_x][arr_y] = num[arr_x][arr_y] + 1;
+				curData = my_data[i][j];
+				linearData.push({"value" : maxSpeed(curData), "x" : curData.x, "y" : curData.z});
 			}
 		}
 
-		for (var i = 0; i < arr.length; i++)
+		var colorDomain = d3.extent(linearData, function(d)
 		{
-			for (var j = 0; j < arr[0].length; j++)
+			return d.value;
+		});
+
+		var percentages = [];
+		for (var i = 100; i >= 0; i--)
+		{
+			percentages.push(i);
+		}
+
+		var quantileScale = d3.scaleQuantile()
+			.domain(colorDomain)
+			.range(percentages);
+
+		var retData = [];
+		for (var i = 0; i < linearData.length; i++)
+		{
+			if (quantileScale(linearData[i].value) >= threshold)
 			{
-				if (num[i][j] != 0)
-				{
-					avg[i][j] = arr[i][j] / num[i][j];
-				}
+				retData.push(linearData[i]);
 			}
 		}
-		// console.log(avg);
-		return avg;
+		return [retData,quantileScale];
 	}
 
 	function getMean(new_data)
@@ -830,7 +710,7 @@
 					//More styles are just a case --Brett
 					function(d,i){
 						switch(colorStyle){
-							case "User Color":
+							case "Pilot Color":
 								return color;
 							case "Rainbow Time":
 								return d3.hsl(360*(i/len),1.0,0.5)
@@ -991,6 +871,7 @@
 	{
 		// console.log("Drawing triangles")
 		// var verticalTransform = midHeight + Math.sqrt(triangleSize);
+		if (drawTrisReset==0) return;
 
 		var triangle = d3.symbol()
 		            .type(d3.symbolTriangle)
@@ -1008,12 +889,12 @@
 					.attr("d", function(d)
 					{
 						//console.log(d);
-					    if (d.y < triangleRange[0]) ry = triangleSize[0]
-							else if (d.y < triangleRange[1]) ry = triangleSize[1]
-							else if (d.y < triangleRange[2]) ry = triangleSize[2]
+					    if (d.y < heightRange[0]) ry = triangleSize[0]
+							else if (d.y < heightRange[1]) ry = triangleSize[1]
+							else if (d.y < heightRange[2]) ry = triangleSize[2]
 							else ry = triangleSize[3];
 
-							rx = ry/2; //triangleSize/2;
+							rx = ry*0.75; //triangleSize/2;
 							// var rx = 3; //triangleSize/2;
 							// var ry = 6; //triangleSize
 							var x = chart.xScale(d.x);
@@ -1028,10 +909,11 @@
 									"L" + x + "," + uy + "Z";
 					})
 					.attr("stroke","black")
-					.attr("stroke-width","0.5")
+					.attr("stroke-width","1.0")
+  				// .attr("stroke-width","0.5")
 					.attr("fill" ,function(d,i){
 						switch(colorStyle){
-							case "User Color":
+							case "Pilot Color":
 								return color;
 							case "Rainbow Time":
 								return d3.hsl(360*(i/len),1.0,0.5)
@@ -1165,8 +1047,6 @@
 	{
 		//var circleRadius     = 6;
 		var cr;
-		var circleRadius = [3,4.5,6,7.5];
-		var heightRange = [1.5, 3, 4.5, 6];
 		// console.log("Drawing dots")
 		// plot dots
 		var dots = layer3.selectAll(label).data(my_data);
@@ -1216,8 +1096,6 @@
 	{
 		//var circleRadius     = 6;
 		var cr;
-		var circleRadius = [3,4.5,6,7.5];
-		var heightRange = [1.5, 3, 4.5, 6];
 		// console.log("Drawing dots")
 		// plot dots
 		var dots = layer3.selectAll(label).data(my_data);
@@ -1340,10 +1218,57 @@
 	// -------------------------------------------------------------------------------------
 	function drawImage(string1,string2)
 	{
+		/*
+
+		d3.xml("./data/Maps/Map_Traced.svg")
+    		.then(data => {
+    			data.documentElement.setAttributeNS(null,"id", "background")
+        		d3.select('svg').node().append(data.documentElement)
+
+
+				var html = document.getElementById("background").innerHTML
+				//console.log(html)
+				document.getElementById("backgroundImage").innerHTML = html;
+
+
+				var img = document.getElementById("background")
+
+				img.innerHTML=""
+   		})
+
+
+    	var xoffset = chart.xScale(0);
+    	var yoffset = chart.yScale(0);
+    	//console.log(layer4[0].getBBox())
+
+    	layer4
+    		.attr("transform", "translate("+xoffset+ ", "+yoffset+") scale(0.65,0.45)")
+		*/
+		//console.log(layer4)
+		//console.log(d3.select("#backgroundImage").style('width'))
 		//var string = "Map_Traced.jpg"
+		//var string = "Map_Traced.jpg"
+		var aspect_ratio, legend_x, legend_y;
+
+		if(width<height){
+			aspect_ratio = width/height;
+			legend_y = 20;
+			legend_x = 1.4*legend_y/aspect_ratio;
+		}else{
+			aspect_ratio = height/width;
+			legend_x = 20
+			legend_y = legend_x/1.4/aspect_ratio;
+		}
+		console.log(aspect_ratio)
+		console.log(legend_x)
+		console.log(legend_y)
+
+
 		d3.select("svg")
-			.style("background","url(/data/Maps/"+string1+") no-repeat center, url(/data/Maps/"+string2+") no-repeat top center")
-			.style("background-size", "75% 45%, 20% 22%");
+			.style("background","url(/data/Maps/"+string1+") no-repeat center, url(/data/Maps/"+string2+") no-repeat")
+			// .style("background-size", "75% 45%, 20% 22%");
+			.style("background-size", "75% 45%,"+legend_x+"% "+legend_y+"%")
+			.style("background-position","center, 7.5% 2%")
 
 	}
 
@@ -1377,66 +1302,69 @@
 
 	function redraw()
 	{
+		//Draw in order:  lines, triangles, start/stop circles, markers
 		var heat_data = [];
 		d3.selectAll("circle").remove();
 
+		//Draw lines;
+		for(var i = 0; i<lineIds.length; i++){
+			d3.selectAll("#"+lineIds[i]).remove();
+			// console.log("In Redraw - active data = "+activeDatasets);
+			// console.log("i = "+i+" is included "+activeDatasets.includes(i))
+			// if(drawLinesReset && activeDatasets.includes(i))
+			if(activeDatasets.includes(i))
+			{
+				if (drawLinesReset) drawLines(lin_data[i],lineColors[i], "line"+i);
+				heat_data.push(lin_data[i]);
+			}
+
+		}
+
+		//Draw Triangles
 		for(var i = 0; i< triIds.length; i++){
 			d3.selectAll("#"+triIds[i]).remove();
-			if(drawTrisReset  && activeDatasets.includes(i)){
+			console.log("in redraw:")
+			if(activeDatasets.includes(i)){
 				drawTriangles(tri_data[i],lineColors[i], "tri"+i);
 			}
 		}
+		//Draw start and end points
+		for(var i = 0; i<lineIds.length; i++) {
+			// d3.selectAll("#"+lineIds[i]).remove();
 
-		for(var i = 0; i<lineIds.length; i++){
-			d3.selectAll("#"+lineIds[i]).remove();
-
-			if(drawLinesReset && activeDatasets.includes(i))
+			// if(drawLinesReset && activeDatasets.includes(i))  //only draw dots if the line is on
+			if(activeDatasets.includes(i))   //draw dots if they are "on"
 			{
-
 				if (drawEndReset == true){
 					drawDotsEnds([jdataend[i]],"yellow",dotIds[i])
-					drawDots(markers_d,"red","marker")
-					//console.log("dots are on")
-
 				}
-				else if (drawEndReset == false){
-					//console.log("dots are off")
-					drawDots(markers_d,"red","marker")
-
-				}
-
 				if (drawStartReset == true){
 					drawDotsEnds(jdatastart,"blue",dotIds[i])
-					drawDots(markers_d,"red","marker")
-					//console.log("dots are on")
 				}
-				else if (drawStartReset == false){
-					//console.log("dots are off")
-					drawDots(markers_d,"red","marker")
-
-				}
-
-				drawLines(lin_data[i],lineColors[i], "line"+i);
-				heat_data.push(lin_data[i]);
 			}
 		}
 
-		layer1.selectAll("rect").remove();
-		layer3.selectAll("rect").remove();
-		layer3.selectAll("text").remove();
-		if(heatmapVisible)
-			heatMap(heat_data, heat_resolution);
+		drawDots(markers_d,"red","marker")
 
-
+		layer1.selectAll("heatCircles").remove();
+		console.log("redraw: heatmapVisible = "+heatmapVisible);
+		if(heatmapVisible == true) {
+			console.log("drawing heatmap");
+			// console.log("drawing heatmap")
+			heatMap(heat_data, heat_threshold);
+		}
 
 	}
 
 	function createLayers()
 	{
+		layer4 = chart.append("g");
 		layer0 = chart.append("g");
 		layer1 = chart.append("g");
 		layer2 = chart.append("g");
 		layer3 = chart.append("g");
+
+		layer4.attr("id", "backgroundImage")
 	}
 
 	function createAxes()
