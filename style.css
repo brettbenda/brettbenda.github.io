@@ -4,6 +4,7 @@ a{
 
 a:hover{
   color: #ffcea1;
+  text-decoration: none;
 }
 
 .bg-blue{
