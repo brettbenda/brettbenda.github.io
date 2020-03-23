@@ -29,23 +29,23 @@
     var id = getUrlParam("id",100000)
     console.log(id)
 
-    var rand = Math.floor(Math.random()*4)
+    var rand = Math.random()*4
     console.log(rand)
-    switch(rand){
-      case 0:
-          window.open('https://ufl.qualtrics.com/jfe/form/SV_50aVsvUwpST3U0J?id='+id, "_self");
-          break;
-      case 1:
-          window.open('https://ufl.qualtrics.com/jfe/form/SV_0B4t361qnbVapEN?id='+id, "_self");
-          break;
-      case 2:
-          window.open('https://ufl.qualtrics.com/jfe/form/SV_2gX81Hq5ac0pQCF?id='+id, "_self");
-          break;
-      case 3:
-          //D
-          window.open('https://ufl.qualtrics.com/jfe/form/SV_55Wjbq0JgqNsjBP?id='+id, "_self");
-          break;
-    }
+
+
+    if(rand > 2.5)
+      //C
+      window.open('https://ufl.qualtrics.com/jfe/form/SV_2gX81Hq5ac0pQCF?id='+id, "_self");
+    else if (rand > 1.67)
+      //A
+      window.open('https://ufl.qualtrics.com/jfe/form/SV_50aVsvUwpST3U0J?id='+id, "_self");       
+    else if (rand > 0.86)
+      //B
+      window.open('https://ufl.qualtrics.com/jfe/form/SV_0B4t361qnbVapEN?id='+id, "_self");
+    else
+      //D
+      window.open('https://ufl.qualtrics.com/jfe/form/SV_55Wjbq0JgqNsjBP?id='+id, "_self");
+
   </script>
 
 </head>
