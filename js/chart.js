@@ -16,7 +16,7 @@ Promise.all([
 Promise.all([
 	d3.json("/js/test.json")
 ]).then(function(json){
-	logs = json[0] //everything is wrapped in an extra array so
+	logs = json[0] 
 
 	var seg = logs[0][1] //get P1
 	
@@ -85,20 +85,21 @@ Promise.all([
 				})
 				.call(wrap, 385)
 
-	card.drag = barElement(card, 15,150,"Drag", function(d){
-		return 50*(1.0 - d.drag_ratio)
-	})
 
-	card.search = barElement(card, 75,150,"Search", function(d){
+	card.search = barElement(card, 15,150,"Search", function(d){
 		return 50*(1.0 - d.search_ratio)
 	})
 
-	card.highlight = barElement(card, 135,150,"Highlight", function(d){
+	card.highlight = barElement(card, 75,150,"Highlight", function(d){
 		return 50*(1.0 - d.highlight_ratio)
 	})
 
-	card.notes = barElement(card, 195,150,"Notes", function(d){
+	card.notes = barElement(card, 135,150,"Notes", function(d){
 		return 50*(1.0 - d.note_ratio)
+	})
+
+	card.drag = barElement(card, 195,150,"Drag", function(d){
+		return 50*(1.0 - d.drag_ratio)
 	})
 
 
