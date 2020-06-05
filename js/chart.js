@@ -18,18 +18,29 @@ Promise.all([
 ]).then(function(json){
 	logs = json[0] //everything is wrapped in an extra array so
 
-	var seg = logs[2][7] //get P1
+	var seg = logs[0][1] //get P1
 	
 	var seg = segmentify(seg)
 	console.log(seg)
 
+	var total_interactions = 0;
 	for (var i = 0; i<seg.length; i++){
 		var summary = summarize_segment(seg[i])
 		summary.pid = 1;
 		summary.number = i
+		if(summary.interesting)
+			total_interactions += summary.total_interactions;
 		data.push(summary)
 	}
-	
+
+	//average number of interactions
+	total_interactions /= data.length
+
+	//interactions rate = 0.5 if at average, <0.5 if
+	for(var seg of data){
+		seg.interaction_rate = Math.max(0,(seg.total_interactions / total_interactions));
+	}
+
 	console.log(data)
 	
 	//draw cards
@@ -52,7 +63,9 @@ Promise.all([
 				attr("height",200).
 				attr("width",400).
 				style("fill","white").
-				style("stroke","royalblue").
+				style("stroke", function(d){
+					return d.interesting ? "royalblue" : "indianred"
+				}).
 				style("stroke-width", 3)
 
 	card.label = card.append("text").
@@ -72,86 +85,69 @@ Promise.all([
 				})
 				.call(wrap, 385)
 
-	card.drag_bg = card.append("rect").
-					attr("x",15).
-					attr("y",150).
-					attr("height", function(d){
-						return 50
-					}).
-					attr("width",50).
-					style("fill","royalblue")
+	card.drag = barElement(card, 15,150,"Drag", function(d){
+		return 50*(1.0 - d.drag_ratio)
+	})
 
-	card.drag_bar = card.append("rect").
-					attr("x",15).
-					attr("y",150).
-					attr("height", function(d){
-						return 50*(1.0 - d.drag_ratio)
-					}).
-					attr("width",50).
-					style("fill","lightblue")
+	card.search = barElement(card, 75,150,"Search", function(d){
+		return 50*(1.0 - d.search_ratio)
+	})
 
-	card.drag_text = card.append("text").
-					attr("x",15).
-					attr("y",150).
-					text("Dragging").
-					style("font-size", 12)
-					.call(wrap, 385)
+	card.highlight = barElement(card, 135,150,"Highlight", function(d){
+		return 50*(1.0 - d.highlight_ratio)
+	})
 
-	card.search_bg = card.append("rect").
-					attr("x",75).
-					attr("y",150).
-					attr("height", function(d){
-						return 50
-					}).
-					attr("width",50).
-					style("fill","royalblue")
-
-	card.search_bar = card.append("rect").
-					attr("x",75).
-					attr("y",150).
-					attr("height", function(d){
-						return 50*(1.0 - d.search_ratio)
-					}).
-					attr("width",50).
-					style("fill","lightblue")
-
-	card.drag_text = card.append("text").
-					attr("x",75).
-					attr("y",150).
-					text("Searching").
-					style("font-size", 12)
-					.call(wrap, 385)
-
-	card.highlight_bg = card.append("rect").
-					attr("x",135).
-					attr("y",150).
-					attr("height", function(d){
-						return 50
-					}).
-					attr("width",50).
-					style("fill","royalblue")
-
-	card.highlight_bar = card.append("rect").
-					attr("x",135).
-					attr("y",150).
-					attr("height", function(d){
-						return 50*(1.0 - d.highlight_ratio)
-					}).
-					attr("width",50).
-					style("fill","lightblue")
-
-	card.drag_text = card.append("text").
-					attr("x",135).
-					attr("y",150).
-					text("Highlighting").
-					style("font-size", 12)
-					.call(wrap, 385)
+	card.notes = barElement(card, 195,150,"Notes", function(d){
+		return 50*(1.0 - d.note_ratio)
+	})
 
 
+	card.total = card.append("text")
+				 .attr("x", 250)
+				 .attr("y", 185)
+				 .text(function(d){
+				 	return "Total Interactions: " + d.total_interactions
+				 })
+
+	// barElement(card, 200,150,"Total", function(d){
+	// 	return 50*(1.0 - d.interaction_rate)
+	// })
 
 	console.log(card)
 
 })
+
+
+//Arguments: The svg element to draw the bar on, x location, y location, text label, function to determine size of bar
+//Output: void return, item added to input svg
+function barElement(card, x, y, text, sizefunc){
+	element = {}
+	element.bg = card.append("rect").
+					attr("x",x).
+					attr("y",y).
+					attr("height", 50).
+					attr("width",50).
+					style("fill",function(d){
+							return d.interesting ? "royalblue" : "coral"
+					})
+
+	element.bar = card.append("rect").
+					attr("x",x).
+					attr("y",y).
+					attr("height", sizefunc).
+					attr("width",50).
+					style("fill",function(d){
+							return d.interesting ? "lightblue" : "lightcoral"
+					})
+
+	element.text = card.append("text").
+					attr("x",x).
+					attr("y",y).
+					text(text).
+					style("font-size", 12)
+					.call(wrap, 385)
+
+}
 
 //Argument: a participant interaction json object
 //Result: 	an array of interaction json objects regrouped by segment
@@ -162,7 +158,7 @@ function segmentify(json){
 	for (var item of json){
 		if(item['segment'] == segment_id){
 			current_segment.push(item)
-		}else{
+		}else if(item['segment']!=null){
 			segmented_data.push(current_segment)
 			current_segment = [];
 			segment_id++;
@@ -181,7 +177,7 @@ function summarize_segment(segment){
 	var searches = []; //Search
 	var notes = [] //Add note
 	var highlights = [] //Highlight
-	var total_interactions = 1;
+	var total_interactions = 0;
 
 	//remove non-alphanumeric chars to aboid issue
 	for(var interaction of segment){
@@ -209,45 +205,48 @@ function summarize_segment(segment){
 	}
 
 	//only unique
-	searches = [...new Set(searches)]
-	highlights = [...new Set(highlights)]
+	searches2 = [...new Set(searches)]
+	highlights2 = [...new Set(highlights)]
 
 	//Find features	
 	var bestFeatures = []
 	var summaryText = "";
-	if(searches.length !=0){
+
+	//check for searches
+	if(searches2.length !=0){
 		summaryText += "The investigator searched for documents related to "
-		for(var i =0; i<Math.min(3,searches.length); i++){
+		for(var i =0; i<Math.min(3,searches2.length); i++){
 
 			//last
-			if(i!=0 && i==Math.min(3,searches.length)-1)
+			if(i!=0 && i==Math.min(3,searches2.length)-1)
 				summaryText +="and "
 
-			summaryText += searches[i]
+			summaryText += searches2[i]
 
 			//not first
-			if(i!=Math.min(3,searches.length)-1)
+			if(i!=Math.min(3,searches2.length)-1)
 				summaryText +=", "
 		}
 		summaryText+=". \n"
 	}
 
-	if(highlights.length !=0){
-		if(highlights.length == 1)
+	//check for highlights
+	if(highlights2.length !=0){
+		if(highlights2.length == 1)
 			summaryText += "The investigator thought the phrase "
 		else
 			summaryText += "The investigator thought the phrases "
 
-		for(var i =0; i<Math.min(3,highlights.length); i++){
+		for(var i =0; i<Math.min(3,highlights2.length); i++){
 
 			//not first and last
-			if(i!=0 && i==Math.min(3,highlights.length)-1)
+			if(i!=0 && i==Math.min(3,highlights2.length)-1)
 				summaryText +="and "
 
-			summaryText += "\"" + highlights[i] + "\""
+			summaryText += "\"" + highlights2[i] + "\""
 
 			//not last
-			if(i!=Math.min(3,highlights.length)-1)
+			if(i!=Math.min(3,highlights2.length)-1)
 				summaryText +=", "
 		}
 		
@@ -257,6 +256,14 @@ function summarize_segment(segment){
 			summaryText += " were notable."
 	}
 
+	if(summaryText == "" && notes.length != 0){
+		summaryText += "The investigator made the following note: \'" + notes[0] + "\".";
+	}
+
+	if(summaryText == "" && drags.length != 0){
+		summaryText += "The investigator rearranged some documents.";
+	}
+
 
 	if(summaryText == ""){
 		summaryText = "Nothing interesting was found."
@@ -264,15 +271,16 @@ function summarize_segment(segment){
 
 	console.log( drags.length/total_interactions)
 	var summary = {
+		interesting : (total_interactions > 0) ? true:false,
 		total_interactions: total_interactions,
 		drags: drags,
-		drag_ratio: drags.length/total_interactions,
+		drag_ratio: (total_interactions > 0) ? drags.length/total_interactions : 0,
 		searches: searches,
-		search_ratio: searches.length/total_interactions,
+		search_ratio: (total_interactions > 0) ? searches.length/total_interactions : 0,
 		notes: notes,
-		note_ratio: notes.length/total_interactions,
+		note_ratio: (total_interactions > 0) ? notes.length/total_interactions :0,
 		highlights: highlights,
-		highlight_ratio: highlights.length/total_interactions,
+		highlight_ratio: (total_interactions > 0) ? highlights.length/total_interactions:0,
 		summaryText: summaryText
 	}
 	return summary;
