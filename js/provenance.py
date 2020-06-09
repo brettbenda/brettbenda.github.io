@@ -49,7 +49,9 @@ for i in range (1,4):
     logs.append(setlogs)
     segments.append(setsegments)
 
-print(segments[0][1])
+##print(segments[0][1])
+
+_segment = 1;
 
 for _set in range(0,3):
     for _id in range(0,8):

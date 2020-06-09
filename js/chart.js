@@ -16,7 +16,7 @@ Promise.all([
 Promise.all([
 	d3.json("/js/test.json")
 ]).then(function(json){
-	logs = json[0] 
+	logs = json[0]
 
 	var seg = logs[0][1] //get P1
 	
@@ -34,7 +34,7 @@ Promise.all([
 	}
 
 	//average number of interactions
-	total_interactions /= data.length
+	//total_interactions /= data.length
 
 	//interactions rate = 0.5 if at average, <0.5 if
 	for(var seg of data){
@@ -45,16 +45,20 @@ Promise.all([
 	
 	//draw cards
 	var card = d3.select("#chart").
-				selectAll("svg").
+				selectAll("card").
 				data(data).
 				enter().
 				append("svg").
 				attr("height", 210).
 				attr("width",410).
+				// attr("transform", function(d){
+				// 	return "scale(" + Math.max(0.75,(d.total_interactions/25 > 1.0)?1.0:d.total_interactions/25)  + ")"
+				// }).
 				attr("id",function(d){
-					return d.pid + ":" +d.number
+					return "card" + d.pid + "_" +d.number
 				})
 
+	console.log(card)
 	card.bg = card.append("rect").
 				attr("x",5).
 				attr("y",5).
@@ -102,17 +106,40 @@ Promise.all([
 		return 50*(1.0 - d.drag_ratio)
 	})
 
+	card.total = barElement(card, 345,150,"Total", function(d){
+		return 50*(1.0 - d.interaction_rate)
+	})
 
-	card.total = card.append("text")
-				 .attr("x", 250)
-				 .attr("y", 185)
-				 .text(function(d){
-				 	return "Total Interactions: " + d.total_interactions
-				 })
 
-	// barElement(card, 200,150,"Total", function(d){
-	// 	return 50*(1.0 - d.interaction_rate)
+	// card.search = circleElement(card, 15,150, 25, "Search", function(d){
+	// 	return 50*(d.search_ratio)/2
 	// })
+
+	// card.highlight = circleElement(card, 75,150, 25,"Highlight", function(d){
+	// 	return 50*(d.highlight_ratio)/2
+	// })
+
+	// card.notes = circleElement(card, 135,150, 25,"Notes", function(d){
+	// 	return 50*(d.note_ratio)/2
+	// })
+
+	// card.drag = circleElement(card, 195,150, 25,"Drag", function(d){
+	// 	return 50*(d.drag_ratio)/2
+	// })
+
+	// card.total = circleElement(card, 345,150, 25, "Total", function(d){
+	// 	return 50*(d.interaction_rate)
+	// })
+
+
+	// card.total = card.append("text")
+	// 			 .attr("x", 250)
+	// 			 .attr("y", 185)
+	// 			 .text(function(d){
+	// 			 	return "Total Interactions: " + d.total_interactions
+	// 			 })
+
+	
 
 	console.log(card)
 
@@ -131,6 +158,20 @@ function barElement(card, x, y, text, sizefunc){
 					style("fill",function(d){
 							return d.interesting ? "royalblue" : "coral"
 					})
+					.on("mouseover",function(d,i){
+						console.log("mouseover")
+						var selectID = "#card" + d.pid+"_"+i
+						d3.select(selectID).append("text").
+							attr("x", x+25).
+							attr("y",y+30).
+							attr("class","barText").
+							text(TextToValue(d,text)).
+							style("font-size", 12).
+							style("font-weight", "bold")
+					})
+					.on("mouseout",function(d,i){
+						d3.selectAll(".barText").remove()
+					})
 
 	element.bar = card.append("rect").
 					attr("x",x).
@@ -140,10 +181,84 @@ function barElement(card, x, y, text, sizefunc){
 					style("fill",function(d){
 							return d.interesting ? "lightblue" : "lightcoral"
 					})
+					.on("mouseover",function(d,i){
+						console.log("mouseover")
+						var selectID = "#card" + d.pid+"_"+i
+						d3.select(selectID).append("text").
+							attr("x", x+25).
+							attr("y",y+30).
+							attr("class","barText").
+							text(TextToValue(d,text)).
+							style("font-size", 12).
+							style("font-weight", "bold")
+					})
+					.on("mouseout",function(d,i){
+						d3.selectAll(".barText").remove()
+					})
 
 	element.text = card.append("text").
 					attr("x",x).
-					attr("y",y).
+					attr("y",y-5).
+					text(text).
+					style("font-size", 12)
+					.call(wrap, 385)
+
+	return element
+
+}
+
+//Arguments: The svg element to draw the bar on, x location, y location, text label, function to determine size of bar
+//Output: void return, item added to input svg
+function circleElement(card, x, y, r, text, sizefunc){
+	element = {}
+	element.bg = card.append("circle").
+					attr("cx",x+r).
+					attr("cy",y+r).
+					attr("r", r).
+					style("fill",function(d){
+						return d.interesting ? "lightblue" : "lightcoral"
+							
+					})
+					.on("mouseover",function(d,i){
+						console.log("mouseover")
+						var selectID = "#card" + d.pid+"_"+i
+						d3.select(selectID).append("text").
+							attr("x", x+25).
+							attr("y",y+30).
+							attr("class","barText").
+							text(TextToValue(d,text)).
+							style("font-size", 12).
+							style("font-weight", "bold")
+					})
+					.on("mouseout",function(d,i){
+						d3.selectAll(".barText").remove()
+					})
+
+	element.bar = card.append("circle").
+					attr("cx",x+r).
+					attr("cy",y+r).
+					attr("r", sizefunc).
+					style("fill",function(d){
+							return d.interesting ? "royalblue" : "coral"
+					})
+					.on("mouseover",function(d,i){
+						console.log("mouseover")
+						var selectID = "#card" + d.pid+"_"+i
+						d3.select(selectID).append("text").
+							attr("x", x+25).
+							attr("y", y+30).
+							attr("class","barText").
+							text(TextToValue(d,text)).
+							style("font-size", 12).
+							style("font-weight", "bold")
+					})
+					.on("mouseout",function(d,i){
+						d3.selectAll(".barText").remove()
+					})
+
+	element.text = card.append("text").
+					attr("x",x).
+					attr("y",y-5).
 					text(text).
 					style("font-size", 12)
 					.call(wrap, 385)
@@ -180,7 +295,7 @@ function summarize_segment(segment){
 	var highlights = [] //Highlight
 	var total_interactions = 0;
 
-	//remove non-alphanumeric chars to aboid issue
+	//remove non-alphanumeric chars to avoid issues
 	for(var interaction of segment){
 		switch(interaction['InteractionType']){
 			case "Draging":
@@ -333,4 +448,19 @@ function wrap(text, width) {
             }
         }
     });
+}
+
+function TextToValue(d, Text){
+	switch(Text){
+		case "Search":
+			return d.searches.length
+		case "Highlight": 
+			return d.highlights.length
+		case "Notes":
+			return d.notes.length
+		case "Drag":
+			return d.drags.length
+		case "Total":
+			return d.total_interactions
+	}
 }
