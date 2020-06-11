@@ -49,10 +49,51 @@ for i in range (1,4):
     logs.append(setlogs)
     segments.append(setsegments)
 
-##print(segments[0][1])
+#Create segment JSON, cluster short segments into previous segments
+segment_json = []
+for _set in range(0,3):
+    for _id in range(0,8):
+        current_segment = 0
+        new_segment = True;
+        segment_start = 0;
+        segment_end = 0;
+        current_segment_json = []
+        for i,segment in enumerate(segments[_set][_id]):
+            stringjson = json.loads(segment)
+
+            segment_start = int(float(stringjson['start']))
+            segment_end = int(float(stringjson['end']))
+
+            if(current_segment!=0 and segment_end-segment_start < 25):
+                current_segment_json[current_segment-1].update({'end' : segment_end})
+            elif(i==len(segments[_set][_id])-1):
+                item = {}
+                item.update({"dataset" : _set+1})
+                item.update({"pid" : _id+1})
+                item.update({"sid" : current_segment})
+                item.update({"start" :  int(segment_start)})
+                item.update({"end" : int(segment_end)})
+                item.update({"length" : int(segment_end-segment_start)})
+                current_segment_json.append(item)
+
+                current_segment = current_segment+1
+            else:
+                item = {}
+                item.update({"dataset" : _set+1})
+                item.update({"pid" : _id+1})
+                item.update({"sid" : current_segment})
+                item.update({"start" :  int(segment_start)})
+                item.update({"end" : int(segment_end)})
+                item.update({"length" : int(segment_end-segment_start)})
+                current_segment_json.append(item)
+
+                current_segment = current_segment+1
+        for segment in current_segment_json:
+            segment.update({"length" : int(segment['end']-segment['start'])})
+            segment_json.append(segment)
+
 
 _segment = 1;
-
 for _set in range(0,3):
     for _id in range(0,8):
         # print(_set, _id)
@@ -61,12 +102,21 @@ for _set in range(0,3):
             item.update({'dataset' : _set+1})
             item.update({'PID': _id+1})
 
-            for segment in segments[_set][_id]:
-                stringjson = json.loads(segment)
-                if(item['time']/10 >= float(stringjson['start']) and item['time']/10 <= float(stringjson['end'])):
-                    item.update({'segment' : int(stringjson['ID'])})
+            for segment in segment_json:
+                if(item['time']/10 >= segment['start'] and item['time']/10 <= segment['end'] and segment['pid']==_id+1 and segment['dataset']==_set+1):
+                    item.update({'segment' : segment['sid']})
 
+
+
+final_json = {}
+
+
+
+final_json.update({"segments": segment_json})
+
+
+final_json.update({'interactionLogs' : logs})
 
 
 #with open('test.json', 'w') as json_file:
-print(json.dumps(logs, indent=4))
+print(json.dumps(final_json, indent=4))

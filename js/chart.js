@@ -1,6 +1,7 @@
 var userCounts = [8, 8, 8]
 var docs;
 var logs;
+var segments;
 var data = []
 
 //Load Docs
@@ -16,9 +17,11 @@ Promise.all([
 Promise.all([
 	d3.json("/js/test.json")
 ]).then(function(json){
-	logs = json[0]
+	logs = json[0].interactionLogs
+	segments = json[0].segments
+	console.log(segments)
 
-	var seg = logs[0][1] //get P1
+	var seg = logs[0][0] //get P1
 	
 	var seg = segmentify(seg)
 	console.log(seg)
@@ -27,6 +30,7 @@ Promise.all([
 	for (var i = 0; i<seg.length; i++){
 		var summary = summarize_segment(seg[i])
 		summary.pid = 1;
+		summary.dataset = 1
 		summary.number = i
 		if(summary.interesting)
 			total_interactions += summary.total_interactions;
@@ -58,7 +62,6 @@ Promise.all([
 					return "card" + d.pid + "_" +d.number
 				})
 
-	console.log(card)
 	card.bg = card.append("rect").
 				attr("x",5).
 				attr("y",5).
@@ -78,7 +81,8 @@ Promise.all([
 				style("font-weight", "bold").
 				style("text-decoration", "underline").
 				text(function(d){
-					return "Participant: " + d.pid + ", Segment: " + d.number
+					var segment =  GetSegment(d.number, d.pid, d.dataset)
+					return "Participant: " + d.pid + ", Segment: " + (d.number+1) + " [" + segment.start + ", " + segment.end + "] (" + segment.length + ")"
 				})
 
 	card.text = card.append("text").
@@ -90,23 +94,23 @@ Promise.all([
 				.call(wrap, 385)
 
 
-	card.search = barElement(card, 15,150,"Search", function(d){
+	card.search = barElement(card, 15, 150, "Search", function(d){
 		return 50*(1.0 - d.search_ratio)
 	})
 
-	card.highlight = barElement(card, 75,150,"Highlight", function(d){
+	card.highlight = barElement(card, 75, 150, "Highlight", function(d){
 		return 50*(1.0 - d.highlight_ratio)
 	})
 
-	card.notes = barElement(card, 135,150,"Notes", function(d){
+	card.notes = barElement(card, 135, 150, "Notes", function(d){
 		return 50*(1.0 - d.note_ratio)
 	})
 
-	card.drag = barElement(card, 195,150,"Drag", function(d){
+	card.drag = barElement(card, 195, 150, "Drag", function(d){
 		return 50*(1.0 - d.drag_ratio)
 	})
 
-	card.total = barElement(card, 345,150,"Total", function(d){
+	card.total = barElement(card, 345, 150, "Total", function(d){
 		return 50*(1.0 - d.interaction_rate)
 	})
 
@@ -155,12 +159,13 @@ function barElement(card, x, y, text, sizefunc){
 					attr("y",y).
 					attr("height", 50).
 					attr("width",50).
+					attr("class", "barBG"+text).
 					style("fill",function(d){
 							return d.interesting ? "royalblue" : "coral"
 					})
 					.on("mouseover",function(d,i){
-						console.log("mouseover")
 						var selectID = "#card" + d.pid+"_"+i
+
 						d3.select(selectID).append("text").
 							attr("x", x+25).
 							attr("y",y+30).
@@ -168,9 +173,19 @@ function barElement(card, x, y, text, sizefunc){
 							text(TextToValue(d,text)).
 							style("font-size", 12).
 							style("font-weight", "bold")
+
+						d3.select(selectID).select(".barBG"+text).
+							style("fill", "lightcoral")
 					})
 					.on("mouseout",function(d,i){
+						var selectID = "#card" + d.pid+"_"+i
+
 						d3.selectAll(".barText").remove()
+
+						d3.select(selectID).select(".barBG"+text).
+							style("fill", function(d){
+								return d.interesting ? "royalblue" : "coral"
+							})
 					})
 
 	element.bar = card.append("rect").
@@ -182,7 +197,6 @@ function barElement(card, x, y, text, sizefunc){
 							return d.interesting ? "lightblue" : "lightcoral"
 					})
 					.on("mouseover",function(d,i){
-						console.log("mouseover")
 						var selectID = "#card" + d.pid+"_"+i
 						d3.select(selectID).append("text").
 							attr("x", x+25).
@@ -191,9 +205,18 @@ function barElement(card, x, y, text, sizefunc){
 							text(TextToValue(d,text)).
 							style("font-size", 12).
 							style("font-weight", "bold")
+
+						d3.select(selectID).select(".barBG"+text).
+							style("fill", "lightcoral")
 					})
 					.on("mouseout",function(d,i){
+						var selectID = "#card" + d.pid+"_"+i
 						d3.selectAll(".barText").remove()
+
+						d3.select(selectID).select(".barBG"+text).
+							style("fill", function(d){
+								return d.interesting ? "royalblue" : "coral"
+							})
 					})
 
 	element.text = card.append("text").
@@ -216,11 +239,9 @@ function circleElement(card, x, y, r, text, sizefunc){
 					attr("cy",y+r).
 					attr("r", r).
 					style("fill",function(d){
-						return d.interesting ? "lightblue" : "lightcoral"
-							
+						return d.interesting ? "lightblue" : "lightcoral"	
 					})
 					.on("mouseover",function(d,i){
-						console.log("mouseover")
 						var selectID = "#card" + d.pid+"_"+i
 						d3.select(selectID).append("text").
 							attr("x", x+25).
@@ -385,7 +406,7 @@ function summarize_segment(segment){
 		summaryText = "Nothing interesting was found."
 	}
 
-	console.log( drags.length/total_interactions)
+	console.log(drags.length/total_interactions)
 	var summary = {
 		interesting : (total_interactions > 0) ? true:false,
 		total_interactions: total_interactions,
@@ -462,5 +483,13 @@ function TextToValue(d, Text){
 			return d.drags.length
 		case "Total":
 			return d.total_interactions
+	}
+}
+
+function GetSegment(sid, pid, dataset){
+	for(var seg of segments){
+		if(seg.sid == sid && seg.pid==pid && seg.dataset==dataset){
+			return seg
+		}
 	}
 }
