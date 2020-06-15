@@ -60,6 +60,20 @@ Promise.all([
 				// }).
 				attr("id",function(d){
 					return "card" + d.pid + "_" +d.number
+				}).
+				style("fill-opacity", "0.7").
+				style("stroke-opacity", "0.7")
+				.on("mouseover", function(d, i){
+					var selectID = "#card" + d.pid+"_"+i
+					d3.select(selectID)
+						.style("fill-opacity", "1.0")
+						.style("stroke-opacity", "1.0")
+				})
+				.on("mouseout",function(d, i){
+					var selectID = "#card" + d.pid+"_"+i
+					d3.select(selectID)
+						.style("fill-opacity", "0.7")
+						.style("stroke-opacity", "0.7")
 				})
 				//attr("class","card")
 
@@ -72,7 +86,13 @@ Promise.all([
 				attr("width",400).
 				style("fill","white").
 				style("stroke", function(d){
-					return d.interesting ? "royalblue" : "indianred"
+					var seg = GetSegment(d.number, d.pid, d.dataset)
+					if(seg.length > 300)
+						return "forestgreen"
+					else if(seg.length >150)
+						return "gold"
+					else
+					return "darkred"
 				}).
 				style("stroke-width", 3)
 
@@ -155,15 +175,19 @@ Promise.all([
 //Output: void return, item added to input svg
 function barElement(card, x, y, text, sizefunc){
 	element = {}
+
+	selectBar = "indianred"
+	selectBG = "lightpink"
+	unselectBar = "royalblue"
+	unselectBG = "lightblue"
+
 	element.bar = card.append("rect").
 					attr("x",x).
 					attr("y",y).
 					attr("height", 50).
 					attr("width",50).
 					attr("class", "barBar"+text).
-					style("fill",function(d){
-							return d.interesting ? "royalblue" : "coral"
-					})
+					style("fill", unselectBar)
 					.on("mouseover",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
 
@@ -174,10 +198,16 @@ function barElement(card, x, y, text, sizefunc){
 							attr("class","barText").
 							text(function(d,i){return TextToValue(d,text)}).
 							style("font-size", 12).
-							style("font-weight", "bold")
+							style("font-weight", "bold").
+							style("fill-opacity", "1.0")
 
 						card.selectAll(".barBar"+text).
-							style("fill", "lightcoral")
+							style("fill", selectBar).
+							style("fill-opacity", "1.0")
+
+						card.selectAll(".barBG"+text).
+							style("fill", selectBG).
+							style("fill-opacity", "1.0")
 					})
 					.on("mouseout",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
@@ -185,9 +215,12 @@ function barElement(card, x, y, text, sizefunc){
 						d3.selectAll(".barText").remove()
 
 						card.selectAll(".barBar"+text).
-							style("fill", function(d){
-								return d.interesting ? "royalblue" : "coral"
-							})
+							style("fill", unselectBar).
+							style("fill-opacity", null)
+
+						card.selectAll(".barBG"+text).
+							style("fill", unselectBG).
+							style("fill-opacity", null)
 					})
 
 	element.bg = card.append("rect").
@@ -195,9 +228,8 @@ function barElement(card, x, y, text, sizefunc){
 					attr("y",y).
 					attr("height", sizefunc).
 					attr("width",50).
-					style("fill",function(d){
-							return d.interesting ? "lightblue" : "lightcoral"
-					})
+					attr("class", "barBG"+text).
+					style("fill", unselectBG)
 					.on("mouseover",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
 
@@ -208,20 +240,29 @@ function barElement(card, x, y, text, sizefunc){
 							attr("class","barText").
 							text(function(d,i){return TextToValue(d,text)}).
 							style("font-size", 12).
-							style("font-weight", "bold")
+							style("font-weight", "bold").
+							style("fill-opacity", "1.0")
 
 						
 						card.selectAll(".barBar"+text).
-							style("fill", "lightcoral")
+							style("fill", selectBar).
+							style("fill-opacity", "1.0")
+
+						card.selectAll(".barBG"+text).
+							style("fill", selectBG).
+							style("fill-opacity", "1.0")
 					})
 					.on("mouseout",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
 						d3.selectAll(".barText").remove()
 
 						card.selectAll(".barBar"+text).
-							style("fill", function(d){
-								return d.interesting ? "royalblue" : "coral"
-							})
+							style("fill", unselectBar).
+							style("fill-opacity", null)
+
+						card.selectAll(".barBG"+text).
+							style("fill", unselectBG).
+							style("fill-opacity", null)
 					})
 
 	element.text = card.append("text").
