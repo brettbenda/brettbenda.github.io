@@ -61,6 +61,7 @@ Promise.all([
 				attr("id",function(d){
 					return "card" + d.pid + "_" +d.number
 				})
+				//attr("class","card")
 
 	card.bg = card.append("rect").
 				attr("x",5).
@@ -154,27 +155,28 @@ Promise.all([
 //Output: void return, item added to input svg
 function barElement(card, x, y, text, sizefunc){
 	element = {}
-	element.bg = card.append("rect").
+	element.bar = card.append("rect").
 					attr("x",x).
 					attr("y",y).
 					attr("height", 50).
 					attr("width",50).
-					attr("class", "barBG"+text).
+					attr("class", "barBar"+text).
 					style("fill",function(d){
 							return d.interesting ? "royalblue" : "coral"
 					})
 					.on("mouseover",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
 
-						d3.select(selectID).append("text").
+						//linked to other data!
+						card.append("text").
 							attr("x", x+25).
 							attr("y",y+30).
 							attr("class","barText").
-							text(TextToValue(d,text)).
+							text(function(d,i){return TextToValue(d,text)}).
 							style("font-size", 12).
 							style("font-weight", "bold")
 
-						d3.select(selectID).select(".barBG"+text).
+						card.selectAll(".barBar"+text).
 							style("fill", "lightcoral")
 					})
 					.on("mouseout",function(d,i){
@@ -182,13 +184,13 @@ function barElement(card, x, y, text, sizefunc){
 
 						d3.selectAll(".barText").remove()
 
-						d3.select(selectID).select(".barBG"+text).
+						card.selectAll(".barBar"+text).
 							style("fill", function(d){
 								return d.interesting ? "royalblue" : "coral"
 							})
 					})
 
-	element.bar = card.append("rect").
+	element.bg = card.append("rect").
 					attr("x",x).
 					attr("y",y).
 					attr("height", sizefunc).
@@ -198,22 +200,25 @@ function barElement(card, x, y, text, sizefunc){
 					})
 					.on("mouseover",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
-						d3.select(selectID).append("text").
+
+						//linked to other data!
+						card.append("text").
 							attr("x", x+25).
 							attr("y",y+30).
 							attr("class","barText").
-							text(TextToValue(d,text)).
+							text(function(d,i){return TextToValue(d,text)}).
 							style("font-size", 12).
 							style("font-weight", "bold")
 
-						d3.select(selectID).select(".barBG"+text).
+						
+						card.selectAll(".barBar"+text).
 							style("fill", "lightcoral")
 					})
 					.on("mouseout",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
 						d3.selectAll(".barText").remove()
 
-						d3.select(selectID).select(".barBG"+text).
+						card.selectAll(".barBar"+text).
 							style("fill", function(d){
 								return d.interesting ? "royalblue" : "coral"
 							})
@@ -316,7 +321,7 @@ function summarize_segment(segment){
 	var highlights = [] //Highlight
 	var total_interactions = 0;
 
-	//remove non-alphanumeric chars to avoid issues
+	//collect interesting data from logs, removes non-alphanumeric chars to avoid issues
 	for(var interaction of segment){
 		switch(interaction['InteractionType']){
 			case "Draging":
@@ -328,15 +333,18 @@ function summarize_segment(segment){
 				total_interactions++
 				break;
 			case "Add note":
-				notes.push(interaction["Text"])
-				total_interactions++
+				//ignore really long notes
+				//if(interaction["Text"].legth <= 30){
+					notes.push(interaction["Text"])
+					total_interactions++
+				//}
 				break
 			case "Highlight":
 				//ignore really long highlights
-				if(interaction["Text"].length <=15){
+				//if(interaction["Text"].length <=15){
 					total_interactions++
 					highlights.push(interaction["Text"].replace(/\W/g, ''))
-				}
+				//}
 				break
 		}
 	}
@@ -393,7 +401,7 @@ function summarize_segment(segment){
 			summaryText += " were notable."
 	}
 
-	if(summaryText == "" && notes.length != 0){
+	if(summaryText == "" && notes.length != 0 && notes[0].length < 30){
 		summaryText += "The investigator made the following note: \'" + notes[0] + "\".";
 	}
 
@@ -492,4 +500,8 @@ function GetSegment(sid, pid, dataset){
 			return seg
 		}
 	}
+}
+
+function colorAll(classname){
+
 }
