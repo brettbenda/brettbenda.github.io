@@ -1,6 +1,20 @@
 <!DOCTYPE>
 <html>
-
+<style>
+  div.tooltip { 
+    position: absolute;     
+    text-align: center;     
+    display:flex;  
+    flex-direction: column;       
+    padding: 2px;         
+    background: lightgrey; 
+    border-color: : black;
+    border: 3px;    
+    border-style: solid;
+    border-radius: 5px;     
+    pointer-events: none;     
+}
+</style>
 <head>
 
 
@@ -32,7 +46,19 @@
       <div class="col-sm-1"></div>
       <div class="col-sm-10">
           <div id="text">
+
             <h1>Provenance Segment Visualization</h1>
+            <h3>Data Processing</h3>
+            <p>Data from provenance logs are segmented. Small segments (<30s long) are grouped into the preceeding segment. Only "interesting" action types from the logs are regarded in summarizing each segment.</p>
+            
+            <h3>Overview</h3>
+            <p>Each segment is represented by a card, featuring the PID and segment number it represents, start and end times, and total length. The card border encodes the length of the segment (thicker border is longer). A naive textual explanation of actions taken during the segment are generated, prioritizing direct actions such as searching/highlighting/note taking over dragging.  Bars showing the relative frequency of each action are shown for each segment. A "Total" activity bar shows how much of the total activity occurs in the segment.</p>
+
+            <h3>Zoom/Filter</h3>
+            <p> Nothing present for this. </p>
+
+            <h3>Details on Demand</h3>
+            <p> Hovering over each bar displays all the interactions of the type from that segment and is linked to highlight corresponding interactions from other segments and shows their frequency as well.</p>
           </div>
           <div id="chart"></div>
       </div>

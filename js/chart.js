@@ -3,7 +3,7 @@ var docs;
 var logs;
 var segments;
 var data = []
-
+var tooltip
 //Load Docs
 Promise.all([	
 	d3.json("/js/ProvSegments/Dataset_1/Documents/Documents_Dataset_1.json"),
@@ -46,6 +46,10 @@ Promise.all([
 	}
 
 	console.log(data)
+
+	tooltip = d3.select("body").append("div")
+		.attr("class", "tooltip")
+		.style("opacity", 0)
 	
 	//draw cards
 	var card = d3.select("#chart").
@@ -68,12 +72,14 @@ Promise.all([
 					d3.select(selectID)
 						.style("fill-opacity", "1.0")
 						.style("stroke-opacity", "1.0")
+           	
 				})
 				.on("mouseout",function(d, i){
 					var selectID = "#card" + d.pid+"_"+i
 					d3.select(selectID)
 						.style("fill-opacity", "0.7")
 						.style("stroke-opacity", "0.7")
+
 				})
 				//attr("class","card")
 
@@ -86,15 +92,24 @@ Promise.all([
 				attr("width",400).
 				style("fill","white").
 				style("stroke", function(d){
+					// var seg = GetSegment(d.number, d.pid, d.dataset)
+					// if(seg.length > 300)
+					// 	return "forestgreen"
+					// else if(seg.length >150)
+					// 	return "gold"
+					// else
+					// return "darkred"
+					return "chocolate"
+				}).
+				style("stroke-width", function(d){
 					var seg = GetSegment(d.number, d.pid, d.dataset)
 					if(seg.length > 300)
-						return "forestgreen"
+						return 5
 					else if(seg.length >150)
-						return "gold"
+						return 3
 					else
-					return "darkred"
-				}).
-				style("stroke-width", 3)
+					return 1
+				})
 
 	card.label = card.append("text").
 				attr("x",15).
@@ -123,7 +138,7 @@ Promise.all([
 		return 50*(1.0 - d.highlight_ratio)
 	})
 
-	card.notes = barElement(card, 135, 150, "Notes", function(d){
+	card.notes = barElement(card, 135, 150, "Note", function(d){
 		return 50*(1.0 - d.note_ratio)
 	})
 
@@ -188,40 +203,6 @@ function barElement(card, x, y, text, sizefunc){
 					attr("width",50).
 					attr("class", "barBar"+text).
 					style("fill", unselectBar)
-					.on("mouseover",function(d,i){
-						var selectID = "#card" + d.pid+"_"+i
-
-						//linked to other data!
-						card.append("text").
-							attr("x", x+25).
-							attr("y",y+30).
-							attr("class","barText").
-							text(function(d,i){return TextToValue(d,text)}).
-							style("font-size", 12).
-							style("font-weight", "bold").
-							style("fill-opacity", "1.0")
-
-						card.selectAll(".barBar"+text).
-							style("fill", selectBar).
-							style("fill-opacity", "1.0")
-
-						card.selectAll(".barBG"+text).
-							style("fill", selectBG).
-							style("fill-opacity", "1.0")
-					})
-					.on("mouseout",function(d,i){
-						var selectID = "#card" + d.pid+"_"+i
-
-						d3.selectAll(".barText").remove()
-
-						card.selectAll(".barBar"+text).
-							style("fill", unselectBar).
-							style("fill-opacity", null)
-
-						card.selectAll(".barBG"+text).
-							style("fill", unselectBG).
-							style("fill-opacity", null)
-					})
 
 	element.bg = card.append("rect").
 					attr("x",x).
@@ -230,6 +211,22 @@ function barElement(card, x, y, text, sizefunc){
 					attr("width",50).
 					attr("class", "barBG"+text).
 					style("fill", unselectBG)
+	
+	element.text = card.append("text").
+						attr("x",x).
+						attr("y",y-5).
+						text(text).
+						style("font-size", 12)
+						.call(wrap, 385)
+
+	//invisible box over bar, to handle interactions for both rects of the bar
+	element.selectionArea = card.append("rect").
+					attr("x",x).
+					attr("y",y).
+					attr("height", 50).
+					attr("width",50).
+					attr("class", "selectionArea"+text).
+					style("opacity", 0)
 					.on("mouseover",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
 
@@ -243,7 +240,6 @@ function barElement(card, x, y, text, sizefunc){
 							style("font-weight", "bold").
 							style("fill-opacity", "1.0")
 
-						
 						card.selectAll(".barBar"+text).
 							style("fill", selectBar).
 							style("fill-opacity", "1.0")
@@ -251,9 +247,18 @@ function barElement(card, x, y, text, sizefunc){
 						card.selectAll(".barBG"+text).
 							style("fill", selectBG).
 							style("fill-opacity", "1.0")
+
+						tooltip.transition()		
+                			.duration(100)		
+                			.style("opacity", 1.0);	
+
+                		tooltip.html(TooltipText(d,text))	
+                			.style("left", (d3.event.pageX) + "px")		
+                			.style("top", (d3.event.pageY - 28) + "px");		
 					})
 					.on("mouseout",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
+
 						d3.selectAll(".barText").remove()
 
 						card.selectAll(".barBar"+text).
@@ -263,14 +268,13 @@ function barElement(card, x, y, text, sizefunc){
 						card.selectAll(".barBG"+text).
 							style("fill", unselectBG).
 							style("fill-opacity", null)
+
+						tooltip.transition()		
+                			.duration(100)		
+                			.style("opacity", 0);
 					})
 
-	element.text = card.append("text").
-					attr("x",x).
-					attr("y",y-5).
-					text(text).
-					style("font-size", 12)
-					.call(wrap, 385)
+	
 
 	return element
 
@@ -520,13 +524,14 @@ function wrap(text, width) {
     });
 }
 
-function TextToValue(d, Text){
-	switch(Text){
+//gets counts of interaction types in segment
+function TextToValue(d, type){
+	switch(type){
 		case "Search":
 			return d.searches.length
 		case "Highlight": 
 			return d.highlights.length
-		case "Notes":
+		case "Note":
 			return d.notes.length
 		case "Drag":
 			return d.drags.length
@@ -543,6 +548,34 @@ function GetSegment(sid, pid, dataset){
 	}
 }
 
-function colorAll(classname){
+function TooltipText(d, type){
+	var title = "<b>"+type+" Actions (" + TextToValue(d,type) + "):</b> <br>"
+	var text = ""
+	switch(type){
+		case "Search":
+			for(var i=0; i<d.searches.length;i++){
+				text += d.searches[i] + "<br>"
+			}
+			break
+		case "Highlight":
+			for(var i=0; i<d.highlights.length;i++){
+				text += d.highlights[i] + "<br>"
+			}
+			break
+		case "Note":
+			for(var i=0; i<d.notes.length;i++){
+				text += d.notes[i] + "<br>"
+			}
+			break
+		case "Drag":
+			for(var i=0; i<d.drags.length;i++){
+				text += d.drags[i] + "<br>"
+			}
+			break
+	}
 
+	if(text=="")
+		text="None"
+
+	return title + "<br>" + text;
 }
