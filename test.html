@@ -55,10 +55,26 @@
             <p>Each segment is represented by a card, featuring the PID and segment number it represents, start and end times, and total length. The card border encodes the length of the segment (thicker border is longer). A naive textual explanation of actions taken during the segment are generated, prioritizing direct actions such as searching/highlighting/note taking over dragging.  Bars showing the relative frequency of each action are shown for each segment. A "Total" activity bar shows how much of the total activity occurs in the segment.</p>
 
             <h3>Zoom/Filter</h3>
-            <p> Nothing present for this. </p>
+            <p> Nothing present for this. Doesn't seem like its necessary really at the moment.</p>
 
             <h3>Details on Demand</h3>
             <p> Hovering over each bar displays all the interactions of the type from that segment and is linked to highlight corresponding interactions from other segments and shows their frequency as well.</p>
+
+            <h3 style="color:red">TODO</h3>
+            <p style="color:red">
+              <b>1. Determine "significant segment" marker/strategy</b> <br>
+              &nbsp;1a. Naive: above average interaction counts for the duration?<br>
+              &nbsp;1b. The actual same process as Sina used? <br>
+              <br>
+              <b>2. Further reduce number of segments</b><br>
+              &nbsp;2a. Shae's provenance work suggests that people naturally create fewer segments anyways, the ML segmentation seems too sensitive.<br>
+              &nbsp;2b. Proposal: collapse segments with very few interactions (<5) into nearest segment.<br>
+              <br>
+              <b>3. Inclusion of more information on each card</b><br>
+              &nbsp;3a. Try to do a bit more complex analysis of each segment to create better textual summary.<br>
+              &nbsp;3b. More details for each segment, some small display of the actions over time in the segment.
+
+            </p>
           </div>
           <div id="chart"></div>
       </div>
