@@ -150,35 +150,6 @@ Promise.all([
 		return 50*(1.0 - d.interaction_rate)
 	})
 
-
-	// card.search = circleElement(card, 15,150, 25, "Search", function(d){
-	// 	return 50*(d.search_ratio)/2
-	// })
-
-	// card.highlight = circleElement(card, 75,150, 25,"Highlight", function(d){
-	// 	return 50*(d.highlight_ratio)/2
-	// })
-
-	// card.notes = circleElement(card, 135,150, 25,"Notes", function(d){
-	// 	return 50*(d.note_ratio)/2
-	// })
-
-	// card.drag = circleElement(card, 195,150, 25,"Drag", function(d){
-	// 	return 50*(d.drag_ratio)/2
-	// })
-
-	// card.total = circleElement(card, 345,150, 25, "Total", function(d){
-	// 	return 50*(d.interaction_rate)
-	// })
-
-
-	// card.total = card.append("text")
-	// 			 .attr("x", 250)
-	// 			 .attr("y", 185)
-	// 			 .text(function(d){
-	// 			 	return "Total Interactions: " + d.total_interactions
-	// 			 })
-
 	
 
 	console.log(card)
@@ -274,67 +245,11 @@ function barElement(card, x, y, text, sizefunc){
                 			.style("opacity", 0);
 					})
 
-	
 
 	return element
 
 }
 
-//Arguments: The svg element to draw the bar on, x location, y location, text label, function to determine size of bar
-//Output: void return, item added to input svg
-function circleElement(card, x, y, r, text, sizefunc){
-	element = {}
-	element.bg = card.append("circle").
-					attr("cx",x+r).
-					attr("cy",y+r).
-					attr("r", r).
-					style("fill",function(d){
-						return d.interesting ? "lightblue" : "lightcoral"	
-					})
-					.on("mouseover",function(d,i){
-						var selectID = "#card" + d.pid+"_"+i
-						d3.select(selectID).append("text").
-							attr("x", x+25).
-							attr("y",y+30).
-							attr("class","barText").
-							text(TextToValue(d,text)).
-							style("font-size", 12).
-							style("font-weight", "bold")
-					})
-					.on("mouseout",function(d,i){
-						d3.selectAll(".barText").remove()
-					})
-
-	element.bar = card.append("circle").
-					attr("cx",x+r).
-					attr("cy",y+r).
-					attr("r", sizefunc).
-					style("fill",function(d){
-							return d.interesting ? "royalblue" : "coral"
-					})
-					.on("mouseover",function(d,i){
-						console.log("mouseover")
-						var selectID = "#card" + d.pid+"_"+i
-						d3.select(selectID).append("text").
-							attr("x", x+25).
-							attr("y", y+30).
-							attr("class","barText").
-							text(TextToValue(d,text)).
-							style("font-size", 12).
-							style("font-weight", "bold")
-					})
-					.on("mouseout",function(d,i){
-						d3.selectAll(".barText").remove()
-					})
-
-	element.text = card.append("text").
-					attr("x",x).
-					attr("y",y-5).
-					text(text).
-					style("font-size", 12)
-					.call(wrap, 385)
-
-}
 
 //Argument: a participant interaction json object
 //Result: 	an array of interaction json objects regrouped by segment

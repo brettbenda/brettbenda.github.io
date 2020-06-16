@@ -49,7 +49,7 @@
 
             <h1>Provenance Segment Visualization</h1>
             <h3>Data Processing</h3>
-            <p>Data from provenance logs are segmented. Small segments (<30s long) are grouped into the preceeding segment. Only "interesting" action types from the logs are regarded in summarizing each segment.</p>
+            <p>Data from provenance logs are segmented. Small segments (<25s long) are grouped into the preceeding segment. Only "interesting" action types from the logs are regarded in summarizing each segment.</p>
             
             <h3>Overview</h3>
             <p>Each segment is represented by a card, featuring the PID and segment number it represents, start and end times, and total length. The card border encodes the length of the segment (thicker border is longer). A naive textual explanation of actions taken during the segment are generated, prioritizing direct actions such as searching/highlighting/note taking over dragging.  Bars showing the relative frequency of each action are shown for each segment. A "Total" activity bar shows how much of the total activity occurs in the segment.</p>
