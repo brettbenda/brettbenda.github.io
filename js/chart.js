@@ -118,18 +118,134 @@ Promise.all([
 				style("text-decoration", "underline").
 				text(function(d){
 					var segment =  GetSegment(d.number, d.pid, d.dataset)
-					return "Participant: " + d.pid + ", Segment: " + (d.number+1) + " [" + segment.start + ", " + segment.end + "] (" + segment.length + ")"
+					return "Segment #" + (d.number+1) + " [" + segment.start + ", " + segment.end + "] (" + segment.length + ")"
 				})
 
-	card.text = card.append("text").
+	//textual explanation		
+	// card.text = card.append("text").
+	// 			attr("x",15).
+	// 			attr("y",60).
+	// 			html(function(d){
+	// 				var spantext = ""
+	// 				var x = d3.select(this).attr("x");//get the x position of the text
+ //        			var y = d3.select(this).attr("dy");//get the y position of the text
+	// 				for(var i=0; i<d.summaryText.length; i++){
+	// 					//add span for each item, 
+	// 					spantext += "<tspan class=\"sentence\" x="+x+ " y = "+(3+1.5*i)+"em id=" +i+ ">" + d.summaryText[i] + "</tspan>"
+	// 				}
+	// 				return spantext
+	// 			})
+
+	// card.text.selectAll("tspan.sentence").call(wrap,385)
+
+	card.text = []
+	card.text.push(
+			card.append("text").
 				attr("x",15).
 				attr("y",60).
-				text(function(d){
-					return d.summaryText
+				attr("id", "searchText").
+				//style("font-weight","bold").
+				html(function(d,i){
+					var keys =Object.keys(d.searches)
+					if(keys.length==0)
+						return
+					var text = "Search Terms: "
+					for(var i=0; i<(Math.min(3,keys.length)); i++){
+						text += "<tspan style=\"font-weight:bold\">"+keys[i]+"</tspan>"
+						if(i!=(Math.min(3,keys.length)-1))
+							text+=", "
+					}
+					d.displayedInfo++
+
+					return text
 				})
-				.call(wrap, 385)
+		)
 
+	card.text.push(
+			card.append("text").
+				attr("x",15).
+				attr("y",function(d,i){
+					return 60+20*d.displayedInfo
+				}).
+				attr("id", "highlightText").
+				html(function(d,i){
+					var keys =Object.keys(d.highlights)
+					if(keys.length==0)
+						return
 
+					var text = "Highlight: "
+					var slicedText = keys[0].slice(0,25)
+					text += "<tspan style=\"font-weight:bold\">" + slicedText + ((keys[0].length == slicedText.length)?"":"...") +"</tspan>"
+					
+					d.displayedInfo++
+
+					return text
+				}).on("mouseover",function(d,i){
+					tooltip.transition()		
+                			.duration(100)		
+                			.style("opacity", 1.0);	
+
+					tooltip.html(SummaryToolTip(Object.keys(d.highlights)[0],"Full Highlight"))	
+                			.style("left", (d3.event.pageX) + "px")		
+                			.style("top", (d3.event.pageY - 28) + "px");
+				}).on("mouseout",function(d,i){
+					tooltip.transition()		
+                			.duration(100)		
+                			.style("opacity", 0.0);	
+				})
+		)
+
+	card.text.push(
+			card.append("text").
+				attr("x",15).
+				attr("y",function(d,i){
+					return 60+20*d.displayedInfo
+				}).
+				attr("id", "noteText").
+				html(function(d,i){
+					var keys =Object.keys(d.notes)
+					if(keys.length==0)
+						return
+
+					var text = "Note: "
+					var slicedText = keys[0].slice(0,25)
+					text += "<tspan style=\"font-weight:bold\">" + slicedText + ((keys[0].length = slicedText.length)?"":"...") +"</tspan>"
+					d.displayedInfo++
+					return text
+				}).on("mouseover",function(d,i){
+					tooltip.transition()		
+                			.duration(100)		
+                			.style("opacity", 1.0);	
+
+					tooltip.html(SummaryToolTip(Object.keys(d.notes)[0],"Full Note"))	
+                			.style("left", (d3.event.pageX) + "px")		
+                			.style("top", (d3.event.pageY - 28) + "px");
+				}).on("mouseout",function(d,i){
+					tooltip.transition()		
+                			.duration(100)		
+                			.style("opacity", 0.0);	
+				})
+		)
+
+	card.text.push(
+			card.append("text").
+				attr("x",15).
+				attr("y",function(d,i){
+					return 60+20*d.displayedInfo
+				}).
+				attr("id", "dragText").
+				html(function(d,i){
+					var keys =Object.keys(d.drags)
+					if(keys==0)
+						return
+
+					var text = "Several documents were moved."
+					d.displayedInfo++
+					return text
+				})
+		)
+
+	console.log(card.text)
 	card.search = barElement(card, 15, 150, "Search", function(d){
 		return 50*(1.0 - d.search_ratio)
 	})
@@ -289,104 +405,116 @@ function summarize_segment(segment){
 				total_interactions++
 				break
 			case "Search":
-				searches.push(interaction["Text"].replace(/\W/g, ''))
+				searches.push(interaction["Text"])
 				total_interactions++
 				break;
 			case "Add note":
-				//ignore really long notes
-				//if(interaction["Text"].legth <= 30){
-					notes.push(interaction["Text"])
-					total_interactions++
-				//}
+				notes.push(interaction["Text"])
+				total_interactions++
 				break
 			case "Highlight":
-				//ignore really long highlights
-				//if(interaction["Text"].length <=15){
-					total_interactions++
-					highlights.push(interaction["Text"].replace(/\W/g, ''))
-				//}
+				total_interactions++
+				highlights.push(interaction["Text"])
 				break
 		}
 	}
 
-	//only unique
-	searches2 = [...new Set(searches)]
-	highlights2 = [...new Set(highlights)]
+	if(false){
+		//only unique
+		searches2 = [...new Set(searches)]
+		highlights2 = [...new Set(highlights)]
 
-	//Find features	
-	var bestFeatures = []
-	var summaryText = "";
+		//Find features	
+		var bestFeatures = []
+		var summaryText = "";
+		var sentences = [];
 
-	//check for searches
-	if(searches2.length !=0){
-		summaryText += "The investigator searched for documents related to "
-		for(var i =0; i<Math.min(3,searches2.length); i++){
+		//check for searches
+		if(searches2.length !=0){
+			summaryText += "Important searches: "
+			for(var i =0; i<Math.min(3,searches2.length); i++){
 
-			//last
-			if(i!=0 && i==Math.min(3,searches2.length)-1)
-				summaryText +="and "
+				//last
+				if(i!=0 && i==Math.min(3,searches2.length)-1)
+					summaryText +="and "
 
-			summaryText += searches2[i]
+				summaryText += searches2[i]
 
-			//not first
-			if(i!=Math.min(3,searches2.length)-1)
-				summaryText +=", "
+				//not first
+				if(i!=Math.min(3,searches2.length)-1)
+					summaryText +=", "
+			}
+			summaryText+="."
+			sentences.push(summaryText)
+		}	
+
+		summaryText = ""
+		if(sentences.length==0 && notes.length != 0){
+			summaryText += "Note made: \'" + notes[0] + "\".";
+			sentences.push(summaryText)
 		}
-		summaryText+=". \n"
-	}
 
-	//check for highlights
-	if(highlights2.length !=0){
-		if(highlights2.length == 1)
-			summaryText += "The investigator thought the phrase "
-		else
-			summaryText += "The investigator thought the phrases "
+		summaryText = ""
+		//check for highlights
+		if(highlights2.length !=0 && sentences.length==1 ){
+			if(highlights2.length == 1)
+				summaryText += "The phrase "
+			else
+				summaryText += "The phrases "
 
-		for(var i =0; i<Math.min(3,highlights2.length); i++){
+			for(var i =0; i<Math.min(3,highlights2.length); i++){
 
-			//not first and last
-			if(i!=0 && i==Math.min(3,highlights2.length)-1)
-				summaryText +="and "
+				//not first and last
+				if(i!=0 && i==Math.min(3,highlights2.length)-1)
+					summaryText +="and "
 
-			summaryText += "\"" + highlights2[i] + "\""
+				summaryText += "\"" + highlights2[i] + "\""
 
-			//not last
-			if(i!=Math.min(3,highlights2.length)-1)
-				summaryText +=", "
+				//not last
+				if(i!=Math.min(3,highlights2.length)-1)
+					summaryText +=", "
+			}
+			
+			if(highlights.length == 1)
+				summaryText += " was notable."
+			else
+				summaryText += " were notable."
+			sentences.push(summaryText)
 		}
-		
-		if(highlights.length == 1)
-			summaryText += " was notable."
-		else
-			summaryText += " were notable."
+
+
+
+		summaryText = ""
+		if(sentences.length==0 && drags.length != 0){
+			summaryText += "Some documents were moved.";
+			sentences.push(summaryText)
+		}
+
+
+		if(sentences.length==0){
+			summaryText = "Nothing interesting was found."
+			sentences.push(summaryText)
+		}
 	}
-
-	if(summaryText == "" && notes.length != 0 && notes[0].length < 30){
-		summaryText += "The investigator made the following note: \'" + notes[0] + "\".";
-	}
-
-	if(summaryText == "" && drags.length != 0){
-		summaryText += "The investigator rearranged some documents.";
-	}
-
-
-	if(summaryText == ""){
-		summaryText = "Nothing interesting was found."
-	}
-
-	console.log(drags.length/total_interactions)
+	
 	var summary = {
 		interesting : (total_interactions > 0) ? true:false,
 		total_interactions: total_interactions,
-		drags: drags,
+
+		drags: ListToCounts(drags),
 		drag_ratio: (total_interactions > 0) ? drags.length/total_interactions : 0,
-		searches: searches,
+
+		searches: ListToCounts(searches),
 		search_ratio: (total_interactions > 0) ? searches.length/total_interactions : 0,
-		notes: notes,
+
+		notes: ListToCounts(notes),
 		note_ratio: (total_interactions > 0) ? notes.length/total_interactions :0,
-		highlights: highlights,
+
+		highlights: ListToCounts(highlights),
 		highlight_ratio: (total_interactions > 0) ? highlights.length/total_interactions:0,
-		summaryText: summaryText
+
+		summaryText: sentences,
+		displayedInfo: 0
 	}
 	return summary;
 }
@@ -405,7 +533,7 @@ function count(arr){
 	return counts;
 }
 
-//Magic dunction found on stackoverflow for wrapping text
+//Magic function found on stackoverflow for wrapping text
 function wrap(text, width) {
     text.each(function () {
         var text = d3.select(this),
@@ -416,6 +544,7 @@ function wrap(text, width) {
             lineHeight = 1.1, // ems
             x = text.attr("x"),
             y = text.attr("y"),
+            id = text.attr("id"),
             dy = 0, //parseFloat(text.attr("dy")),
             tspan = text.text(null)
                         .append("tspan")
@@ -441,20 +570,34 @@ function wrap(text, width) {
 
 //gets counts of interaction types in segment
 function TextToValue(d, type){
+	var data
 	switch(type){
 		case "Search":
-			return d.searches.length
+			data = d.searches
+			break;
 		case "Highlight": 
-			return d.highlights.length
+			data =  d.highlights
+			break;
 		case "Note":
-			return d.notes.length
+			data =  d.notes
+			break;
 		case "Drag":
-			return d.drags.length
+			data =  d.drags
+			break;
 		case "Total":
 			return d.total_interactions
+			break;
 	}
+
+	var key = Object.keys(data)
+	var sum = 0;
+	for(var i=0; i<key.length;i++){
+		sum+=data[key[i]]
+	}
+	return sum
 }
 
+//links segments and interactions
 function GetSegment(sid, pid, dataset){
 	for(var seg of segments){
 		if(seg.sid == sid && seg.pid==pid && seg.dataset==dataset){
@@ -466,31 +609,50 @@ function GetSegment(sid, pid, dataset){
 function TooltipText(d, type){
 	var title = "<b>"+type+" Actions (" + TextToValue(d,type) + "):</b> <br>"
 	var text = ""
+	var data
 	switch(type){
 		case "Search":
-			for(var i=0; i<d.searches.length;i++){
-				text += d.searches[i] + "<br>"
-			}
+			data = d.searches			
 			break
 		case "Highlight":
-			for(var i=0; i<d.highlights.length;i++){
-				text += d.highlights[i] + "<br>"
-			}
+			data = d.highlights	
 			break
 		case "Note":
-			for(var i=0; i<d.notes.length;i++){
-				text += d.notes[i] + "<br>"
-			}
+			data = d.notes
 			break
 		case "Drag":
-			for(var i=0; i<d.drags.length;i++){
-				text += d.drags[i] + "<br>"
-			}
+			data = d.drags	
 			break
+		case "Total":
+			return title
+	}
+
+	var keys = Object.keys(data)
+	for(var i=0; i<keys.length;i++){
+		text += "#"+(i+1)+": " + keys[i] + " (" + data[keys[i]]+")<br>"
 	}
 
 	if(text=="")
 		text="None"
 
 	return title + "<br>" + text;
+}
+
+function SummaryToolTip(text, type){
+	var title = "<b>"+type+"</b> <br>"
+	var text = text
+
+	return title + "<br>" + text;
+}
+
+
+//Given a list, convert to a dictionary of items and counts
+function ListToCounts(list){
+	var counts = {}
+	
+	for (var i = 0; i < list.length; i++) {
+	  var num = list[i];
+	  counts[num] = counts[num] ? counts[num] + 1 : 1;
+	}
+	return counts
 }
