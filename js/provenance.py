@@ -64,9 +64,10 @@ for _set in range(0,3):
             segment_start = int(float(stringjson['start']))
             segment_end = int(float(stringjson['end']))
 
+            #first segment will always exist, ignore later segments that are short
             if(current_segment!=0 and segment_end-segment_start < 25):
                 current_segment_json[current_segment-1].update({'end' : segment_end})
-            elif(i==len(segments[_set][_id])-1):
+            elif(i==len(segments[_set][_id])-1): #save last segment specifically
                 item = {}
                 item.update({"dataset" : _set+1})
                 item.update({"pid" : _id+1})
@@ -74,10 +75,11 @@ for _set in range(0,3):
                 item.update({"start" :  int(segment_start)})
                 item.update({"end" : int(segment_end)})
                 item.update({"length" : int(segment_end-segment_start)})
+                item.update({"interactionCount" : 0})
                 current_segment_json.append(item)
 
                 current_segment = current_segment+1
-            else:
+            else: #save intermediary segment
                 item = {}
                 item.update({"dataset" : _set+1})
                 item.update({"pid" : _id+1})
@@ -85,6 +87,7 @@ for _set in range(0,3):
                 item.update({"start" :  int(segment_start)})
                 item.update({"end" : int(segment_end)})
                 item.update({"length" : int(segment_end-segment_start)})
+                item.update({"interactionCount" : 0})
                 current_segment_json.append(item)
 
                 current_segment = current_segment+1
@@ -92,7 +95,7 @@ for _set in range(0,3):
             segment.update({"length" : int(segment['end']-segment['start'])})
             segment_json.append(segment)
 
-
+#count number of items that WOULD be in the segment.
 _segment = 1;
 for _set in range(0,3):
     for _id in range(0,8):
@@ -105,6 +108,7 @@ for _set in range(0,3):
             for segment in segment_json:
                 if(item['time']/10 >= segment['start'] and item['time']/10 <= segment['end'] and segment['pid']==_id+1 and segment['dataset']==_set+1):
                     item.update({'segment' : segment['sid']})
+                    segment.update({"interactionCount" : segment["interactionCount"]+1})
 
 
 

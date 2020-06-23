@@ -3,16 +3,16 @@
 <style>
   div.tooltip { 
     position: absolute;     
-    text-align: center;     
+    text-align: center; 
+    max-width: 500px;    
     display:flex;  
     flex-direction: column;       
     padding: 2px;         
-    background: lightgrey; 
-    border-color: : black;
-    border: 3px;    
-    border-style: solid;
+    background: white; 
+    border: 3px solid navy;    
     border-radius: 5px;     
-    pointer-events: none;     
+    pointer-events: none;  
+    text-align:left;   
 }
 </style>
 <head>
@@ -52,15 +52,15 @@
             <p>Data from provenance logs are segmented. Small segments (<25s long) are grouped into the preceeding segment. Only "interesting" action types from the logs are regarded in summarizing each segment.</p>
             
             <h3>Overview</h3>
-            <p>Each segment is represented by a card, featuring the PID and segment number it represents, start and end times, and total length. The card border encodes the length of the segment (thicker border is longer). A naive textual explanation of actions taken during the segment are generated, prioritizing direct actions such as searching/highlighting/note taking over dragging.  Bars showing the relative frequency of each action are shown for each segment. A "Total" activity bar shows how much of the total activity occurs in the segment.</p>
+            <p>Each segment is represented by a card, featuring the PID and segment number it represents. A green bar represents the timeline for the entire segment, with a dark green block showing the relative start and end times for the segment. The length of this bar encodes the duration of the segment. Key information about searching, note taking, highlighting, and document moving is included. Bars showing the relative frequency of each action are shown for each segment. A "Total" activity bar shows how much of the total activity occurs in the segment.</p>
 
             <h3>Zoom/Filter</h3>
             <p> Nothing present for this. Doesn't seem like its necessary really at the moment.</p>
 
             <h3>Details on Demand</h3>
-            <p> Hovering over each bar displays all the interactions of the type from that segment and is linked to highlight corresponding interactions from other segments and shows their frequency as well.</p>
+            <p> Hovering over the timeline shows precises start, end, and duration times. Incomplete notes/highlights can be hovered to show the entire text. Hovering over each bar displays all the interactions of the type from that segment and is linked to highlight corresponding interactions from other segments and shows their frequency. A list of all actions with frequencies is provided</p>
 
-<!--             <h3 style="color:red">TODO</h3>
+            <h3 style="color:red">TODO</h3>
             <p style="color:red">
               <b>1. Determine "significant segment" marker/strategy</b> <br>
               &nbsp;1a. Naive: above average interaction counts for the duration?<br>
@@ -72,9 +72,15 @@
               <br>
               <b>3. Inclusion of more information on each card</b><br>
               &nbsp;3a. Try to do a bit more complex analysis of each segment to create better textual summary.<br>
-              &nbsp;3b. More details for each segment, some small display of the actions over time in the segment.
+              &nbsp;3b. More details for each segment, some small display of the actions over time in the segment.<br>
+              <br>
+              <b>4. Eric Comments</b><br>
+              &nbsp;4a. play with font/color for text to distinguish keywords<br>
+              &nbsp;4b. explore spacing/whitespace to help separate statement types in each card<br>
+              &nbsp;4c. reduce words where possible<br>
+              &nbsp;4d. represent how much time each card represents<br>
 
-            </p> -->
+            </p>
           </div>
           <div id="chart"></div>
       </div>
