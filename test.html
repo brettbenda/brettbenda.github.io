@@ -60,25 +60,22 @@
             <h3>Details on Demand</h3>
             <p> Hovering over the timeline shows precises start, end, and duration times. Incomplete notes/highlights can be hovered to show the entire text. Hovering over each bar displays all the interactions of the type from that segment and is linked to highlight corresponding interactions from other segments and shows their frequency. A list of all actions with frequencies is provided</p>
 
+            <h3 style="color:darkgreen">Updates</h3>
+            <p style="color:darkgreen">
+              <b>1. Time updated to a bar on each segment. Details available on hover.</b><br>
+              &nbsp;Idea: shows positioning/duration in entire investigation visually.<br>
+              <b>2. Text cleaned up + styled for keywords/phrases. Hovering shows whole text if it is too big.</b><br>
+              &nbsp;Limitation: text has to be on one line otherwise the style breaks because svg text is bad when you want to wrap and have interactions in the text.<br>
+              <b>3. Better tooltips for interaction bars: shows quantity of each item (i.e. if something was searched for or a document was moved multiple times. </b><br>
+              <b>4. Bug fixing/refactored stuff for modularity.</b><br>
+            </p>
             <h3 style="color:red">TODO</h3>
             <p style="color:red">
-              <b>1. Determine "significant segment" marker/strategy</b> <br>
-              &nbsp;1a. Naive: above average interaction counts for the duration?<br>
-              &nbsp;1b. The actual same process as Sina used? <br>
-              <br>
-              <b>2. Further reduce number of segments</b><br>
-              &nbsp;2a. Shae's provenance work suggests that people naturally create fewer segments anyways, the ML segmentation seems too sensitive.<br>
-              &nbsp;2b. Proposal: collapse segments with very few interactions (<5) into nearest segment.<br>
-              <br>
-              <b>3. Inclusion of more information on each card</b><br>
-              &nbsp;3a. Try to do a bit more complex analysis of each segment to create better textual summary.<br>
-              &nbsp;3b. More details for each segment, some small display of the actions over time in the segment.<br>
-              <br>
-              <b>4. Eric Comments</b><br>
-              &nbsp;4a. play with font/color for text to distinguish keywords<br>
-              &nbsp;4b. explore spacing/whitespace to help separate statement types in each card<br>
-              &nbsp;4c. reduce words where possible<br>
-              &nbsp;4d. represent how much time each card represents<br>
+              <b>1. Add symbols for actions</b><br>
+              <b>2. Still try different resegmentation techniques? Or just assume later better segments will be provided?</b><br>
+              <b>3. Actual controls for loadings different datasets, sorting, filtering, etc.?</b><br>
+              <b>4. Larger view for a card/actual timeline view of actions similar to the other tools?</b><br>
+
 
             </p>
           </div>
