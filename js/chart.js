@@ -256,20 +256,20 @@ Promise.all([
 				})
 		)
 
-	//drag info
+	//open info
 	card.text.push(
 			card.append("text").
 				attr("x",15).
 				attr("y",function(d,i){
 					return 60+20*d.displayedInfo
 				}).
-				attr("id", "dragText").
+				attr("id", "openText").
 				html(function(d,i){
-					var keys =Object.keys(d.drags)
+					var keys =Object.keys(d.opens)
 					if(keys==0)
 						return
 
-					var text = keys.length + " document" + ((keys.length==1)?" was":"s were") + " moved."
+					var text = keys.length + " document" + ((keys.length==1)?" was":"s were") + " opened."
 					d.displayedInfo++
 					return text
 				})
@@ -289,8 +289,8 @@ Promise.all([
 		return 50*(1.0 - d.note_ratio)
 	})
 
-	card.drag = barElement(card, 195, 150, "Drag", function(d){
-		return 50*(1.0 - d.drag_ratio)
+	card.open = barElement(card, 195, 150, "Open Doc", function(d){
+		return 50*(1.0 - d.open_ratio)
 	})
 
 	card.total = barElement(card, 345, 150, "Total", function(d){
@@ -427,7 +427,7 @@ function segmentify(interactions){
 //Returns:  a json object
 function summarize_segment(segment){
 
-	var drags = []; //Draging
+	var opens = []; //opening
 	var searches = []; //Search
 	var notes = [] //Add note
 	var highlights = [] //Highlight
@@ -436,8 +436,8 @@ function summarize_segment(segment){
 	//collect interesting data from logs, removes non-alphanumeric chars to avoid issues
 	for(var interaction of segment){
 		switch(interaction['InteractionType']){
-			case "Draging":
-				drags.push(interaction["Text"])
+			case "Doc_open":
+				opens.push(interaction["Text"])
 				total_interactions++
 				break
 			case "Search":
@@ -521,8 +521,8 @@ function summarize_segment(segment){
 
 
 		summaryText = ""
-		if(sentences.length==0 && drags.length != 0){
-			summaryText += "Some documents were moved.";
+		if(sentences.length==0 && opens.length != 0){
+			summaryText += "Some documents were opened.";
 			sentences.push(summaryText)
 		}
 
@@ -537,8 +537,8 @@ function summarize_segment(segment){
 		interesting : (total_interactions > 0) ? true:false,
 		total_interactions: total_interactions,
 
-		drags: ListToCounts(drags),
-		drag_ratio: (total_interactions > 0) ? drags.length/total_interactions : 0,
+		opens: ListToCounts(opens),
+		open_ratio: (total_interactions > 0) ? opens.length/total_interactions : 0,
 
 		searches: ListToCounts(searches),
 		search_ratio: (total_interactions > 0) ? searches.length/total_interactions : 0,
@@ -617,8 +617,8 @@ function TextToValue(d, type){
 		case "Note":
 			data =  d.notes
 			break;
-		case "Drag":
-			data =  d.drags
+		case "Open Doc":
+			data =  d.opens
 			break;
 		case "Total":
 			return d.total_interactions
@@ -668,8 +668,8 @@ function BarToolTipText(d, type){
 		case "Note":
 			data = d.notes
 			break
-		case "Drag":
-			data = d.drags	
+		case "Open Doc":
+			data = d.opens	
 			break
 		case "Total":
 			return title
