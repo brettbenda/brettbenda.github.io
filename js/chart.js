@@ -174,14 +174,20 @@ Promise.all([
 					var keys =Object.keys(d.searches)
 					if(keys.length==0)
 						return
-					var text = "Search Terms: "
+					var text = "The user searched for "
 					for(var i=0; i<(Math.min(3,keys.length)); i++){
+            if(i==(Math.min(3,keys.length)-1) && keys.length!=1)
+              text += "and "
+
 						text += "<tspan style=\"font-weight:bold\">"+keys[i]+"</tspan>"
+
 						if(i!=(Math.min(3,keys.length)-1))
 							text+=", "
+
+
 					}
 					d.displayedInfo++
-
+          text += "."
 					return text
 				})
 		)
@@ -199,10 +205,10 @@ Promise.all([
 					if(keys.length==0)
 						return
 
-					var text = "Highlight: "
 					var slicedText = keys[0].slice(0,25)
-					text += "<tspan style=\"font-weight:bold\">" + slicedText + ((keys[0].length == slicedText.length)?"":"...") +"</tspan>"
-					
+					var text = "<tspan style=\"font-weight:bold;text-decoration:underline;fill:royalblue\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") + "\""+"</tspan>"
+					text += " was highlighted."
+
 					d.displayedInfo++
 
 					return text
@@ -236,7 +242,7 @@ Promise.all([
 
 					var text = "Note: "
 					var slicedText = keys[0].slice(0,25)
-					text += "<tspan style=\"font-weight:bold;\">" + slicedText + ((keys[0].length == slicedText.length)?"":"...") +"</tspan>"
+					text += "<tspan style=\"font-weight:bold;text-decoration:underline;fill:royalblue\">" + slicedText + ((keys[0].length == slicedText.length)?"":"...") +"</tspan>"
 
 					d.displayedInfo++
 
@@ -277,24 +283,24 @@ Promise.all([
 
 
 	//interaction bars
-	card.search = barElement(card, 15, 150, "Search", function(d){
-		return 50*(1.0 - d.search_ratio)
+	card.search = barElement(card, 15, 175, "Search", "🔎", function(d){
+		return 25*(1.0 - d.search_ratio)
 	})
 
-	card.highlight = barElement(card, 75, 150, "Highlight", function(d){
-		return 50*(1.0 - d.highlight_ratio)
+	card.highlight = barElement(card, 50, 175, "Highlight", "📑", function(d){
+		return 25*(1.0 - d.highlight_ratio)
 	})
 
-	card.notes = barElement(card, 135, 150, "Note", function(d){
-		return 50*(1.0 - d.note_ratio)
+	card.notes = barElement(card, 85, 175, "Note", "✏", function(d){
+		return 25*(1.0 - d.note_ratio)
 	})
 
-	card.open = barElement(card, 195, 150, "Open Doc", function(d){
-		return 50*(1.0 - d.open_ratio)
+	card.open = barElement(card, 120, 175, "Open Doc", "📖", function(d){
+		return 25*(1.0 - d.open_ratio)
 	})
 
-	card.total = barElement(card, 345, 150, "Total", function(d){
-		return 50*(1.0 - d.interaction_rate)
+	card.total = barElement(card, 375, 175, "Total", "Total", function(d){
+		return 25*(1.0 - d.interaction_rate)
 	})
 
 	
@@ -306,7 +312,7 @@ Promise.all([
 
 //Arguments: The svg element to draw the bar on, x location, y location, text label, function to determine size of bar
 //Output: void return, item added to input svg
-function barElement(card, x, y, text, sizefunc){
+function barElement(card, x, y, text, symbol, sizefunc){
 	element = {}
 
 	selectBar = "indianred"
@@ -317,56 +323,61 @@ function barElement(card, x, y, text, sizefunc){
 	element.bar = card.append("rect").
 					attr("x",x).
 					attr("y",y).
-					attr("height", 50).
-					attr("width",50).
-					attr("class", "barBar"+text).
+					attr("height", 25).
+					attr("width",25).
+					attr("class", "barBar"+text.replace(/\s+/g, '')).
 					style("fill", unselectBar)
 
 	element.bg = card.append("rect").
 					attr("x",x).
 					attr("y",y).
 					attr("height", sizefunc).
-					attr("width",50).
-					attr("class", "barBG"+text).
+					attr("width",25).
+					attr("class", "barBG"+text.replace(/\s+/g, '')).
 					style("fill", unselectBG)
 	
-	element.text = card.append("text").
-						attr("x",x).
-						attr("y",y-5).
-						style("user-select","none").
-						text(text).
-						style("font-size", 12)
-						.call(wrap, 385)
+	// element.text = card.append("text").
+	// 					attr("x",x).
+	// 					attr("y",y-5).
+	// 					style("user-select","none").
+	// 					text(text).
+	// 					style("font-size", 12)
+	// 					.call(wrap, 385)
+
+  element.text = card.append("text").
+            attr("x",x).
+            attr("y",y-5).
+            style("user-select","none").
+            html(symbol).
+            style("font-size", function(){return (text=="Total"?12:18)})
+            .call(wrap, 385)
 
 	//invisible box over bar, to handle interactions for both rects of the bar
 	element.selectionArea = card.append("rect").
 					attr("x",x).
 					attr("y",y).
-					attr("height", 50).
-					attr("width",50).
-					attr("class", "selectionArea"+text).
+					attr("height", 25).
+					attr("width",25).
+					attr("class", "selectionArea"+text.replace(/\s+/g, '')).
 					style("opacity", 0)
 					.on("mouseover",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
 
-						//linked to other data!
-						card.append("text").
-							attr("x", x+25).
-							attr("y",y+30).
-							attr("class","barText").
-							text(function(d,i){return TextToValue(d,text)}).
-							style("font-size", 12).
-							style("font-weight", "bold").
-							style("fill-opacity", "1.0").
-							style("user-select","none")
+						// card.selectAll(".barBar"+text).
+						// 	style("fill", selectBar).
+						// 	style("fill-opacity", "1.0")
 
-						card.selectAll(".barBar"+text).
-							style("fill", selectBar).
-							style("fill-opacity", "1.0")
+						// card.selectAll(".barBG"+text).
+						// 	style("fill", selectBG).
+						// 	style("fill-opacity", "1.0")
 
-						card.selectAll(".barBG"+text).
-							style("fill", selectBG).
-							style("fill-opacity", "1.0")
+            d3.select(selectID).select(".barBar"+text.replace(/\s+/g, '')).
+             style("fill", selectBar).
+             style("fill-opacity", "1.0")
+
+            d3.select(selectID).selectAll(".barBG"+text.replace(/\s+/g, '')).
+             style("fill", selectBG).
+             style("fill-opacity", "1.0")
 
 						tooltip.transition()		
                 			.duration(100)		
@@ -379,15 +390,22 @@ function barElement(card, x, y, text, sizefunc){
 					.on("mouseout",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
 
-						d3.selectAll(".barText").remove()
+						// card.selectAll(".barBar"+text).
+						// 	style("fill", unselectBar).
+						// 	style("fill-opacity", null)
 
-						card.selectAll(".barBar"+text).
-							style("fill", unselectBar).
-							style("fill-opacity", null)
+						// card.selectAll(".barBG"+text).
+						// 	style("fill", unselectBG).
+						// 	style("fill-opacity", null)
 
-						card.selectAll(".barBG"+text).
-							style("fill", unselectBG).
-							style("fill-opacity", null)
+            d3.select(selectID).selectAll(".barBar"+text.replace(/\s+/g, '')).
+             style("fill", unselectBar).
+             style("fill-opacity", null)
+
+            d3.select(selectID).selectAll(".barBG"+text.replace(/\s+/g, '')).
+             style("fill", unselectBG).
+             style("fill-opacity", null)
+
 
 						tooltip.transition()		
                 			.duration(100)		
@@ -398,7 +416,6 @@ function barElement(card, x, y, text, sizefunc){
 	return element
 
 }
-
 
 //Argument: a participant interaction json object
 //Result: 	an array of interaction json objects regrouped by segment
