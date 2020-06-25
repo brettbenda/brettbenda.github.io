@@ -123,7 +123,7 @@ Promise.all([
 				return d3.line()([[start+scale(seg.start), 20],[start+scale(seg.end),20]])
 				}).
 				attr("stroke","royalblue").
-				attr("stroke-width", 15).
+				attr("stroke-width", 20).
 				attr('pointer-events', 'visibleStroke')
 
 	card.timeLineHitbox = card.append("path").
@@ -132,7 +132,7 @@ Promise.all([
 					return d3.line()([[start, 20],[400,20]])
 				}).
 				attr("stroke","darkSeaGreen").
-				attr("stroke-width", 15).
+				attr("stroke-width", 20).
 				attr("stroke-opacity",0).
 				attr('pointer-events', 'visibleStroke').
 				on("mouseover",function(d,i){
@@ -283,19 +283,19 @@ Promise.all([
 
 
 	//interaction bars
-	card.search = barElement(card, 15, 175, "Search", "🔎", function(d){
+	card.search = barElement(card, 15, 175, "Searches", "🔎", function(d){
 		return 25*(1.0 - d.search_ratio)
 	})
 
-	card.highlight = barElement(card, 50, 175, "Highlight", "📑", function(d){
+	card.highlight = barElement(card, 50, 175, "Highlights", "📑", function(d){
 		return 25*(1.0 - d.highlight_ratio)
 	})
 
-	card.notes = barElement(card, 85, 175, "Note", "✏", function(d){
+	card.notes = barElement(card, 85, 175, "Notes", "✏", function(d){
 		return 25*(1.0 - d.note_ratio)
 	})
 
-	card.open = barElement(card, 120, 175, "Open Doc", "📖", function(d){
+	card.open = barElement(card, 120, 175, "Documents Opened", "📖", function(d){
 		return 25*(1.0 - d.open_ratio)
 	})
 
@@ -336,14 +336,6 @@ function barElement(card, x, y, text, symbol, sizefunc){
 					attr("class", "barBG"+text.replace(/\s+/g, '')).
 					style("fill", unselectBG)
 	
-	// element.text = card.append("text").
-	// 					attr("x",x).
-	// 					attr("y",y-5).
-	// 					style("user-select","none").
-	// 					text(text).
-	// 					style("font-size", 12)
-	// 					.call(wrap, 385)
-
   element.text = card.append("text").
             attr("x",x).
             attr("y",y-5).
@@ -352,24 +344,16 @@ function barElement(card, x, y, text, symbol, sizefunc){
             style("font-size", function(){return (text=="Total"?12:18)})
             .call(wrap, 385)
 
-	//invisible box over bar, to handle interactions for both rects of the bar
+	//invisible box over bar and lable, to handle interactions for both rects of the bar
 	element.selectionArea = card.append("rect").
 					attr("x",x).
-					attr("y",y).
-					attr("height", 25).
+					attr("y",y-25).
+					attr("height", 25+25).
 					attr("width",25).
 					attr("class", "selectionArea"+text.replace(/\s+/g, '')).
 					style("opacity", 0)
 					.on("mouseover",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
-
-						// card.selectAll(".barBar"+text).
-						// 	style("fill", selectBar).
-						// 	style("fill-opacity", "1.0")
-
-						// card.selectAll(".barBG"+text).
-						// 	style("fill", selectBG).
-						// 	style("fill-opacity", "1.0")
 
             d3.select(selectID).select(".barBar"+text.replace(/\s+/g, '')).
              style("fill", selectBar).
@@ -389,14 +373,6 @@ function barElement(card, x, y, text, symbol, sizefunc){
 					})
 					.on("mouseout",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
-
-						// card.selectAll(".barBar"+text).
-						// 	style("fill", unselectBar).
-						// 	style("fill-opacity", null)
-
-						// card.selectAll(".barBG"+text).
-						// 	style("fill", unselectBG).
-						// 	style("fill-opacity", null)
 
             d3.select(selectID).selectAll(".barBar"+text.replace(/\s+/g, '')).
              style("fill", unselectBar).
@@ -472,84 +448,6 @@ function summarize_segment(segment){
 		}
 	}
 
-	if(false){
-		//only unique
-		searches2 = [...new Set(searches)]
-		highlights2 = [...new Set(highlights)]
-
-		//Find features	
-		var bestFeatures = []
-		var summaryText = "";
-		var sentences = [];
-
-		//check for searches
-		if(searches2.length !=0){
-			summaryText += "Important searches: "
-			for(var i =0; i<Math.min(3,searches2.length); i++){
-
-				//last
-				if(i!=0 && i==Math.min(3,searches2.length)-1)
-					summaryText +="and "
-
-				summaryText += searches2[i]
-
-				//not first
-				if(i!=Math.min(3,searches2.length)-1)
-					summaryText +=", "
-			}
-			summaryText+="."
-			sentences.push(summaryText)
-		}	
-
-		summaryText = ""
-		if(sentences.length==0 && notes.length != 0){
-			summaryText += "Note made: \'" + notes[0] + "\".";
-			sentences.push(summaryText)
-		}
-
-		summaryText = ""
-		//check for highlights
-		if(highlights2.length !=0 && sentences.length==1 ){
-			if(highlights2.length == 1)
-				summaryText += "The phrase "
-			else
-				summaryText += "The phrases "
-
-			for(var i =0; i<Math.min(3,highlights2.length); i++){
-
-				//not first and last
-				if(i!=0 && i==Math.min(3,highlights2.length)-1)
-					summaryText +="and "
-
-				summaryText += "\"" + highlights2[i] + "\""
-
-				//not last
-				if(i!=Math.min(3,highlights2.length)-1)
-					summaryText +=", "
-			}
-			
-			if(highlights.length == 1)
-				summaryText += " was notable."
-			else
-				summaryText += " were notable."
-			sentences.push(summaryText)
-		}
-
-
-
-		summaryText = ""
-		if(sentences.length==0 && opens.length != 0){
-			summaryText += "Some documents were opened.";
-			sentences.push(summaryText)
-		}
-
-
-		if(sentences.length==0){
-			summaryText = "Nothing interesting was found."
-			sentences.push(summaryText)
-		}
-	}
-	
 	var summary = {
 		interesting : (total_interactions > 0) ? true:false,
 		total_interactions: total_interactions,
@@ -566,10 +464,59 @@ function summarize_segment(segment){
 		highlights: ListToCounts(highlights),
 		highlight_ratio: (total_interactions > 0) ? highlights.length/total_interactions:0,
 
-		summaryText: sentences,
 		displayedInfo: 0
 	}
 	return summary;
+}
+
+//get html for action bar tooltips
+function BarToolTipText(d, type){
+  var title = "<b>"+type+" (" + TextToValue(d,type) + ")"
+  var text = ""
+  var data
+  switch(type){
+    case "Searches":
+      data = d.searches     
+      break
+    case "Highlights":
+      data = d.highlights 
+      break
+    case "Notes":
+      data = d.notes
+      break
+    case "Documents Opened":
+      data = d.opens  
+      break
+    case "Total":
+      return title
+  }
+  title+= ":</b> <br>"
+  var keys = Object.keys(data)
+  for(var i=0; i<keys.length;i++){
+    text += "#"+(i+1)+": " + keys[i] + ((data[keys[i]]==1?"":" (x" + data[keys[i]]+")"))+"<br>"
+  }
+
+  if(text=="")
+    text="None"
+
+  return title + "<br>" + text;
+}
+
+//gets html for textual summary tooltip
+function SummaryToolTip(text, type){
+  var title = "<b>"+type+"</b> <br>"
+  var text = text
+
+  return title + "<br>" + text;
+}
+
+//get html for timeline tooltip
+function TimeToolTip(segment){
+  var text = "<b>Segment Time Information</b> <br>"
+  text += "Start: " + IntToTime(segment.start) + "<br>"
+  text += "End: " + IntToTime(segment.end) + "<br>"
+  text += "Duration: " + IntToTime(segment.length) + "<br>"
+  return text 
 }
 
 //Argument: An array
@@ -625,16 +572,16 @@ function wrap(text, width) {
 function TextToValue(d, type){
 	var data
 	switch(type){
-		case "Search":
+		case "Searches":
 			data = d.searches
 			break;
-		case "Highlight": 
+		case "Highlights": 
 			data =  d.highlights
 			break;
-		case "Note":
+		case "Notes":
 			data =  d.notes
 			break;
-		case "Open Doc":
+		case "Documents Opened":
 			data =  d.opens
 			break;
 		case "Total":
@@ -670,54 +617,6 @@ function GetSegments(dataset,pid){
 	return segments2
 }
 
-
-function BarToolTipText(d, type){
-	var title = "<b>"+type+" Actions (" + TextToValue(d,type) + ")"
-	var text = ""
-	var data
-	switch(type){
-		case "Search":
-			data = d.searches			
-			break
-		case "Highlight":
-			data = d.highlights	
-			break
-		case "Note":
-			data = d.notes
-			break
-		case "Open Doc":
-			data = d.opens	
-			break
-		case "Total":
-			return title
-	}
-	title+= ":</b> <br>"
-	var keys = Object.keys(data)
-	for(var i=0; i<keys.length;i++){
-		text += "#"+(i+1)+": " + keys[i] + ((data[keys[i]]==1?"":" (x" + data[keys[i]]+")"))+"<br>"
-	}
-
-	if(text=="")
-		text="None"
-
-	return title + "<br>" + text;
-}
-
-function SummaryToolTip(text, type){
-	var title = "<b>"+type+"</b> <br>"
-	var text = text
-
-	return title + "<br>" + text;
-}
-
-function TimeToolTip(segment){
-	var text = "<b>Segment Time Information</b> <br>"
-	text += "Start: " + IntToTime(segment.start) + "<br>"
-	text += "End: " + IntToTime(segment.end) + "<br>"
-	text += "Duration: " + IntToTime(segment.length) + "<br>"
-	return text 
-}
-
 //Given a list, convert to a dictionary of items and counts
 function ListToCounts(list){
 	var counts = {}
@@ -729,6 +628,7 @@ function ListToCounts(list){
 	return counts
 }
 
+//Given an int representing seconds, gives a mm:ss string back
 function IntToTime(int){
 	var min = Math.floor(int/60)
 	var sec = int%60
