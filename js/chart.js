@@ -5,8 +5,8 @@ var segments;
 var data = []
 var tooltip
 
-var DS = 1
-var P = 1
+var DS = 3
+var P = 5
 //Load Docs
 Promise.all([	
 	d3.json("/js/ProvSegments/Dataset_1/Documents/Documents_Dataset_1.json"),
@@ -242,7 +242,7 @@ Promise.all([
 
 					var text = "Note: "
 					var slicedText = keys[0].slice(0,25)
-					text += "<tspan style=\"font-weight:bold;text-decoration:underline;fill:royalblue\">" + slicedText + ((keys[0].length == slicedText.length)?"":"...") +"</tspan>"
+					text += "<tspan style=\"font-weight:bold;text-decoration:underline;fill:royalblue\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") +"\""+ "</tspan>"
 
 					d.displayedInfo++
 
@@ -299,7 +299,7 @@ Promise.all([
 		return 25*(1.0 - d.open_ratio)
 	})
 
-	card.total = barElement(card, 375, 175, "Total", "Total", function(d){
+	card.total = barElement(card, 155, 175, "Total", "Total", function(d){
 		return 25*(1.0 - d.interaction_rate)
 	})
 
@@ -694,7 +694,7 @@ function BarToolTipText(d, type){
 	title+= ":</b> <br>"
 	var keys = Object.keys(data)
 	for(var i=0; i<keys.length;i++){
-		text += "#"+(i+1)+": " + keys[i] + " (" + data[keys[i]]+")<br>"
+		text += "#"+(i+1)+": " + keys[i] + ((data[keys[i]]==1?"":" (x" + data[keys[i]]+")"))+"<br>"
 	}
 
 	if(text=="")
