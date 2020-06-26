@@ -62,6 +62,9 @@ Promise.all([
 		.attr("class", "tooltip")
 		.style("opacity", 0)
 	
+
+
+  
 	//draw cards
 	var card = d3.select("#chart").
 				selectAll("card").
@@ -273,7 +276,10 @@ Promise.all([
 				html(function(d,i){
 					var keys =Object.keys(d.opens)
 					if(keys==0)
-						return
+            if(d.displayedInfo==0)
+              return "Nothing interesting happened."
+            else
+						  return 
 
 					var text = keys.length + " document" + ((keys.length==1)?" was":"s were") + " opened."
 					d.displayedInfo++
