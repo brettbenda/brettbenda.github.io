@@ -51,6 +51,7 @@ for i in range (1,4):
 
 #Create segment JSON, cluster short segments into previous segments
 segment_json = []
+min_segment_length = 180
 for _set in range(0,3):
     for _id in range(0,8):
         current_segment = 0
@@ -61,11 +62,13 @@ for _set in range(0,3):
         for i,segment in enumerate(segments[_set][_id]):
             stringjson = json.loads(segment)
 
+            min_segment_length = float(json.loads(segments[_set][_id][-1])['end'])/24
+
             segment_start = int(float(stringjson['start']))
             segment_end = int(float(stringjson['end']))
 
             #first segment will always exist, ignore later segments that are short
-            if(current_segment!=0 and segment_end-segment_start < 25):
+            if(current_segment!=0 and segment_end-segment_start < min_segment_length):
                 current_segment_json[current_segment-1].update({'end' : segment_end})
             elif(i==len(segments[_set][_id])-1): #save last segment specifically
                 item = {}
