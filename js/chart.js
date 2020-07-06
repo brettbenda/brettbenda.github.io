@@ -255,28 +255,50 @@ Promise.all([
                                 var seg = GetSegment(d.number, d.pid, d.dataset)
                                 var scale = d3.scaleLinear().domain([seg.start,seg.end]).range([10,400])
 
+                                //first draw reading
                                 for(var j=0; j<d.all_interactions.length;j++){
                                   var int = d.all_interactions[j]  
+                                  if(int.InteractionType!="Reading")
+                                    continue
 
-                                  //space-filling ticks
-                                  var x1 = (j==0)?seg.start:(int.time + d.all_interactions[j-1].time)/20
-                                  x1 = scale(x1)
-                                  var x2 = (j==d.all_interactions.length-1)?seg.end:(int.time + d.all_interactions[j+1].time)/20
-                                  x2 = scale(x2)-0.5
-                                  var y1 = 45
-                                  var y2 = 45
+                                  var color, x1,x2,y1,y2,stroke
+                                  //colors
+                                  switch(int.InteractionType){
+                                      case "Reading":
+                                        color ="slategrey"
+                                      break
+                                  }   
+                                  //positioning
+                                  switch(int.InteractionType){
+                                      case "Reading":
+                                        x1 = scale(int.time/10)
+                                        x2 = scale((int.time+int.duration)/10)
+                                        console.log(x1)
+                                        y1 = 45
+                                        y2 = 45
+                                        stroke = 15
+                                      break
+                                  }                    
 
-                                  // //small ticks
-                                  // var x1 = scale(int.time/10)
-                                  // var x2 = scale(int.time/10)
-                                  // var y1 = 45-7.5
-                                  // var y2 = 45+7.5
+                                  var arg = "\""+d.number+"\",\""+j+"\""
 
-                                  var color 
+                                  console.log(arg)
+
+                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"stroke:"+color+";stroke-width:"+stroke+"\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
+                                }
+
+                                //then draw interactions
+                                for(var j=0; j<d.all_interactions.length;j++){
+                                  var int = d.all_interactions[j]  
+                                  if(int.InteractionType=="Reading")
+                                    continue
+                                  var color, x1,x2,y1,y2,stroke
+                                  
+                                  //colors
                                   switch(int.InteractionType){
                                       case "Doc_open":
-                                        color ="crimson"
-                                      break
+                                        color = "crimson"
+                                      break;
                                       case "Search":
                                         color = "darkolivegreen"
                                       break;
@@ -286,13 +308,22 @@ Promise.all([
                                       case "Highlight":
                                         color = "darkgoldenrod"
                                       break  
-                                    }                    
+                                  }   
+                                  //positioning
+                                  switch(int.InteractionType){
+                                      default:
+                                        x1 = scale(int.time/10)
+                                        x2 = scale(int.time/10)
+                                        y1 = 45-7.5
+                                        y2 = 45+15
+                                        stroke = 2
+                                  }                    
 
                                   var arg = "\""+d.number+"\",\""+j+"\""
 
                                   console.log(arg)
 
-                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"stroke:"+color+";stroke-width:15\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
+                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"stroke:"+color+";stroke-width:"+stroke+"\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
                                 }
                                 return html
                               })
@@ -526,6 +557,9 @@ function segTimelineOver(sid, number){
     case "Highlight":
     text = "Highlighted <b>\"" +int.Text+"\"</b> on <b>" +int.ID+"</b>"
     break  
+    case "Reading":
+    text = "Reading <b>\"" +int.Text+"\"</b> for "+Math.floor(int.duration/10)+" seconds"
+    break 
   }  
 
 
@@ -580,6 +614,7 @@ function summarize_segment(segment){
 	var searches = []; //Search
 	var notes = [] //Add note
 	var highlights = [] //Highlight
+  var readings = [] //reading
   var all_interactions = []
 	var total_interactions = 0;
 
@@ -594,23 +629,43 @@ function summarize_segment(segment){
 			case "Search":
 				searches.push(interaction["Text"])
         all_interactions.push(interaction)
-
 				total_interactions++
 				break;
 			case "Add note":
 				notes.push(interaction["Text"])
         all_interactions.push(interaction)
-
 				total_interactions++
 				break
 			case "Highlight":
 				total_interactions++
 				highlights.push(interaction["Text"])
         all_interactions.push(interaction)
-
 				break
+      case "Reading":
+        readings.push(interaction)
+        //all_interactions.push(interaction)
+        break
 		}
 	}
+  //merge small reading segments
+  for(var i = 0; i<readings.length; i++){
+    var int = readings[i]
+    for(var j=i+1;j<readings.length;j++){
+      if(readings[j].Text==int.Text){
+        int.duration = (readings[j].time - int.time) + readings[j].duration
+        i=j
+      }
+
+      if(readings[j].Text!=int.Text){
+        if(int.duration>100)
+          all_interactions.push(int)
+        break
+      }
+      
+    }
+    console.log(int)
+    //ll_interactions.push(int)
+  }
 
 	var summary = {
 		interesting : (total_interactions > 0) ? true:false,
