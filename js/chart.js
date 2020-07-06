@@ -5,6 +5,9 @@ var segments;
 var data = []
 var tooltip
 
+var cardWidth = 510
+var cardHeight = 210
+
 var colors = {
   "Doc_open":"crimson",
   "Search":"darkolivegreen",
@@ -78,8 +81,8 @@ Promise.all([
 				data(data).
 				enter().
 				append("svg").
-				attr("height", 210).
-				attr("width",410).
+				attr("height", cardHeight).
+				attr("width", cardWidth).
 				attr("id",function(d){
 					return "card" + d.pid + "_" +d.number
 				}).
@@ -90,9 +93,8 @@ Promise.all([
 					d3.select(selectID)
 						.style("fill-opacity", "1.0")
 						.style("stroke-opacity", "1.0")
-						.attr("transform", function(d){
-							return "scale(1.0)"
-						})
+						//.attr("transform","scale(1.5)")
+
            	
 				})
 				.on("mouseout",function(d, i){
@@ -100,6 +102,7 @@ Promise.all([
 					d3.select(selectID)
 						.style("fill-opacity", "0.7")
 						.style("stroke-opacity", "0.7")
+            //.attr("transform","")
 
 				})
 
@@ -108,8 +111,8 @@ Promise.all([
 				attr("x",5).
 				attr("y",5).
 				attr("rx", 5).
-				attr("height",200).
-				attr("width",400).
+				attr("height", cardHeight-10).
+				attr("width",cardWidth-10).
 				style("fill","white").
 				style("stroke", "navy").
 				style("stroke-width", 3)
@@ -170,7 +173,7 @@ Promise.all([
 					if(keys.length==0)
 						return
 
-					var slicedText = keys[0].slice(0,25)
+					var slicedText = keys[0].slice(0,35)
 					var text = "• The user highlighted " + "<tspan style=\"font-weight:bold;fill:chocolate\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") + "\""+"</tspan>."
 
 					d.displayedInfo++
@@ -205,7 +208,7 @@ Promise.all([
 						return
 
 					var text = "• The user noted "
-					var slicedText = keys[0].slice(0,25)
+					var slicedText = keys[0].slice(0,35)
 					text += "<tspan style=\"font-weight:bold;fill:chocolate\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") +"\""+ "</tspan>."
 
 					d.displayedInfo++
@@ -251,7 +254,7 @@ Promise.all([
   card.timeline = timelineElement(card, startTime, endTime);
 
   card.segmentTimelineBG = card.append("path").
-                              attr("d", d3.line()([[10,45],[400,45]])).
+                              attr("d", d3.line()([[10,45],[cardWidth-10,45]])).
                               attr("stroke","lightgrey").
                               attr("stroke-width", 15)
 
@@ -260,7 +263,7 @@ Promise.all([
                               html(function(d,i){
                                 var html = ""
                                 var seg = GetSegment(d.number, d.pid, d.dataset)
-                                var scale = d3.scaleLinear().domain([seg.start,seg.end]).range([10,400])
+                                var scale = d3.scaleLinear().domain([seg.start,seg.end]).range([10,cardWidth-10])
 
                                 //first draw reading
                                 for(var j=0; j<d.all_interactions.length;j++){
@@ -439,7 +442,7 @@ function timelineElement(card, startTime, endTime){
     element.timeLineBG = card.append("path").
           attr("d",function(d,i){
             var start = 125
-            return d3.line()([[start, 20],[400,20]])
+            return d3.line()([[start, 20],[cardWidth-10,20]])
           }).
           attr("stroke","lightblue").
           attr("stroke-width", 15).
@@ -448,7 +451,7 @@ function timelineElement(card, startTime, endTime){
     element.timeLineBox = card.append("path").
           attr("d",function(d,i){
             var seg = GetSegment(d.number, d.pid, d.dataset)
-            var scale = d3.scaleLinear().domain([startTime,endTime]).range([0,400-125])
+            var scale = d3.scaleLinear().domain([startTime,endTime]).range([0,cardWidth-10-125])
             var start = 125
 
           return d3.line()([[start+scale(seg.start), 20],[start+scale(seg.end),20]])
@@ -460,7 +463,7 @@ function timelineElement(card, startTime, endTime){
     element.timeLineHitbox = card.append("path").
           attr("d",function(d,i){
             var start = 125
-            return d3.line()([[start, 20],[400,20]])
+            return d3.line()([[start, 20],[cardWidth-10,20]])
           }).
           attr("stroke","darkSeaGreen").
           attr("stroke-width", 20).
@@ -648,6 +651,7 @@ function summarize_segment(segment){
   for(var i = 0; i<readings.length; i++){
     var int = readings[i]
     for(var j=i+1;j<readings.length;j++){
+
       if(readings[j].Text==int.Text){
         int.duration = (readings[j].time - int.time) + readings[j].duration
         i=j
