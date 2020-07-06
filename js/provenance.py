@@ -70,6 +70,7 @@ for _set in range(0,3):
             #first segment will always exist, ignore later segments that are short
             if(current_segment!=0 and segment_end-segment_start < min_segment_length):
                 current_segment_json[current_segment-1].update({'end' : segment_end})
+
             elif(i==len(segments[_set][_id])-1): #save last segment specifically
                 item = {}
                 item.update({"dataset" : _set+1})
@@ -80,7 +81,6 @@ for _set in range(0,3):
                 item.update({"length" : int(segment_end-segment_start)})
                 item.update({"interactionCount" : 0})
                 current_segment_json.append(item)
-
                 current_segment = current_segment+1
             else: #save intermediary segment
                 item = {}

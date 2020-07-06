@@ -243,49 +243,10 @@ Promise.all([
 
   card.timeline = timelineElement(card, startTime, endTime);
 
-  //card.segmentTimeline = segmentTimeline(card)
-
   card.segmentTimelineBG = card.append("path").
-                              attr("d", d3.line()([[10,50],[400,50]])).
+                              attr("d", d3.line()([[10,45],[400,45]])).
                               attr("stroke","lightgrey").
                               attr("stroke-width", 15)
-
-  // //Manually add lines for each item in the segment... was annoying to get this working to say the least
-  // card.segmentTimelineBG = card.append("g").
-  //                             html(function(d,i){
-  //                               var html = ""
-  //                               var seg = GetSegment(d.number, d.pid, d.dataset)
-  //                               var scale = d3.scaleLinear().domain([seg.start,seg.end]).range([10,400])
-
-  //                               for(var j=0; j<d.all_interactions.length;j++){
-  //                                 var int = d.all_interactions[j]                               
-  //                                 var x1 = scale(int.time/10)
-  //                                 var x2 = scale(int.time/10)
-  //                                 var y1 = 50-7.5
-  //                                 var y2 = 50+7.5
-  //                                 var color 
-  //                                 switch(int.InteractionType){
-  //                                     case "Doc_open":
-  //                                       color ="red"
-  //                                     break
-  //                                     case "Search":
-  //                                       color = "green"
-  //                                     break;
-  //                                     case "Add note":
-  //                                       color = "blue"
-  //                                     break
-  //                                     case "Highlight":
-  //                                       color = "yellow"
-  //                                     break  
-  //                                   }       
-  //                                 var arg = "\""+d.number+"\",\""+j+"\""
-
-  //                                 console.log(arg)
-
-  //                                 html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"stroke:"+color+";stroke-width:3\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
-  //                               }
-  //                               return html
-  //                             })
 
   //Alternate "sideways line" method with line going from start of interaction to beginning of next
   card.segmentTimelineBG = card.append("g").
@@ -297,27 +258,33 @@ Promise.all([
                                 for(var j=0; j<d.all_interactions.length;j++){
                                   var int = d.all_interactions[j]  
 
+                                  //space-filling ticks
                                   var x1 = (j==0)?seg.start:(int.time + d.all_interactions[j-1].time)/20
-                                  //var x1 = int.time/10
                                   x1 = scale(x1)
                                   var x2 = (j==d.all_interactions.length-1)?seg.end:(int.time + d.all_interactions[j+1].time)/20
-                                  //var x2 = (j==d.all_interactions.length-1)?seg.end:d.all_interactions[j+1].time/10
                                   x2 = scale(x2)-0.5
-                                  var y1 = 50
-                                  var y2 = 50
+                                  var y1 = 45
+                                  var y2 = 45
+
+                                  // //small ticks
+                                  // var x1 = scale(int.time/10)
+                                  // var x2 = scale(int.time/10)
+                                  // var y1 = 45-7.5
+                                  // var y2 = 45+7.5
+
                                   var color 
                                   switch(int.InteractionType){
                                       case "Doc_open":
-                                        color ="red"
+                                        color ="crimson"
                                       break
                                       case "Search":
-                                        color = "green"
+                                        color = "darkolivegreen"
                                       break;
                                       case "Add note":
-                                        color = "blue"
+                                        color = "steelblue"
                                       break
                                       case "Highlight":
-                                        color = "yellow"
+                                        color = "darkgoldenrod"
                                       break  
                                     }                    
 
@@ -325,7 +292,7 @@ Promise.all([
 
                                   console.log(arg)
 
-                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"stroke:"+color+";stroke-width:20\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
+                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"stroke:"+color+";stroke-width:15\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
                                 }
                                 return html
                               })
@@ -545,7 +512,24 @@ function segTimelineOver(sid, number){
   var type = (int.InteractionType=="Doc_open")?"Document Opened":int.InteractionType
   var time = IntToTime(int.time/10)
 
-  var text2 = "<p><b>"+type+"</b> ("+time+")<br>"+int.Text+"</p>"
+  var text
+  switch(int.InteractionType){
+    case "Doc_open":
+    text = "Opened <b>" + int.Text +"</b>"
+    break
+    case "Search":
+    text = "Searched for <b>" +int.Text +"</b>" 
+    break;
+    case "Add note":
+    text = "Noted <b>\"" +int.Text+"\"</b>"
+    break
+    case "Highlight":
+    text = "Highlighted <b>\"" +int.Text+"\"</b> on <b>" +int.ID+"</b>"
+    break  
+  }  
+
+
+  var text2 = "<p class=\"tooltipP\"><b>("+time+")</b><br>"+text+"</p>"
 
   tooltip.transition()    
   .duration(100)    
