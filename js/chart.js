@@ -5,6 +5,13 @@ var segments;
 var data = []
 var tooltip
 
+var colors = {
+  "Doc_open":"crimson",
+  "Search":"darkolivegreen",
+  "Add note":"steelblue",
+  "Highlight":"darkgoldenrod"
+}
+
 var DS = 1
 var P = 2
 //Load Docs
@@ -273,7 +280,6 @@ Promise.all([
                                       case "Reading":
                                         x1 = scale(int.time/10)
                                         x2 = scale((int.time+int.duration)/10)
-                                        console.log(x1)
                                         y1 = 45
                                         y2 = 45
                                         stroke = 15
@@ -293,22 +299,9 @@ Promise.all([
                                   if(int.InteractionType=="Reading")
                                     continue
                                   var color, x1,x2,y1,y2,stroke
-                                  
+                                
                                   //colors
-                                  switch(int.InteractionType){
-                                      case "Doc_open":
-                                        color = "crimson"
-                                      break;
-                                      case "Search":
-                                        color = "darkolivegreen"
-                                      break;
-                                      case "Add note":
-                                        color = "steelblue"
-                                      break
-                                      case "Highlight":
-                                        color = "darkgoldenrod"
-                                      break  
-                                  }   
+                                  color = colors[int.InteractionType]
                                   //positioning
                                   switch(int.InteractionType){
                                       default:
@@ -534,7 +527,7 @@ function SummaryToolTip(text, type){
 
 //get html for timeline tooltip
 function TimeToolTip(segment){
-  var text =IntToTime(segment.start) + "-" + IntToTime(segment.end)+" ("+IntToTime(segment.length)+")"
+  var text ="<p class=\"tooltipP\"><b>"+IntToTime(segment.start) + "-" + IntToTime(segment.end)+"</b> ("+IntToTime(segment.length)+")</p>"
   return text 
 }
 
@@ -563,7 +556,9 @@ function segTimelineOver(sid, number){
   }  
 
 
-  var text2 = "<p class=\"tooltipP\"><b>("+time+")</b><br>"+text+"</p>"
+  var text2 = "<p class=\"tooltipP\"><b>"+time+"</b><br>"+text+"</p>"
+  if(int.InteractionType=="Reading")
+    text2 = "<p class=\"tooltipP\"><b>"+time+"-"+IntToTime((int.time+int.duration)/10)+"</b> ("+IntToTime(int.duration/10)+")<br>"+text+"</p>"
 
   tooltip.transition()    
   .duration(100)    
@@ -647,6 +642,8 @@ function summarize_segment(segment){
         break
 		}
 	}
+
+  var readings_merged = []
   //merge small reading segments
   for(var i = 0; i<readings.length; i++){
     var int = readings[i]
@@ -655,16 +652,15 @@ function summarize_segment(segment){
         int.duration = (readings[j].time - int.time) + readings[j].duration
         i=j
       }
-
       if(readings[j].Text!=int.Text){
-        if(int.duration>100)
+        if(int.duration>100){
+          readings_merged.push(int)
           all_interactions.push(int)
+        }
         break
       }
       
     }
-    console.log(int)
-    //ll_interactions.push(int)
   }
 
 	var summary = {
@@ -687,6 +683,8 @@ function summarize_segment(segment){
 		highlights: ListToCounts(highlights),
     highlights_list:highlights,
 		local_highlight_ratio: (total_interactions > 0) ? highlights.length/total_interactions:0,
+
+    readings:readings_merged,
 
 		displayedInfo: 0
 	}
