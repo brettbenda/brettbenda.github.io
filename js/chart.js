@@ -10,10 +10,19 @@ var cardHeight = 210
 
 var colors = {
   "Doc_open":"crimson",
-  "Search":"darkolivegreen",
-  "Add note":"steelblue",
-  "Highlight":"darkgoldenrod"
+  "Documents Opened":"crimson",
+  "Search":"#009420",
+  "Searches":"#009420",
+  "Add note":"#4278f5",
+  "Notes":"#4278f5",
+  "Highlight":"#ab8300",
+  "Highlights":"#ab8300",
+  "Reading":"pink",
+  "barBG": "lightgrey"
 }
+
+
+
 
 var DS = 1
 var P = 2
@@ -255,8 +264,8 @@ Promise.all([
 
   card.segmentTimelineBG = card.append("path").
                               attr("d", d3.line()([[10,45],[cardWidth-10,45]])).
-                              attr("stroke","lightgrey").
-                              attr("stroke-width", 15)
+                              attr("stroke","black").
+                              attr("stroke-width", 3)
 
   //Alternate "sideways line" method with line going from start of interaction to beginning of next
   card.segmentTimelineBG = card.append("g").
@@ -267,33 +276,24 @@ Promise.all([
 
                                 //first draw reading
                                 for(var j=0; j<d.all_interactions.length;j++){
-                                  var int = d.all_interactions[j]  
+                                  var int = d.all_interactions[j]
+                                  //only do for reading
                                   if(int.InteractionType!="Reading")
                                     continue
 
                                   var color, x1,x2,y1,y2,stroke
-                                  //colors
-                                  switch(int.InteractionType){
-                                      case "Reading":
-                                        color ="slategrey"
-                                      break
-                                  }   
-                                  //positioning
-                                  switch(int.InteractionType){
-                                      case "Reading":
-                                        x1 = scale(int.time/10)
-                                        x2 = scale((int.time+int.duration)/10)
-                                        y1 = 45
-                                        y2 = 45
-                                        stroke = 15
-                                      break
-                                  }                    
+                                  color = colors["Reading"]
+                                  x1 = scale(int.time/10)+1
+                                  x2 = scale((int.time+int.duration)/10)-1
+                                  y1 = 45
+                                  y2 = 45
+                                  stroke = 15                
 
                                   var arg = "\""+d.number+"\",\""+j+"\""
 
                                   console.log(arg)
 
-                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"stroke:"+color+";stroke-width:"+stroke+"\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
+                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"opacity:0.9; stroke:"+color+";stroke-width:"+stroke+"\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
                                 }
 
                                 //then draw interactions
@@ -311,8 +311,8 @@ Promise.all([
                                         x1 = scale(int.time/10)
                                         x2 = scale(int.time/10)
                                         y1 = 45-7.5
-                                        y2 = 45+15
-                                        stroke = 2
+                                        y2 = 45+7.5
+                                        stroke = int.InteractionType=="Doc_open"?2:4
                                   }                    
 
                                   var arg = "\""+d.number+"\",\""+j+"\""
@@ -356,9 +356,6 @@ Promise.all([
 //Output: void return, item added to input svg
 function barElement(card, x, y, text, symbol, sizefunc){
 	element = {}
-
-	selectBar = "indianred"
-	selectBG = "lightpink"
 	unselectBar = "royalblue"
 	unselectBG = "lightblue"
 
@@ -368,7 +365,7 @@ function barElement(card, x, y, text, symbol, sizefunc){
 					attr("height", 25).
 					attr("width",25).
 					attr("class", "barBar"+text.replace(/\s+/g, '')).
-					style("fill", unselectBar)
+					style("fill", colors[text])
 
 	element.bg = card.append("rect").
 					attr("x",x).
@@ -376,7 +373,7 @@ function barElement(card, x, y, text, symbol, sizefunc){
 					attr("height", sizefunc).
 					attr("width",25).
 					attr("class", "barBG"+text.replace(/\s+/g, '')).
-					style("fill", unselectBG)
+					style("fill", colors["barBG"])
 	
   element.text = card.append("text").
             attr("x",x).
@@ -417,11 +414,11 @@ function barElement(card, x, y, text, symbol, sizefunc){
 						var selectID = "#card" + d.pid+"_"+i
 
             d3.select(selectID).selectAll(".barBar"+text.replace(/\s+/g, '')).
-             style("fill", unselectBar).
+             style("fill", colors[text]).
              style("fill-opacity", null)
 
             d3.select(selectID).selectAll(".barBG"+text.replace(/\s+/g, '')).
-             style("fill", unselectBG).
+             style("fill", colors["barBG"]).
              style("fill-opacity", null)
 
 

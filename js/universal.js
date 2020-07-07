@@ -6,6 +6,9 @@ window.onload = function(){
 	      <li class="nav-item">\
 	        <a class="nav-link" href="index.html">Home</a>\
 	      </li>\
+        <li class="nav-item">\
+          <a class="nav-link" href="pictures.html">Photography</a>\
+        </li>\
 	      <li class="nav-item">\
 	        <a class="nav-link" href="research.html">Research</a>\
 	      </li>\
@@ -29,5 +32,5 @@ window.onload = function(){
       </div>\
     </div>'
 
-    console.log("loaded")
+  console.log("loaded")
 }
