@@ -58,7 +58,7 @@ Promise.all([
 	//Summarize segments, get some more stats
 	var total_interactions = 0;
 	for (var i = 0; i<participantData.length; i++){
-		var summary = summarize_segment(participantData[i])
+		var summary = summarize_segment(participantData[i], segments)
 		summary.pid = P;
 		summary.dataset = DS
 		summary.number = i
@@ -262,88 +262,18 @@ Promise.all([
 
   card.timeline = timelineElement(card, startTime, endTime);
 
-  card.segmentTimelineBG = card.append("path").
-                              attr("d", d3.line()([[10,45],[cardWidth-10,45]])).
-                              attr("stroke","black").
-                              attr("stroke-width", 3)
-
-  //Alternate "sideways line" method with line going from start of interaction to beginning of next
-  card.segmentTimelineBG = card.append("g").
-                              html(function(d,i){
-                                var html = ""
-                                var seg = GetSegment(d.number, d.pid, d.dataset)
-                                var scale = d3.scaleLinear().domain([seg.start,seg.end]).range([10,cardWidth-10])
-
-                                //first draw reading
-                                for(var j=0; j<d.all_interactions.length;j++){
-                                  var int = d.all_interactions[j]
-                                  //only do for reading
-                                  if(int.InteractionType!="Reading")
-                                    continue
-
-                                  var color, x1,x2,y1,y2,stroke
-                                  color = colors["Reading"]
-                                  x1 = scale(int.time/10)+1
-                                  x2 = scale((int.time+int.duration)/10)-1
-                                  y1 = 45
-                                  y2 = 45
-                                  stroke = 15                
-
-                                  var arg = "\""+d.number+"\",\""+j+"\""
-
-                                  console.log(arg)
-
-                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"opacity:0.9; stroke:"+color+";stroke-width:"+stroke+"\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
-                                }
-
-                                //then draw interactions
-                                for(var j=0; j<d.all_interactions.length;j++){
-                                  var int = d.all_interactions[j]  
-                                  if(int.InteractionType=="Reading")
-                                    continue
-                                  var color, x1,x2,y1,y2,stroke
-                                
-                                  //colors
-                                  color = colors[int.InteractionType]
-                                  //positioning
-                                  switch(int.InteractionType){
-                                      default:
-                                        x1 = scale(int.time/10)
-                                        x2 = scale(int.time/10)
-                                        y1 = 45-7.5
-                                        y2 = 45+7.5
-                                        stroke = int.InteractionType=="Doc_open"?2:4
-                                  }                    
-
-                                  var arg = "\""+d.number+"\",\""+j+"\""
-
-                                  console.log(arg)
-
-                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"stroke:"+color+";stroke-width:"+stroke+"\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
-                                }
-                                return html
-                              })
+  card.segmentTimeline = segmentTimelineElement(card);
 
 	//interaction bars
-	card.search = barElement(card, 15, 175, "Searches", "🔎", function(d){
-		return 25*(1.0 - d.local_search_ratio)
-	})
+	card.search = barElement(card, 15, 175, "Searches", "🔎", function(d){ return 25*(1.0 - d.local_search_ratio) })
 
-	card.highlight = barElement(card, 50, 175, "Highlights", "📑", function(d){
-		return 25*(1.0 - d.local_highlight_ratio)
-	})
+	card.highlight = barElement(card, 50, 175, "Highlights", "📑", function(d){ return 25*(1.0 - d.local_highlight_ratio) })
 
-	card.notes = barElement(card, 85, 175, "Notes", "✏", function(d){
-		return 25*(1.0 - d.local_note_ratio)
-	})
+	card.notes = barElement(card, 85, 175, "Notes", "✏", function(d){ return 25*(1.0 - d.local_note_ratio) })
 
-	card.open = barElement(card, 120, 175, "Documents Opened", "📖", function(d){
-		return 25*(1.0 - d.local_open_ratio)
-	})
+	card.open = barElement(card, 120, 175, "Documents Opened", "📖", function(d){ return 25*(1.0 - d.local_open_ratio) })
 
-	card.total = barElement(card, 155, 175, "Total", "Total", function(d){
-		return 25*(1.0 - d.interaction_rate)
-	})
+	card.total = barElement(card, 155, 175, "Total", "Total", function(d){ return 25*(1.0 - d.interaction_rate) })
 
 	
 
@@ -395,12 +325,12 @@ function barElement(card, x, y, text, symbol, sizefunc){
 						var selectID = "#card" + d.pid+"_"+i
 
             d3.select(selectID).select(".barBar"+text.replace(/\s+/g, '')).
-             style("fill", selectBar).
-             style("fill-opacity", "1.0")
+             style("fill", colors[text]).
+             style("fill-opacity", "0.7")
 
             d3.select(selectID).selectAll(".barBG"+text.replace(/\s+/g, '')).
-             style("fill", selectBG).
-             style("fill-opacity", "1.0")
+             style("fill", colors["barBG"]).
+             style("fill-opacity", "0.7")
 
 						tooltip.transition()		
                 			.duration(100)		
@@ -483,6 +413,71 @@ function timelineElement(card, startTime, endTime){
 
     return element;
 } 
+
+
+//adds a segment timeline to each card with all interactions presented.
+function segmentTimelineElement(card){ 
+  var element = {}
+
+  element.segmentTimelineBG = card.append("path").
+                              attr("d", d3.line()([[10,45],[cardWidth-10,45]])).
+                              attr("stroke","black").
+                              attr("stroke-width", 3)
+
+  element.segmentTimelineBG = card.append("g").
+                              html(function(d,i){
+                                var html = ""
+                                var seg = GetSegment(d.number, d.pid, d.dataset)
+                                var scale = d3.scaleLinear().domain([seg.start,seg.end]).range([10,cardWidth-10])
+
+                                //first draw reading
+                                for(var j=0; j<d.all_interactions.length;j++){
+                                  var int = d.all_interactions[j]
+                                  //only do for reading
+                                  if(int.InteractionType!="Reading")
+                                    continue
+
+                                  var color, x1,x2,y1,y2,stroke
+                                  color = colors["Reading"]
+                                  x1 = scale(int.time/10)+1
+                                  x2 = scale((int.time+int.duration)/10)-1
+                                  y1 = 45
+                                  y2 = 45
+                                  stroke = 15                
+
+                                  var arg = "\""+d.number+"\",\""+j+"\""
+
+                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"opacity:0.9; stroke:"+color+";stroke-width:"+stroke+"\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
+                                }
+
+                                //then draw interactions
+                                for(var j=0; j<d.all_interactions.length;j++){
+                                  var int = d.all_interactions[j]  
+                                  if(int.InteractionType=="Reading")
+                                    continue
+                                  var color, x1,x2,y1,y2,stroke
+                                
+                                  //colors
+                                  color = colors[int.InteractionType]
+                                  //positioning
+                                  switch(int.InteractionType){
+                                      default:
+                                        x1 = scale(int.time/10)
+                                        x2 = scale(int.time/10)
+                                        y1 = 45-7.5
+                                        y2 = 45+7.5
+                                        stroke = int.InteractionType=="Doc_open"?2:4
+                                  }                    
+
+                                  var arg = "\""+d.number+"\",\""+j+"\""
+
+                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"stroke:"+color+";stroke-width:"+stroke+"\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
+                                }
+                                return html
+                              })
+  return element
+  }
+
 
 //get html for action bar tooltips
 function BarToolTipText(d, type){
@@ -567,8 +562,6 @@ function segTimelineOver(sid, number){
   tooltip.html(text2)  
   .style("left", (event.pageX) + "px")   
   .style("top", (event.pageY - 28) + "px");
-
-  console.log(text2)
 }
 
 function segTimelineOut(){
@@ -603,7 +596,7 @@ function segmentify(interactions){
 
 //Argument: a segment from the array returned by segmentify
 //Returns:  a json object
-function summarize_segment(segment){
+function summarize_segment(segment, segmentJSON){
 
 	var opens = []; //opening
 	var searches = []; //Search
@@ -638,7 +631,6 @@ function summarize_segment(segment){
 				break
       case "Reading":
         readings.push(interaction)
-        //all_interactions.push(interaction)
         break
 		}
 	}
@@ -663,6 +655,46 @@ function summarize_segment(segment){
       
     }
   }
+
+  all_interactions.sort(function(a,b){return a.time-b.time})
+  var descriptions = []
+  console.log("New Segment")
+  for(var i=0; i<all_interactions.length; i++){
+
+   try{
+    if(all_interactions[i].InteractionType=="Search"){
+      //Search->open->read pattern
+      if(all_interactions[i+1].InteractionType=="Doc_open"){
+        if(all_interactions[i+2].InteractionType=="Reading"&&(all_interactions[i+1].Text==all_interactions[i+2].Text)){
+          descriptions.push("User searched for \"" + all_interactions[i].Text +"\" then read " + all_interactions[i+1].Text)
+        }
+      }
+
+      //Search->openmany->(maybe) read pattern
+      var docCount = 0;
+      var finalDoc = ""
+      for(var j=i+1; j<all_interactions.length;j++){
+        if(all_interactions[j].InteractionType=="Doc_open"){
+          docCount++
+        }
+        else if(all_interactions[j].InteractionType=="Reading"){
+          finalDoc=all_interactions[j].Text
+          break
+        }
+        else
+          break
+      }
+      if(docCount>1 && finalDoc =="")
+        descriptions.push("User searched for \"" + all_interactions[i].Text +"\" then opened " + docCount +" documents")
+      else if(docCount>1 && finalDoc !="")
+        descriptions.push("User searched for \"" + all_interactions[i].Text +"\" then opened " + docCount +" documents before reading " + finalDoc)
+
+    }
+  }catch{}
+     
+  }
+
+  console.log(descriptions)
 
 	var summary = {
 		interesting : (total_interactions > 0) ? true:false,
@@ -690,7 +722,7 @@ function summarize_segment(segment){
 		displayedInfo: 0
 	}
 	return summary;
-}
+   }
 
 
 
