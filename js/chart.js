@@ -6,7 +6,7 @@ var data = []
 var tooltip
 
 var cardWidth = 510
-var cardHeight = 210
+var cardHeight = 290
 
 var colors = {
   "Doc_open":"crimson",
@@ -144,15 +144,15 @@ Promise.all([
   card.segmentTimeline = segmentTimelineElement(card);
 
 	//interaction bars
-	card.search = barElement(card, 15, 175, "Searches", "🔎", function(d){ return 25*(1.0 - d.local_search_ratio) })
+	card.search = barElement(card, 15, 250, "Searches", "🔎", function(d){ return 25*(1.0 - d.local_search_ratio) })
 
-	card.highlight = barElement(card, 50, 175, "Highlights", "📑", function(d){ return 25*(1.0 - d.local_highlight_ratio) })
+	card.highlight = barElement(card, 50, 250, "Highlights", "📑", function(d){ return 25*(1.0 - d.local_highlight_ratio) })
 
-	card.notes = barElement(card, 85, 175, "Notes", "✏", function(d){ return 25*(1.0 - d.local_note_ratio) })
+	card.notes = barElement(card, 85, 250, "Notes", "✏", function(d){ return 25*(1.0 - d.local_note_ratio) })
 
-	card.open = barElement(card, 120, 175, "Documents Opened", "📖", function(d){ return 25*(1.0 - d.local_open_ratio) })
+	card.open = barElement(card, 120, 250, "Documents Opened", "📖", function(d){ return 25*(1.0 - d.local_open_ratio) })
 
-	card.total = barElement(card, 155, 175, "Total", "Total", function(d){ return 25*(1.0 - d.interaction_rate) })
+	card.total = barElement(card, 155, 250, "Total", "Total", function(d){ return 25*(1.0 - d.interaction_rate) })
 
 	
 
@@ -162,7 +162,7 @@ Promise.all([
 
 function cardText(card){
   var element = {}
-
+  var bulletStartY = 230
   element.descriptionText = card.append("text").
         attr("x",15).
         attr("y",function(d,i){
@@ -182,70 +182,32 @@ function cardText(card){
         }).
         call(wrap,485)
 
-  if(false){
-    //search info
+        
+  //open info
   element.searchText = card.append("text").
         attr("x",15).
         attr("y",function(d,i){
-          return 80+20*d.displayedInfo
+          return bulletStartY-20*d.displayedInfo
         }).
-        attr("id", "searchText").
+        attr("id", "openText").
         html(function(d,i){
-          var keys =Object.keys(d.searches)
-          if(keys.length==0)
-            return
-          var text = "• The user searched for "
-          for(var i=0; i<(Math.min(3,keys.length)); i++){
-            if(i==(Math.min(3,keys.length)-1) && keys.length!=1)
-              text += "and "
+          var keys =Object.keys(d.opens)
+          if(keys==0)
+            if(d.displayedInfo==0)
+              return "• Nothing interesting happened."
+            else
+              return 
 
-            text += "<tspan style=\"font-weight:bold\">"+keys[i]+"</tspan>"
-
-            if(i!=(Math.min(3,keys.length)-1))
-              text+=", "
-          }
+          var text = "• The user explored "+ keys.length + " document" + ((keys.length==1)?"":"s") + "."
           d.displayedInfo++
-          text += "."
           return text
-        })
-
-  //Highlight info
-  element.highlightText = card.append("text").
-        attr("x",15).
-        attr("y",function(d,i){
-          return 80+20*d.displayedInfo
-        }).
-        attr("id", "highlightText").
-        html(function(d,i){
-          var keys =Object.keys(d.highlights)
-          if(keys.length==0)
-            return
-
-          var slicedText = keys[0].slice(0,35)
-          var text = "• The user highlighted " + "<tspan style=\"font-weight:bold;fill:chocolate\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") + "\""+"</tspan>."
-
-          d.displayedInfo++
-
-          return text
-        }).on("mouseover",function(d,i){
-          tooltip.transition()    
-                      .duration(100)    
-                      .style("opacity", 1.0); 
-
-          tooltip.html(SummaryToolTip(Object.keys(d.highlights)[0],"Full Highlight")) 
-                      .style("left", (d3.event.pageX) + "px")   
-                      .style("top", (d3.event.pageY - 28) + "px");
-        }).on("mouseout",function(d,i){
-          tooltip.transition()    
-                      .duration(100)    
-                      .style("opacity", 0.0); 
         })
 
   //Note info
   element.noteText = card.append("text").
         attr("x",15).
         attr("y",function(d,i){
-          return 80+20*d.displayedInfo
+          return bulletStartY-20*d.displayedInfo
         }).
         attr("id", "noteText").
         html(function(d,i){
@@ -274,26 +236,65 @@ function cardText(card){
                       .style("opacity", 0.0); 
         })
 
-  //open info
+
+
+    //Highlight info
+  element.highlightText = card.append("text").
+        attr("x",15).
+        attr("y",function(d,i){
+          return bulletStartY-20*d.displayedInfo
+        }).
+        attr("id", "highlightText").
+        html(function(d,i){
+          var keys =Object.keys(d.highlights)
+          if(keys.length==0)
+            return
+
+          var slicedText = keys[0].slice(0,35)
+          var text = "• The user highlighted " + "<tspan style=\"font-weight:bold;fill:chocolate\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") + "\""+"</tspan>."
+
+          d.displayedInfo++
+
+          return text
+        }).on("mouseover",function(d,i){
+          tooltip.transition()    
+                      .duration(100)    
+                      .style("opacity", 1.0); 
+
+          tooltip.html(SummaryToolTip(Object.keys(d.highlights)[0],"Full Highlight")) 
+                      .style("left", (d3.event.pageX) + "px")   
+                      .style("top", (d3.event.pageY - 28) + "px");
+        }).on("mouseout",function(d,i){
+          tooltip.transition()    
+                      .duration(100)    
+                      .style("opacity", 0.0); 
+        })
+
+            //search info
   element.searchText = card.append("text").
         attr("x",15).
         attr("y",function(d,i){
-          return 80+20*d.displayedInfo
+          return bulletStartY-20*d.displayedInfo
         }).
-        attr("id", "openText").
+        attr("id", "searchText").
         html(function(d,i){
-          var keys =Object.keys(d.opens)
-          if(keys==0)
-            if(d.displayedInfo==0)
-              return "• Nothing interesting happened."
-            else
-              return 
+          var keys =Object.keys(d.searches)
+          if(keys.length==0)
+            return
+          var text = "• The user searched for "
+          for(var i=0; i<(Math.min(3,keys.length)); i++){
+            if(i==(Math.min(3,keys.length)-1) && keys.length!=1)
+              text += "and "
 
-          var text = "• The user explored "+ keys.length + " document" + ((keys.length==1)?"":"s") + "."
+            text += "<tspan style=\"font-weight:bold\">"+keys[i]+"</tspan>"
+
+            if(i!=(Math.min(3,keys.length)-1))
+              text+=", "
+          }
           d.displayedInfo++
+          text += "."
           return text
         })
-  }
   
   return element
 }
