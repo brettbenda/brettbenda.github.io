@@ -137,128 +137,7 @@ Promise.all([
 					return "Segment #" + (d.number+1)// + " [" + segment.start + ", " + segment.end + "] (" + segment.length + ")"
 				})
 
-
-	//all the text
-	card.text = []
-
-	//search info
-	card.text.push(
-			card.append("text").
-				attr("x",15).
-				attr("y",80).
-				attr("id", "searchText").
-				html(function(d,i){
-					var keys =Object.keys(d.searches)
-					if(keys.length==0)
-						return
-					var text = "• The user searched for "
-					for(var i=0; i<(Math.min(3,keys.length)); i++){
-            if(i==(Math.min(3,keys.length)-1) && keys.length!=1)
-              text += "and "
-
-						text += "<tspan style=\"font-weight:bold\">"+keys[i]+"</tspan>"
-
-						if(i!=(Math.min(3,keys.length)-1))
-							text+=", "
-
-
-					}
-					d.displayedInfo++
-          text += "."
-					return text
-				})
-		)
-
-	//Highlight info
-	card.text.push(
-			card.append("text").
-				attr("x",15).
-				attr("y",function(d,i){
-					return 80+20*d.displayedInfo
-				}).
-				attr("id", "highlightText").
-				html(function(d,i){
-					var keys =Object.keys(d.highlights)
-					if(keys.length==0)
-						return
-
-					var slicedText = keys[0].slice(0,35)
-					var text = "• The user highlighted " + "<tspan style=\"font-weight:bold;fill:chocolate\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") + "\""+"</tspan>."
-
-					d.displayedInfo++
-
-					return text
-				}).on("mouseover",function(d,i){
-					tooltip.transition()		
-                			.duration(100)		
-                			.style("opacity", 1.0);	
-
-					tooltip.html(SummaryToolTip(Object.keys(d.highlights)[0],"Full Highlight"))	
-                			.style("left", (d3.event.pageX) + "px")		
-                			.style("top", (d3.event.pageY - 28) + "px");
-				}).on("mouseout",function(d,i){
-					tooltip.transition()		
-                			.duration(100)		
-                			.style("opacity", 0.0);	
-				})
-		)
-
-	//Note info
-	card.text.push(
-			card.append("text").
-				attr("x",15).
-				attr("y",function(d,i){
-					return 80+20*d.displayedInfo
-				}).
-				attr("id", "noteText").
-				html(function(d,i){
-					var keys =Object.keys(d.notes)
-					if(keys.length==0)
-						return
-
-					var text = "• The user noted "
-					var slicedText = keys[0].slice(0,35)
-					text += "<tspan style=\"font-weight:bold;fill:chocolate\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") +"\""+ "</tspan>."
-
-					d.displayedInfo++
-
-					return text
-				}).on("mouseover",function(d,i){
-					tooltip.transition()		
-                			.duration(100)		
-                			.style("opacity", 1.0);	
-
-					tooltip.html(SummaryToolTip(Object.keys(d.notes)[0],"Full Note"))	
-                			.style("left", (d3.event.pageX) + "px")		
-                			.style("top", (d3.event.pageY - 28) + "px");
-				}).on("mouseout",function(d,i){
-					tooltip.transition()		
-                			.duration(100)		
-                			.style("opacity", 0.0);	
-				})
-		)
-
-	//open info
-	card.text.push(
-			card.append("text").
-				attr("x",15).
-				attr("y",function(d,i){
-					return 80+20*d.displayedInfo
-				}).
-				attr("id", "openText").
-				html(function(d,i){
-					var keys =Object.keys(d.opens)
-					if(keys==0)
-            if(d.displayedInfo==0)
-              return "• Nothing interesting happened."
-            else
-						  return 
-
-					var text = "• The user explored "+ keys.length + " document" + ((keys.length==1)?"":"s") + "."
-					d.displayedInfo++
-					return text
-				})
-		)
+  card.text = cardText(card)
 
   card.timeline = timelineElement(card, startTime, endTime);
 
@@ -280,6 +159,144 @@ Promise.all([
 	console.log(card)
 
 })
+
+function cardText(card){
+  var element = {}
+
+  element.descriptionText = card.append("text").
+        attr("x",15).
+        attr("y",function(d,i){
+          return 80+20*d.displayedInfo
+        }).
+        attr("id", "descriptionText").
+        html(function(d,i){
+            if(d.descriptions.length == 0)
+              return
+          
+          var text = ""
+          for(var text2 of d.descriptions)
+           text+= text2+"<br> "
+          
+          d.displayedInfo++
+          return text
+        }).
+        call(wrap,485)
+
+  if(false){
+    //search info
+  element.searchText = card.append("text").
+        attr("x",15).
+        attr("y",function(d,i){
+          return 80+20*d.displayedInfo
+        }).
+        attr("id", "searchText").
+        html(function(d,i){
+          var keys =Object.keys(d.searches)
+          if(keys.length==0)
+            return
+          var text = "• The user searched for "
+          for(var i=0; i<(Math.min(3,keys.length)); i++){
+            if(i==(Math.min(3,keys.length)-1) && keys.length!=1)
+              text += "and "
+
+            text += "<tspan style=\"font-weight:bold\">"+keys[i]+"</tspan>"
+
+            if(i!=(Math.min(3,keys.length)-1))
+              text+=", "
+          }
+          d.displayedInfo++
+          text += "."
+          return text
+        })
+
+  //Highlight info
+  element.highlightText = card.append("text").
+        attr("x",15).
+        attr("y",function(d,i){
+          return 80+20*d.displayedInfo
+        }).
+        attr("id", "highlightText").
+        html(function(d,i){
+          var keys =Object.keys(d.highlights)
+          if(keys.length==0)
+            return
+
+          var slicedText = keys[0].slice(0,35)
+          var text = "• The user highlighted " + "<tspan style=\"font-weight:bold;fill:chocolate\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") + "\""+"</tspan>."
+
+          d.displayedInfo++
+
+          return text
+        }).on("mouseover",function(d,i){
+          tooltip.transition()    
+                      .duration(100)    
+                      .style("opacity", 1.0); 
+
+          tooltip.html(SummaryToolTip(Object.keys(d.highlights)[0],"Full Highlight")) 
+                      .style("left", (d3.event.pageX) + "px")   
+                      .style("top", (d3.event.pageY - 28) + "px");
+        }).on("mouseout",function(d,i){
+          tooltip.transition()    
+                      .duration(100)    
+                      .style("opacity", 0.0); 
+        })
+
+  //Note info
+  element.noteText = card.append("text").
+        attr("x",15).
+        attr("y",function(d,i){
+          return 80+20*d.displayedInfo
+        }).
+        attr("id", "noteText").
+        html(function(d,i){
+          var keys =Object.keys(d.notes)
+          if(keys.length==0)
+            return
+
+          var text = "• The user noted "
+          var slicedText = keys[0].slice(0,35)
+          text += "<tspan style=\"font-weight:bold;fill:chocolate\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") +"\""+ "</tspan>."
+
+          d.displayedInfo++
+
+          return text
+        }).on("mouseover",function(d,i){
+          tooltip.transition()    
+                      .duration(100)    
+                      .style("opacity", 1.0); 
+
+          tooltip.html(SummaryToolTip(Object.keys(d.notes)[0],"Full Note")) 
+                      .style("left", (d3.event.pageX) + "px")   
+                      .style("top", (d3.event.pageY - 28) + "px");
+        }).on("mouseout",function(d,i){
+          tooltip.transition()    
+                      .duration(100)    
+                      .style("opacity", 0.0); 
+        })
+
+  //open info
+  element.searchText = card.append("text").
+        attr("x",15).
+        attr("y",function(d,i){
+          return 80+20*d.displayedInfo
+        }).
+        attr("id", "openText").
+        html(function(d,i){
+          var keys =Object.keys(d.opens)
+          if(keys==0)
+            if(d.displayedInfo==0)
+              return "• Nothing interesting happened."
+            else
+              return 
+
+          var text = "• The user explored "+ keys.length + " document" + ((keys.length==1)?"":"s") + "."
+          d.displayedInfo++
+          return text
+        })
+  }
+  
+  return element
+}
 
 
 //Arguments: The svg element to draw the bar on, x location, y location, text label, function to determine size of bar
@@ -661,12 +678,29 @@ function summarize_segment(segment, segmentJSON){
   console.log("New Segment")
   for(var i=0; i<all_interactions.length; i++){
 
+    //if many things were explored, we do not want to find pattern for all of them.
+    if(searches.length >5 || opens.length > 15){
+      descriptions.push("Ther users searched and explored many documents.")
+      break;
+    }else if(searches.length >3 || opens.length > 10){
+      descriptions.push("The user searched and explored several documents.")
+      break;
+    }
+
+
    try{
+    //single search action
+    if(all_interactions.length==1)
+      if(all_interactions[0].InteractionType=="Search")
+        descriptions.push("The user searched for \"" + all_interactions[0].Text+"\".")
+
     if(all_interactions[i].InteractionType=="Search"){
       //Search->open->read pattern
-      if(all_interactions[i+1].InteractionType=="Doc_open"){
-        if(all_interactions[i+2].InteractionType=="Reading"&&(all_interactions[i+1].Text==all_interactions[i+2].Text)){
-          descriptions.push("User searched for \"" + all_interactions[i].Text +"\" then read " + all_interactions[i+1].Text)
+      if(i+2 < all_interactions.length){
+        if(all_interactions[i+1].InteractionType=="Doc_open"){
+          if(all_interactions[i+2].InteractionType=="Reading"&&(all_interactions[i+1].Text==all_interactions[i+2].Text)){
+            descriptions.push("The user searched for \"" + all_interactions[i].Text +"\" then read " + all_interactions[i+1].Text+".")
+          }
         }
       }
 
@@ -684,15 +718,26 @@ function summarize_segment(segment, segmentJSON){
         else
           break
       }
-      if(docCount>1 && finalDoc =="")
-        descriptions.push("User searched for \"" + all_interactions[i].Text +"\" then opened " + docCount +" documents")
+
+      if(docCount==1 && finalDoc=="")
+        descriptions.push("The user searched for \"" + all_interactions[i].Text +"\" then opened " + all_interactions[i+1].Text+".")
+      else if(docCount>1 && finalDoc =="")
+        descriptions.push("The user searched for \"" + all_interactions[i].Text +"\" then opened " + docCount +" documents.")
       else if(docCount>1 && finalDoc !="")
-        descriptions.push("User searched for \"" + all_interactions[i].Text +"\" then opened " + docCount +" documents before reading " + finalDoc)
+        descriptions.push("The user searched for \"" + all_interactions[i].Text +"\" then opened " + docCount +" documents before reading " + finalDoc+".")
 
     }
   }catch{}
      
   }
+
+  if(searches.length==0 && notes.length==0 && highlights.length==0 && (opens.length!=0 || readings_merged.length!=0))
+    descriptions.push("The user focused on reading documents.")
+  else if(notes.length!=0 || highlights.length!=0)
+    descriptions.push("The user found important information during this time.")
+  else if(opens.length > 0)
+    descriptions.push("The user identified some documents of interest.")
+
 
   console.log(descriptions)
 
@@ -718,6 +763,7 @@ function summarize_segment(segment, segmentJSON){
 		local_highlight_ratio: (total_interactions > 0) ? highlights.length/total_interactions:0,
 
     readings:readings_merged,
+    descriptions:descriptions,
 
 		displayedInfo: 0
 	}
