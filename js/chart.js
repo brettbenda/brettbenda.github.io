@@ -52,7 +52,7 @@ Promise.all([
 	console.log(participantSegments)
 
 	//Regroup by segment
-	var participantData = segmentify(participantData)
+	var participantData = segmentify(participantSegments, participantData)
 	console.log(participantData)
 
 	//Summarize segments, get some more stats
@@ -155,6 +155,17 @@ Promise.all([
 	card.total = barElement(card, 155, 250, "Total", "Total", function(d){ return 25*(1.0 - d.interaction_rate) })
 
 	
+  card.selectionBox = card.append("line")
+      .attr("x1",10)
+      .attr("y1",20)
+      .attr("x2",30)
+      .attr("y2",20)
+      .attr("stroke-width",3)
+      .attr("stroke","darkblue")
+      .style("stroke-opacity","0.0")
+      .attr("class", function(d,i){
+         return "selection" + d.pid + "_" +d.number
+      })
 
 	console.log(card)
 
@@ -354,9 +365,9 @@ function barElement(card, x, y, text, symbol, sizefunc){
                 			.duration(100)		
                 			.style("opacity", 1.0);	
 
-                		tooltip.html(BarToolTipText(d,text))	
-                			.style("left", (d3.event.pageX) + "px")		
-                			.style("top", (d3.event.pageY - 28) + "px");		
+        		tooltip.html(BarToolTipText(d,text))	
+        			.style("left", (d3.event.pageX) + "px")		
+        			.style("top", (d3.event.pageY - 28) + "px");		
 					})
 					.on("mouseout",function(d,i){
 						var selectID = "#card" + d.pid+"_"+i
@@ -373,7 +384,10 @@ function barElement(card, x, y, text, symbol, sizefunc){
 						tooltip.transition()		
                 			.duration(100)		
                 			.style("opacity", 0);
-					})
+					}).on("mousemove",function(){
+            tooltip.style("left", (d3.event.pageX) + "px")   
+                        .style("top", (d3.event.pageY - 28) + "px");
+          })
 
 
 	return element
@@ -384,6 +398,13 @@ function barElement(card, x, y, text, symbol, sizefunc){
 function timelineElement(card, startTime, endTime){
   //timeline stuff
     var element = {}
+    var start = 125
+    element.sWidth = 10;
+    element.clickX1 = -1;
+    element.clickX2 = -1;
+    var scale = d3.scaleLinear().domain([startTime,endTime]).range([0,cardWidth-10-start])
+    var scale2 = d3.scaleLinear().domain([start,cardWidth-10]).range([startTime,endTime])
+    var start = 125
     element.timeLineBG = card.append("path").
           attr("d",function(d,i){
             var start = 125
@@ -396,18 +417,17 @@ function timelineElement(card, startTime, endTime){
     element.timeLineBox = card.append("path").
           attr("d",function(d,i){
             var seg = GetSegment(d.number, d.pid, d.dataset)
-            var scale = d3.scaleLinear().domain([startTime,endTime]).range([0,cardWidth-10-125])
-            var start = 125
 
-          return d3.line()([[start+scale(seg.start), 20],[start+scale(seg.end),20]])
+            return d3.line()([[start+scale(seg.start), 20],[start+scale(seg.end),20]])
           }).
+
           attr("stroke","royalblue").
           attr("stroke-width", 20).
           attr('pointer-events', 'visibleStroke')
 
     element.timeLineHitbox = card.append("path").
           attr("d",function(d,i){
-            var start = 125
+            
             return d3.line()([[start, 20],[cardWidth-10,20]])
           }).
           attr("stroke","darkSeaGreen").
@@ -427,6 +447,60 @@ function timelineElement(card, startTime, endTime){
             tooltip.transition()    
                         .duration(100)    
                         .style("opacity", 0.0); 
+          }).on("mousemove",function(d,i){
+            tooltip.style("left", (d3.event.pageX) + "px")   
+                    .style("top", (d3.event.pageY - 28) + "px");
+
+            var select = d3.select(".selection" + d.pid + "_" +d.number)      
+            //snap to mouse when selection and area
+            select.attr("x2", function(d,i){
+              if(element.clickX1 != -1 && element.clickX2==-1){
+                return (event.offsetX+start-40)
+              }else
+                return select.attr("x2")
+            })
+
+          }).on("mousedown",function(d,i){
+            var select = d3.select(".selection" + d.pid + "_" +d.number)
+            //log first click loc
+            if(element.clickX1 == -1){
+              element.clickX1 = event.offsetX+start-40
+              select
+                .attr("x1", element.clickX1 )
+                .attr("x2",element.clickX1)
+                .attr("y1",20)
+                .attr("y2",20)
+                .style("stroke-opacity", "0.5")
+                .style("stroke-width", 5)
+                .style("stroke", "black")
+
+              console.log(event.offsetX+start-40)
+            }
+            //handle second click
+            else if(element.clickX2 == -1){ 
+              element.clickX2 = event.offsetX+start-40
+              select
+                .attr("x2",element.clickX2)
+                //.style("stroke-opacity", "1.0")
+
+              console.log(event.offsetX+start-40)
+
+
+              //swap if x1 < x2
+              if(select.attr("x1")>select.attr("x2")){
+                var temp = select.attr("x2")
+                select.attr("x2",select.attr("x1"))
+                select.attr("x1",temp)
+              }
+              //log selected times
+              console.log(IntToTime(scale2(select.attr("x1"))))
+              console.log(IntToTime(scale2(select.attr("x2"))))
+
+              //reset
+              element.clickX1=-1
+              element.clickX2=-1
+            }
+            
           })
 
     return element;
@@ -436,6 +510,71 @@ function timelineElement(card, startTime, endTime){
 //adds a segment timeline to each card with all interactions presented.
 function segmentTimelineElement(card){ 
   var element = {}
+  element.sWidth = 10;
+  element.clickX1 = -1;
+  element.clickX2 = -1;
+
+  element.segmentSelectionBG = card.append("path").
+                              attr("d", d3.line()([[10,60],[cardWidth-10,60]])).
+                              attr("stroke","lightgrey").
+                              attr("stroke-width", 10)
+                              .on("mousemove",function(d,i){
+                                  tooltip.style("left", (d3.event.pageX) + "px")   
+                                          .style("top", (d3.event.pageY - 28) + "px");
+
+                                  var select = d3.select(".selection" + d.pid + "_" +d.number)      
+                                  //snap to mouse when selection and area
+                                  select.attr("x2", function(d,i){
+                                    if(element.clickX1 != -1 && element.clickX2==-1){
+                                      return (event.offsetX-10)
+                                    }else
+                                      return select.attr("x2")
+                                  })
+
+                                }).on("mousedown",function(d,i){
+                                  var seg = GetSegment(d.number, d.pid, d.dataset)
+                                  var scale = d3.scaleLinear().domain([10,cardWidth-10]).range([seg.start,seg.end])
+                                  var select = d3.select(".selection" + d.pid + "_" +d.number)
+                                  //log first click loc
+                                  if(element.clickX1 == -1){
+
+                                    element.clickX1 = event.offsetX-10
+                                    select
+                                      .attr("x1", element.clickX1 )
+                                      .attr("x2",element.clickX1)
+                                      .attr("y1",45)
+                                      .attr("y2",45)
+                                      .style("stroke-opacity", "0.5")
+                                      .style("stroke-width", 15)
+                                      .style("stroke", "black")
+
+                                    console.log(event.offsetX-10)
+                                  }
+                                  //handle second click
+                                  else if(element.clickX2 == -1){ 
+                                    element.clickX2 = event.offsetX-10
+                                    select
+                                      .attr("x2",element.clickX2)
+                                      //.style("stroke-opacity", "1.0")
+
+                                    console.log(event.offsetX-10)
+
+
+                                    //swap if x1 < x2
+                                    if(select.attr("x1")>select.attr("x2")){
+                                      var temp = select.attr("x2")
+                                      select.attr("x2",select.attr("x1"))
+                                      select.attr("x1",temp)
+                                    }
+                                    //log selected times
+                                    console.log(IntToTime(scale(select.attr("x1"))))
+                                    console.log(IntToTime(scale(select.attr("x2"))))
+
+                                    //reset
+                                    element.clickX1=-1
+                                    element.clickX2=-1
+                                  }
+                                })
 
   element.segmentTimelineBG = card.append("path").
                               attr("d", d3.line()([[10,45],[cardWidth-10,45]])).
@@ -465,7 +604,7 @@ function segmentTimelineElement(card){
 
                                   var arg = "\""+d.number+"\",\""+j+"\""
 
-                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"opacity:0.9; stroke:"+color+";stroke-width:"+stroke+"\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
+                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"opacity:0.9; stroke:"+color+";stroke-width:"+stroke+"\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" onmousemove=\"segTimelineMove()\" pointer-events:visibleStroke></line>"
                                 }
 
                                 //then draw interactions
@@ -489,10 +628,11 @@ function segmentTimelineElement(card){
 
                                   var arg = "\""+d.number+"\",\""+j+"\""
 
-                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"stroke:"+color+";stroke-width:"+stroke+"\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" pointer-events:visibleStroke></line>"
+                                  html += "<line x1="+x1+" y1="+y1+" x2="+x2+" y2="+y2+ " style=\"stroke:"+color+";stroke-width:"+stroke+"\" onmouseover=segTimelineOver("+arg+") onmouseout=\"segTimelineOut()\" onmousemove=\"segTimelineMove()\" pointer-events:visibleStroke></line>"
                                 }
                                 return html
                               })
+
   return element
   }
 
@@ -588,26 +728,47 @@ function segTimelineOut(){
   .style("opacity", 0); 
 }
 
+function segTimelineMove(){
+  tooltip.style("left", (event.pageX) + "px")   
+         .style("top", (event.pageY - 28) + "px");
+}
+
 
 //Argument: a participant interaction json object
 //Result: 	an array of interaction json objects regrouped by segment
-function segmentify(interactions){
+function segmentify(segments, interactions){
 	var segmented_data = []
 	var current_segment = []
 	var segment_id = 0
 
-	//collect all interactions with same segment
-	for (var item of interactions){
-		if(item['segment'] == segment_id){
-			current_segment.push(item)
-		}else if(item['segment']!=null){
-			segmented_data.push(current_segment)
-			current_segment = [];
-			segment_id++;
-		}	
-	}
+	// //collect all interactions with same segment
+	// for (var item of interactions){
+	// 	if(item['segment'] == segment_id){
+	// 		current_segment.push(item)
+	// 	}else if(item['segment']!=null){
+	// 		segmented_data.push(current_segment)
+	// 		current_segment = [];
+	// 		segment_id++;
+	// 	}	
+	// }
+
+  var currSeg = 0
+  for(var item of interactions){
+    console.log(currSeg)
+      if(item.time/10 < segments[currSeg].end){
+        current_segment.push(item)
+      }else{
+        segmented_data.push(current_segment)
+        current_segment=[]
+        currSeg++
+      }
+
+      if(currSeg==segments.length)
+        break;
+  }
+  
 	//push whatever was in the last segment
-	segmented_data.push(current_segment)
+	//segmented_data.push(current_segment)
 	return segmented_data
 }
 
