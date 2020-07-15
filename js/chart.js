@@ -1,16 +1,16 @@
 var userCounts = [8, 8, 8]
+var json, orignaljson
 var docs;
 var logs;
 var segments;
 var participantData
 var participantSegments
-var participantData
 var data = []
 var tooltip
 var card
 var cardWidth = 510
-var cardHeight = 320
-
+var cardHeight = 300
+var detailed = true
 var colors = {
   "Doc_open":"crimson",
   "Documents Opened":"crimson",
@@ -21,7 +21,8 @@ var colors = {
   "Highlight":"#ab8300",
   "Highlights":"#ab8300",
   "Reading":"pink",
-  "barBG": "lightgrey"
+  "barBG": "lightgrey",
+  "Total": "darkslategrey"
 }
 
 
@@ -41,10 +42,12 @@ Promise.all([
 
 Promise.all([
 	d3.json("/js/test.json")
-]).then(function(json){
+]).then(function(json2){
 	//unwrap json
-	logs = json[0].interactionLogs
-	segments = json[0].segments
+	orignaljson = Object.assign({},json2)
+	json = json2
+	logs = json2[0].interactionLogs
+	segments = json2[0].segments
 
 	processData();
 
@@ -63,15 +66,63 @@ Promise.all([
 
 })
 
+function loadData(){
+	json = Object.assign({},orignaljson)
+	logs = json[0].interactionLogs
+	segments = json[0].segments
+	participantData = []
+	participantSegments = []
+	data=[]
+
+	processData();
+
+	var startTime = 0;
+	var endTime = participantSegments[participantSegments.length-1].end
+	console.log(endTime)
+
+	drawCards(startTime, endTime)
+}
+
+function saveData(){
+	var obj ={}
+	obj.segments=segments
+	obj.interactions = logs
+
+	//Convert JSON Array to string.
+    var json2 = JSON.stringify(obj);
+
+    //Convert JSON string to BLOB.
+    json2 = [json2];
+    var blob1 = new Blob(json2, { type: "text/plain;charset=utf-8" });
+
+    //Check the Browser.
+    var isIE = false || !!document.documentMode;
+    if (isIE) {
+        window.navigator.msSaveBlob(blob1, "data.json");
+    } else {
+        var url = window.URL || window.webkitURL;
+        link = url.createObjectURL(blob1);
+        var a = document.createElement("a");
+        a.download = "data.json";
+        a.href = link;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }}
+
 function processData(){
 	summary = []
 	data=[]
 	//Get P1 interactions
+	var form = document.getElementById("controlForm")
+	DS = form.elements[0].value
+	P = form.elements[1].value
+	detailed = form.elements[2].checked
 	participantData = logs[DS-1][P-1] 
 
 	//Get P1 segments
 	participantSegments = GetSegments(DS,P)
-
+	console.log(participantSegments)
 	//Regroup by segment
 	participantData = segmentify(participantSegments, participantData)
 
@@ -111,7 +162,7 @@ function drawCards(startTime, endTime){
 				data(data).
 				enter().
 				append("svg").
-				attr("height", cardHeight).
+				attr("height", function(d,i){return detailed?cardHeight:cardHeight-80}).
 				attr("width", cardWidth).
 				attr("id",function(d){
 					return "card" + d.pid + "_" +d.number
@@ -141,7 +192,7 @@ function drawCards(startTime, endTime){
 				attr("x",5).
 				attr("y",5).
 				attr("rx", 5).
-				attr("height", cardHeight-10).
+				attr("height", function(d,i){return detailed?cardHeight-10:cardHeight-80-10}).
 				attr("width",cardWidth-10).
 				style("fill","white").
 				style("stroke", "navy").
@@ -159,23 +210,13 @@ function drawCards(startTime, endTime){
 				})
 
   card.text = cardText(card)
-
   card.timeline = timelineElement(card, startTime, endTime);
+  if(detailed){
+  	
 
-  card.segmentTimeline = segmentTimelineElement(card);
+    card.segmentTimeline = segmentTimelineElement(card);  	
 
-	//interaction bars
-	card.search = barElement(card, 15, 280, "Searches", "🔎", function(d){ return 25*(1.0 - d.local_search_ratio) })
-
-	card.highlight = barElement(card, 50, 280, "Highlights", "📑", function(d){ return 25*(1.0 - d.local_highlight_ratio) })
-
-	card.notes = barElement(card, 85, 280, "Notes", "✏", function(d){ return 25*(1.0 - d.local_note_ratio) })
-
-	card.open = barElement(card, 120, 280, "Documents Opened", "📖", function(d){ return 25*(1.0 - d.local_open_ratio) })
-
-	card.total = barElement(card, 155, 280, "Total", "Total", function(d){ return 25*(1.0 - d.interaction_rate) })
-
-  card.divider = card.append("line")
+  	card.divider = card.append("line")
   					.attr("x1",10)
 	      			.attr("y1",100)
 	      			.attr("x2",cardWidth-10)
@@ -183,15 +224,15 @@ function drawCards(startTime, endTime){
 	      			.attr("stroke-width",1)
 	      			.attr("stroke","grey")
 
-	      			card.divider2 = card.append("line")
+	  card.divider2 = card.append("line")
   					.attr("x1",10)
 	      			.attr("y1",33)
 	      			.attr("x2",cardWidth-10)
 	      			.attr("y2",33)
 	      			.attr("stroke-width",1)
 	      			.attr("stroke","grey")
-	
-  card.selectionBox = card.append("line")
+
+	  card.selectionBox = card.append("line")
       .attr("x1",-1)
       .attr("y1",20)
       .attr("x2",-1)
@@ -365,20 +406,31 @@ function drawCards(startTime, endTime){
 				console.log(endTime)
 				drawCards(startTime, endTime)
 			})
-   		})
+   		})     			
+  }
+  	var barY = detailed?280:200
 
-   
+	//interaction bars
+	card.search = barElement(card, 15, barY, "Searches", "🔎", function(d){ return 25*(d.local_search_ratio) })
+
+	card.highlight = barElement(card, 50, barY, "Highlights", "📑", function(d){ return 25*(d.local_highlight_ratio) })
+
+	card.notes = barElement(card, 85, barY, "Notes", "✏", function(d){ return 25*(d.local_note_ratio) })
+
+	card.open = barElement(card, 120, barY, "Documents Opened", "📖", function(d){ return 25*(d.local_open_ratio) })
+
+	card.total = barElement(card, 155, barY, "Total", "Total", function(d){ return 25*(d.interaction_rate) })
 
 
 }
 
 function cardText(card){
   var element = {}
-  var bulletStartY = 245
+  var bulletStartY = detailed?245:170
   element.descriptionText = card.append("text").
         attr("x",15).
         attr("y",function(d,i){
-          return 120+20*d.displayedInfo
+          return detailed?120:50
         }).
         attr("id", "descriptionText").
         html(function(d,i){
@@ -431,7 +483,7 @@ function cardText(card){
 
           var text = "• The user noted "
           var slicedText = keys[0].slice(0,35)
-          text += "<tspan style=\"font-weight:bold;fill:chocolate\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") +"\""+ "</tspan>."
+          text += "<tspan style=\"font-weight:bold;fill:"+colors["Notes"]+"\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") +"\""+ "</tspan>."
 
           d.displayedInfo++
 
@@ -465,7 +517,7 @@ function cardText(card){
             return
 
           var slicedText = keys[0].slice(0,35)
-          var text = "• The user highlighted " + "<tspan style=\"font-weight:bold;fill:chocolate\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") + "\""+"</tspan>."
+          var text = "• The user highlighted " + "<tspan style=\"font-weight:bold;fill:"+colors["Highlight"]+"\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") + "\""+"</tspan>."
 
           d.displayedInfo++
 
@@ -500,7 +552,7 @@ function cardText(card){
             if(i==(Math.min(3,keys.length)-1) && keys.length!=1)
               text += "and "
 
-            text += "<tspan style=\"font-weight:bold\">"+keys[i]+"</tspan>"
+            text += "<tspan style=\"font-weight:bold;fill:"+colors["Search"]+"\">" +keys[i]+"</tspan>"
 
             if(i!=(Math.min(3,keys.length)-1))
               text+=", "
@@ -521,21 +573,24 @@ function barElement(card, x, y, text, symbol, sizefunc){
 	unselectBar = "royalblue"
 	unselectBG = "lightblue"
 
-	element.bar = card.append("rect").
-					attr("x",x).
-					attr("y",y).
-					attr("height", 25).
-					attr("width",25).
+	element.bar = card.append("line").
+					attr("x1",x).
+					attr("y1",y+5).
+          attr("x2",x+25).
+          attr("y2",y+5).
+					attr("stroke-width",5).
+          attr("stroke-opacity","0.5").
 					attr("class", "barBar"+text.replace(/\s+/g, '')).
-					style("fill", colors[text])
+					style("stroke", colors[text])
 
-	element.bg = card.append("rect").
-					attr("x",x).
-					attr("y",y).
-					attr("height", sizefunc).
-					attr("width",25).
+	element.bg = card.append("line").
+					attr("x1",x).
+					attr("y1",y+5).
+					attr("x2",function(d,i){return x+sizefunc(d)}).
+          attr("y2",y+5).
+					attr("stroke-width",5).
 					attr("class", "barBG"+text.replace(/\s+/g, '')).
-					style("fill", colors["barBG"])
+					style("stroke", colors[text])
 	
   element.text = card.append("text").
             attr("x",x).
@@ -549,7 +604,7 @@ function barElement(card, x, y, text, symbol, sizefunc){
 	element.selectionArea = card.append("rect").
 					attr("x",x).
 					attr("y",y-25).
-					attr("height", 25+25).
+					attr("height", 25+10).
 					attr("width",25).
 					attr("class", "selectionArea"+text.replace(/\s+/g, '')).
 					style("opacity", 0)
@@ -774,7 +829,6 @@ function segmentTimelineElement(card){
                                   //only do for reading
                                   if(int.InteractionType!="Reading")
                                     continue
-                                	console.log(int)
 
                                   var color, x1,x2,y1,y2,stroke
                                   color = colors["Reading"]
@@ -927,10 +981,13 @@ function segmentify(segments, interactions){
 
   for(var seg of segments){
     segmented_data.push([])
+    seg.sid = segment_id
+    segment_id++
   }
   for(var item of interactions){
   	for(var seg of segments){
   	  if(item.time < seg.end*10 && item.time>seg.start*10){
+  	  	console.log(seg.sid)
         segmented_data[seg.sid].push(item)
       }
   	}
@@ -978,7 +1035,6 @@ function summarize_segment(segment){
         all_interactions.push(interaction)
 				break
       case "Reading":
-        console.log(interaction)
         readings.push(interaction)
         break
 		}

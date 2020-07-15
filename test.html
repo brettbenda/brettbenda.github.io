@@ -49,9 +49,20 @@
 
   <nav class="navbar navbar-expand bg-blue navbar-dark" id="header"></nav>
 
+
+<div id="controls" style="position: fixed; top:0; width:auto; background-color: white; border:3px solid navy; z-index:1;">
+          <form id="controlForm">
+            Dataset: <input type="text" name="pid" value=1><br>
+            PID: <input type="text" name="dataset" value=1><br>
+            Detailed View: <input type="checkbox" name="detailed" checked onclick="loadData()"><br>
+          </form>
+          <button onclick="loadData()">Load Data</button><br>
+          <button onclick="saveData()">Save Data</button><br>
+        </div>
   <div class="container-fluid bg-light">
     <div class="row row-space my-auto">
-      <div class="col-sm-1"></div>
+      <div class="col-sm-1">
+      </div>
       <div class="col-sm-10">
           <div id="text">
 
