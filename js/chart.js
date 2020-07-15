@@ -9,7 +9,7 @@ var data = []
 var tooltip
 var card
 var cardWidth = 510
-var cardHeight = 290
+var cardHeight = 320
 
 var colors = {
   "Doc_open":"crimson",
@@ -165,15 +165,15 @@ function drawCards(startTime, endTime){
   card.segmentTimeline = segmentTimelineElement(card);
 
 	//interaction bars
-	card.search = barElement(card, 15, 250, "Searches", "🔎", function(d){ return 25*(1.0 - d.local_search_ratio) })
+	card.search = barElement(card, 15, 280, "Searches", "🔎", function(d){ return 25*(1.0 - d.local_search_ratio) })
 
-	card.highlight = barElement(card, 50, 250, "Highlights", "📑", function(d){ return 25*(1.0 - d.local_highlight_ratio) })
+	card.highlight = barElement(card, 50, 280, "Highlights", "📑", function(d){ return 25*(1.0 - d.local_highlight_ratio) })
 
-	card.notes = barElement(card, 85, 250, "Notes", "✏", function(d){ return 25*(1.0 - d.local_note_ratio) })
+	card.notes = barElement(card, 85, 280, "Notes", "✏", function(d){ return 25*(1.0 - d.local_note_ratio) })
 
-	card.open = barElement(card, 120, 250, "Documents Opened", "📖", function(d){ return 25*(1.0 - d.local_open_ratio) })
+	card.open = barElement(card, 120, 280, "Documents Opened", "📖", function(d){ return 25*(1.0 - d.local_open_ratio) })
 
-	card.total = barElement(card, 155, 250, "Total", "Total", function(d){ return 25*(1.0 - d.interaction_rate) })
+	card.total = barElement(card, 155, 280, "Total", "Total", function(d){ return 25*(1.0 - d.interaction_rate) })
 
   card.divider = card.append("line")
   					.attr("x1",10)
@@ -192,9 +192,9 @@ function drawCards(startTime, endTime){
 	      			.attr("stroke","grey")
 	
   card.selectionBox = card.append("line")
-      .attr("x1",10)
+      .attr("x1",-1)
       .attr("y1",20)
-      .attr("x2",30)
+      .attr("x2",-1)
       .attr("y2",20)
       .attr("stroke-width",3)
       .attr("stroke","darkblue")
@@ -209,7 +209,7 @@ function drawCards(startTime, endTime){
 	   			var seg = GetSegment(d.number, d.pid, d.dataset)
 	   			var seg2 = GetSegment(d.number-1, d.pid, d.dataset)
 
-	            var scale = d3.scaleLinear().domain([10,cardWidth-10]).range([seg.start,seg.end])
+	            var scale = d3.scaleLinear().domain([40,cardWidth-40]).range([seg.start,seg.end])
 	            var select = d3.select(".selection" + d.pid + "_" +d.number)
 
 
@@ -246,44 +246,66 @@ function drawCards(startTime, endTime){
 	   		})
     card.button = textButton(card, 190,70, "Create from Selection", "lightblue", function(d,i){
    			var seg = GetSegment(d.number, d.pid, d.dataset)
-            var scale = d3.scaleLinear().domain([10,cardWidth-10]).range([seg.start,seg.end])
+            var scale = d3.scaleLinear().domain([40,cardWidth-40]).range([seg.start,seg.end])
             var select = d3.select(".selection" + d.pid + "_" +d.number)
+
+            var selectStart = Math.floor(scale(select.attr("x1")))
+            var selectEnd = Math.floor(scale(select.attr("x2")))
+
+            console.log(select.attr("x1"))
+            if(select.attr("x1") <0|| select.attr("x2") <0){
+            	console.log("no selection")
+            	return
+            }
+
+            var first = true
+            var third = true
+            if(selectStart-seg.start<5){
+            	first = false
+            	selectStart = seg.start
+            	console.log("short start")
+            }
+
+            if(seg.end-selectEnd<5){
+            	third = false
+            	selectEnd = seg.end
+            	console.log("short end")
+            }
 
 
             console.log(segments)
 
             segments.splice(segments.indexOf(GetSegment(i, P,DS)),1)
 
-            
-            console.log("left("+ seg.start+","+scale(select.attr("x1"))+")")
             var newSeg = {
             	start: seg.start,
-            	end: Math.floor(scale(select.attr("x1"))),
-            	length: Math.floor(scale(select.attr("x1")))-seg.start,
+            	end: selectStart,
+            	length: selectStart-seg.start,
             	dataset: DS,	
             	pid:P
             }
-            segments.push(newSeg)
+            if(first)
+            	segments.push(newSeg)
 
-            console.log("middle("+ scale(select.attr("x1"))+","+scale(select.attr("x2"))+")")
             var newSeg = {
-            	start: Math.floor(scale(select.attr("x1"))),
-            	end: Math.floor(scale(select.attr("x2"))),
-            	length: Math.floor(scale(select.attr("x2")))-Math.floor(scale(select.attr("x1"))),
+            	start: selectStart,
+            	end: selectEnd,
+            	length: selectEnd-selectStart,
             	dataset: DS,
             	pid:P
             }
             segments.push(newSeg)
             
-            console.log("right("+ scale(select.attr("x2"))+","+seg.end+")")
+
             var newSeg = {
-            	start: Math.floor(scale(select.attr("x2"))),
+            	start: selectEnd,
             	end: seg.end,
-            	length: seg.end-Math.floor(scale(select.attr("x2"))),
+            	length: seg.end-selectEnd,
             	dataset: DS,
             	pid:P
             }
-            segments.push(newSeg)
+            if(third)
+            	segments.push(newSeg)
 			
 			segments.sort(function(a,b){return a.dataset-b.dataset || a.pid-b.pid || a.start-b.start})
 			for(var j=0; j<segments.length;j++)
@@ -299,6 +321,10 @@ function drawCards(startTime, endTime){
             
             console.log(IntToTime(scale(select.attr("x1"))))
             console.log(IntToTime(scale(select.attr("x2"))))
+
+            select.attr("x1", -1)
+            select.attr("x2", -1)
+
    		})
 
     card.button2 = textButton(card, 475,40, "➡", "royalblue", function(d,i){
@@ -348,7 +374,7 @@ function drawCards(startTime, endTime){
 
 function cardText(card){
   var element = {}
-  var bulletStartY = 215
+  var bulletStartY = 245
   element.descriptionText = card.append("text").
         attr("x",15).
         attr("y",function(d,i){
@@ -693,32 +719,34 @@ function segmentTimelineElement(card){
 
                                     element.clickX1 = event.offsetX+20
                                     select
-                                      .attr("x1", element.clickX1 )
-                                      .attr("x2",element.clickX1)
+                                      .attr("x1", element.clickX1)
+                                      .attr("x2", element.clickX1)
                                       .attr("y1",45)
                                       .attr("y2",45)
                                       .style("stroke-opacity", "0.5")
                                       .style("stroke-width", 15)
                                       .style("stroke", "black")
 
-                                    console.log(event.offsetX-10)
+                                    console.log(element.clickX1)
                                   }
                                   //handle second click
                                   else if(element.clickX2 == -1){ 
                                     element.clickX2 = event.offsetX+20
-                                    select
-                                      .attr("x2",element.clickX2)
+                                    select.attr("x2",element.clickX2)
                                       //.style("stroke-opacity", "1.0")
 
-                                    console.log(event.offsetX-10)
+                                    console.log(element.clickX2)
 
 
                                     //swap if x1 < x2
-                                    if(select.attr("x1")>select.attr("x2")){
+                                    if(Number(select.attr("x1"))>Number(select.attr("x2"))){
                                       var temp = select.attr("x2")
                                       select.attr("x2",select.attr("x1"))
                                       select.attr("x1",temp)
                                     }
+
+                                    console.log(select.attr("x1"))
+                                    console.log(select.attr("x2"))
                                     //log selected times
                                     console.log(IntToTime(scale(select.attr("x1"))))
                                     console.log(IntToTime(scale(select.attr("x2"))))
@@ -746,6 +774,7 @@ function segmentTimelineElement(card){
                                   //only do for reading
                                   if(int.InteractionType!="Reading")
                                     continue
+                                	console.log(int)
 
                                   var color, x1,x2,y1,y2,stroke
                                   color = colors["Reading"]
@@ -949,6 +978,7 @@ function summarize_segment(segment){
         all_interactions.push(interaction)
 				break
       case "Reading":
+        console.log(interaction)
         readings.push(interaction)
         break
 		}
@@ -973,6 +1003,12 @@ function summarize_segment(segment){
       }
       
     }
+    if(i==readings.length-1){
+    	//push whatever was leftover
+    	readings_merged.push(int)
+    	all_interactions.push(int)
+    }
+    
   }
 
   all_interactions.sort(function(a,b){return a.time-b.time})
