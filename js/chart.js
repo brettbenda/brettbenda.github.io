@@ -261,7 +261,17 @@ function drawCards(startTime, endTime){
       }
       segments.push(newSeg)
       reload()
-   })
+    })
+
+    card.button3.buttonHB.on("mouseover",function(){
+      tooltip.transition().
+        duration(100).
+        style("opacity", 1.0);  
+
+      tooltip.html("<p class=\"tooltipP\">Merge this segment with the <b>previous</b> segment.</p>").
+        style("left", (d3.event.pageX) + "px").
+        style("top", (d3.event.pageY - 28) + "px");   
+    })  
 
     card.button = textButton(card, 190,70, "Create from Selection", "lightblue", function(d,i){
       var seg = GetSegment(d.number, d.pid, d.dataset)
@@ -277,13 +287,13 @@ function drawCards(startTime, endTime){
 
       var first = true
       var third = true
-      if(selectStart-seg.start<5){
+      if(selectStart-seg.start<5 || select.attr("x1")<70){
         first = false
         selectStart = seg.start
         console.log("short start")
       }
 
-      if(seg.end-selectEnd<5){
+      if(seg.end-selectEnd<5 || select.attr("x2")>cardWidth-60){
         third = false
         selectEnd = seg.end
         console.log("short end")
@@ -324,7 +334,17 @@ function drawCards(startTime, endTime){
       select.attr("x1", -1)
       select.attr("x2", -1)
 
-   })
+    })
+
+    card.button.buttonHB.on("mouseover",function(){
+      tooltip.transition().
+        duration(100).
+        style("opacity", 1.0);  
+
+      tooltip.html("<p class=\"tooltipP\">Create a new segment from the current selection.<br>The remaining unselected time will also be made into their own segments.</p>").
+        style("left", (d3.event.pageX) + "px").
+        style("top", (d3.event.pageY - 28) + "px");   
+    })
 
     card.button2 = textButton(card, 475,40, "➡", "royalblue", function(d,i){
       if(i==participantSegments.length-1)
@@ -348,7 +368,16 @@ function drawCards(startTime, endTime){
       segments.push(newSeg)
 
       reload()
-   })     			
+    })  
+    card.button2.buttonHB.on("mouseover",function(){
+      tooltip.transition().
+        duration(100).
+        style("opacity", 1.0);  
+
+      tooltip.html("<p class=\"tooltipP\">Merge this segment with the <b>next</b> segment.</p>").
+        style("left", (d3.event.pageX) + "px").
+        style("top", (d3.event.pageY - 28) + "px");   
+    })   			
   }
 
   var barY = detailed?280:200
@@ -592,7 +621,7 @@ function barElement(card, x, y, text, symbol, sizefunc){
         .style("top", (d3.event.pageY - 28) + "px");
   })
 
-return element
+  return element
 
 }
 
@@ -620,6 +649,18 @@ function textButton(card, x, y, text, color, func){
     .attr("height",25)
     .attr("opacity",0)
     .on("mousedown", func)
+    .on("mouseout",function(d,i){
+
+      tooltip.transition().
+        duration(100).
+        style("opacity", 0);
+    }).
+    on("mousemove",function(){
+      tooltip.style("left", (d3.event.pageX) + "px")   
+        .style("top", (d3.event.pageY - 28) + "px");
+  })
+
+    return element
 }
 
 //draws the timeline element on the card
@@ -684,7 +725,6 @@ function timelineElement(card, startTime, endTime){
   return element;
 } 
 
-
 //adds a segment timeline to each card with all interactions presented.
 function segmentTimelineElement(card){ 
   var element = {}
@@ -693,55 +733,55 @@ function segmentTimelineElement(card){
   element.clickX2 = -1;
 
   element.segmentSelectionBG = card.append("path").
-  attr("d", d3.line()([[40,60],[cardWidth-40,60]])).
-  attr("stroke","lightgrey").
-  attr("stroke-width", 10)
-  .on("mousemove",function(d,i){
-    tooltip.style("left", (d3.event.pageX) + "px").
-    style("top", (d3.event.pageY - 28) + "px");
+    attr("d", d3.line()([[40,60],[cardWidth-40,60]])).
+    attr("stroke","lightgrey").
+    attr("stroke-width", 10)
+    .on("mousemove",function(d,i){
+      tooltip.style("left", (d3.event.pageX) + "px").
+      style("top", (d3.event.pageY - 28) + "px");
 
-    var select = d3.select(".selection" + d.pid + "_" +d.number)      
-    //snap to mouse when selection and area
-    select.attr("x2", function(d,i){
-      if(element.clickX1 != -1 && element.clickX2==-1){
-        return (event.offsetX+20)
-      }else
-        return select.attr("x2")
-      })
-  }).
-  on("mousedown",function(d,i){
-    var seg = GetSegment(d.number, d.pid, d.dataset)
-    var scale = d3.scaleLinear().domain([40,cardWidth-40]).range([seg.start,seg.end])
-    var select = d3.select(".selection" + d.pid + "_" +d.number)
-    //log first click loc
-    if(element.clickX1 == -1){
-      element.clickX1 = event.offsetX+20
-      select
-      .attr("x1", element.clickX1)
-      .attr("x2", element.clickX1)
-      .attr("y1",45)
-      .attr("y2",45)
-      .style("stroke-opacity", "0.5")
-      .style("stroke-width", 15)
-      .style("stroke", "black")
-    }
-    //handle second click
-    else if(element.clickX2 == -1){ 
-      element.clickX2 = event.offsetX+20
-      select.attr("x2",element.clickX2)
-
-      //swap if x1 < x2
-      if(Number(select.attr("x1"))>Number(select.attr("x2"))){
-        var temp = select.attr("x2")
-        select.attr("x2",select.attr("x1"))
-        select.attr("x1",temp)
+      var select = d3.select(".selection" + d.pid + "_" +d.number)      
+      //snap to mouse when selection and area
+      select.attr("x2", function(d,i){
+        if(element.clickX1 != -1 && element.clickX2==-1){
+          return (event.offsetX+20)
+        }else
+          return select.attr("x2")
+        })
+    }).
+    on("mousedown",function(d,i){
+      var seg = GetSegment(d.number, d.pid, d.dataset)
+      var scale = d3.scaleLinear().domain([40,cardWidth-40]).range([seg.start,seg.end])
+      var select = d3.select(".selection" + d.pid + "_" +d.number)
+      //log first click loc
+      if(element.clickX1 == -1){
+        element.clickX1 = event.offsetX+20
+        select
+        .attr("x1", element.clickX1)
+        .attr("x2", element.clickX1)
+        .attr("y1",45)
+        .attr("y2",45)
+        .style("stroke-opacity", "0.5")
+        .style("stroke-width", 15)
+        .style("stroke", "black")
       }
+      //handle second click
+      else if(element.clickX2 == -1){ 
+        element.clickX2 = event.offsetX+20
+        select.attr("x2",element.clickX2)
 
-      //reset
-      element.clickX1=-1
-      element.clickX2=-1
-    }
-    })
+        //swap if x1 < x2
+        if(Number(select.attr("x1"))>Number(select.attr("x2"))){
+          var temp = select.attr("x2")
+          select.attr("x2",select.attr("x1"))
+          select.attr("x1",temp)
+        }
+
+        //reset
+        element.clickX1=-1
+        element.clickX2=-1
+      }
+      })
 
   element.segmentTimelineBG = card.append("path").
     attr("d", d3.line()([[40,45],[cardWidth-40,45]])).
@@ -802,7 +842,6 @@ function segmentTimelineElement(card){
 
   return element
   }
-
 
 //get html for action bar tooltips
 function BarToolTipText(d, type){
@@ -920,6 +959,13 @@ function segmentify(segments, interactions){
       if(item.time < seg.end*10 && item.time>seg.start*10){
         console.log(seg.sid)
         segmented_data[seg.sid].push(item)
+      }else if(item.type=="Reading"){
+        //include reading if the end is also in the segment
+        var endTime = item.time+item.duration
+        if(endTime < seg.end*10 && endTime>seg.start*10){
+          console.log(seg.sid)
+          segmented_data[seg.sid].push(item)
+        }
       }
     }
   }
@@ -1004,7 +1050,7 @@ function summarize_segment(segment){
   for(var i=0; i<all_interactions.length; i++){
     //if many things were explored, we do not want to find pattern for all of them.
     if(searches.length >5 || opens.length > 15){
-      descriptions.push("Ther users searched and explored many documents.")
+      descriptions.push("The users searched and explored many documents.")
       break;
     }else if(searches.length >3 || opens.length > 10){
       descriptions.push("The user searched and explored several documents.")
@@ -1136,41 +1182,6 @@ function count(arr){
 	return counts;
 }
 
-//Magic function found on stackoverflow for wrapping text
-function wrap(text, width) {
-  text.each(function () {
-    var text = d3.select(this),
-    words = text.text().split(/\s+/).reverse(),
-    word,
-    line = [],
-    lineNumber = 0,
-            lineHeight = 1.1, // ems
-            x = text.attr("x"),
-            y = text.attr("y"),
-            id = text.attr("id"),
-            dy = 0, //parseFloat(text.attr("dy")),
-            tspan = text.text(null)
-            .append("tspan")
-            .attr("x", x)
-            .attr("y", y)
-            .attr("dy", dy + "em");
-            while (word = words.pop()) {
-              line.push(word);
-              tspan.text(line.join(" "));
-              if (tspan.node().getComputedTextLength() > width) {
-                line.pop();
-                tspan.text(line.join(" "));
-                line = [word];
-                tspan = text.append("tspan")
-                .attr("x", x)
-                .attr("y", y)
-                .attr("dy", ++lineNumber * lineHeight + dy + "em")
-                .text(word);
-              }
-            }
-          });
-}
-
 //gets counts of interaction types in segment
 function TextToValue(d, type){
 	var data
@@ -1247,5 +1258,63 @@ function GetInteraction(segmentID, interactionNum){
     if(seg.number==segmentID){
       return seg.all_interactions[interactionNum]
     }
+  }
+}
+
+//Magic function found on stackoverflow for wrapping text
+function wrap(text, width) {
+  text.each(function () {
+    var text = d3.select(this),
+    words = text.text().split(/\s+/).reverse(),
+    word,
+    line = [],
+    lineNumber = 0,
+            lineHeight = 1.1, // ems
+            x = text.attr("x"),
+            y = text.attr("y"),
+            id = text.attr("id"),
+            dy = 0, //parseFloat(text.attr("dy")),
+            tspan = text.text(null)
+            .append("tspan")
+            .attr("x", x)
+            .attr("y", y)
+            .attr("dy", dy + "em");
+            while (word = words.pop()) {
+              line.push(word);
+              tspan.text(line.join(" "));
+              if (tspan.node().getComputedTextLength() > width) {
+                line.pop();
+                tspan.text(line.join(" "));
+                line = [word];
+                tspan = text.append("tspan")
+                .attr("x", x)
+                .attr("y", y)
+                .attr("dy", ++lineNumber * lineHeight + dy + "em")
+                .text(word);
+              }
+            }
+          });
+}
+
+function saveSVG(svgEl, name) {
+    svgEl.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    var svgData = svgEl.outerHTML;
+    var preface = '<?xml version="1.0" standalone="no"?>\r\n';
+    var svgBlob = new Blob([preface, svgData], {type:"image/svg+xml;charset=utf-8"});
+    var svgUrl = URL.createObjectURL(svgBlob);
+    var downloadLink = document.createElement("a");
+    downloadLink.href = svgUrl;
+    downloadLink.download = name;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+
+function saveSVGS(){
+  var svgs = d3.selectAll("svg")
+  console.log(svgs._groups[0])
+  for(var i=0;i<svgs._groups[0].length;i++){
+    var name = "dataset"+DS+"-pid"+P+"-segment"+(i+1)+"+.svg"
+    saveSVG(svgs._groups[0][i], name)
   }
 }

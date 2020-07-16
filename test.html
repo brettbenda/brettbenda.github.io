@@ -53,11 +53,11 @@
 <div id="controls" style="position: fixed; top:0; width:auto; background-color: white; border:3px solid navy; z-index:1;">
           <form id="controlForm">
             Dataset:<br> 
-            1<input type="radio" name="dataset" value=1 onclick="loadData()"><br>
-            2<input type="radio" name="dataset" value=2 onclick="loadData()"><br>
+            1<input type="radio" name="dataset" value=1 checked onclick="loadData()">
+            2<input type="radio" name="dataset" value=2 onclick="loadData()">
             3<input type="radio" name="dataset" value=3 onclick="loadData()"><br>
             PID:<br>
-            1<input type="radio" name="pid" value=1 onclick="loadData()">
+            1<input type="radio" name="pid" value=1 checked onclick="loadData()">
             2<input type="radio" name="pid" value=2 onclick="loadData()">
             3<input type="radio" name="pid" value=3 onclick="loadData()"><br>
             4<input type="radio" name="pid" value=4 onclick="loadData()">
@@ -65,10 +65,11 @@
             6<input type="radio" name="pid" value=6 onclick="loadData()"><br>
             7<input type="radio" name="pid" value=7 onclick="loadData()">
             8<input type="radio" name="pid" value=8 onclick="loadData()"><br>
-            Detailed View: <input type="checkbox" name="detailed" checked onclick="loadData()"><br>
+            Detailed View: <input type="checkbox" name="detailed" onclick="loadData()"><br>
           </form>
-          <button onclick="loadData()">Load Data</button><br>
-          <button onclick="saveData()">Save Data</button><br>
+          <!-- <button onclick="loadData()">Load Data</button><br> -->
+          <button onclick="saveData()">Save Data JSON</button><br>
+          <button onclick="saveSVGS()">Save SVGS</button><br>
         </div>
   <div class="container-fluid bg-light">
     <div class="row row-space my-auto">
@@ -88,11 +89,13 @@
             Key information about searching, note taking, highlighting, and document opening is included. Bars showing the relative frequency of each action are shown for each segment. A "Total" activity bar shows how much of the total activity among all segments occurs in the individual segment.</p>
 
             <h3>Zoom/Filter</h3>
-            <p> Clicking and dragging on the light grey bar below the segment timeline allows selection of a sub-segment. Clicking the "Create from Selection" button will create up to three new segments (data before the selected time, the selected time, data after the selected time). Arrow buttons on either side of the timeline will adjoin the segment with the previous or next segment</p>
+            <p> A control panel is present to load different participant data and toggle between a detailed and simple view of each summary. The detailed view shows the timeline of actions, as well as allows users to edit (merge/separate) segments. The control panel also allows users to save the modified JSON with their modified segments and the SVG images for all cards.
+            <p> While in the detailed view, clicking and dragging on the light grey bar below the segment timeline allows selection of a sub-segment. Clicking the "Create from Selection" button will create up to three new segments (data before the selected time, the selected time, data after the selected time). If the resulting segments outside of the selection are short in duration (<5s) or the user clicks near the beginning or end of the segment, they will be grouped back into the selection. Arrow buttons on either side of the timeline will adjoin the segment with the previous or next segment.</p>
 
             <h3>Details on Demand</h3>
             <p> Hovering over the timeline shows time and action details.<br>
             <!--Long notes/highlighted text are shortened, but can be seen in their entirety by hovering the text.<br>-->
+            Colored text can be hovered to show the full text.<br>
             Hovering over each bar/icon displays all the interactions of the type with frequencies if the action occured mutliple times.
             <h3 style="color:darkgreen">Updates</h3>
             <p style="color:darkgreen">
