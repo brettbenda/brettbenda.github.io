@@ -10,6 +10,8 @@ var tooltip
 var card
 var cardWidth = 510
 var cardHeight = 300
+var DS = 1
+var P = 1
 var detailed = true
 var colors = {
   "Doc_open":"crimson",
@@ -25,11 +27,6 @@ var colors = {
   "Total": "darkslategrey"
 }
 
-
-
-
-var DS = 1
-var P = 1
 //Load Docs
 Promise.all([	
 	d3.json("/js/ProvSegments/Dataset_1/Documents/Documents_Dataset_1.json"),
@@ -81,20 +78,20 @@ Promise.all([
   }
 
   function loadData(){
-   json = Object.assign({},orignaljson)
-   logs = json[0].interactionLogs
-   segments = json[0].segments
-   participantData = []
-   participantSegments = []
-   data=[]
+    json = Object.assign({},orignaljson)
+    logs = json[0].interactionLogs
+    segments = json[0].segments
+    participantData = []
+    participantSegments = []
+    data=[]
 
-   processData();
+    processData();
 
-   var startTime = 0;
-   var endTime = participantSegments[participantSegments.length-1].end
-   console.log(endTime)
+    var startTime = 0;
+    var endTime = participantSegments[participantSegments.length-1].end
+    console.log(endTime)
 
-   drawCards(startTime, endTime)
+    drawCards(startTime, endTime)
  }
 
  function saveData(){
@@ -128,9 +125,9 @@ Promise.all([
     summary = []
     data=[]
   	var form = document.getElementById("controlForm")
-  	DS = form.elements[0].value
-  	P = form.elements[1].value
-  	detailed = form.elements[2].checked
+  	DS = document.querySelector('input[name="dataset"]:checked').value;
+  	P = document.querySelector('input[name="pid"]:checked').value;
+  	detailed = document.querySelector('input[name="detailed"]').checked;
   	participantData = logs[DS-1][P-1] 
   	participantSegments = GetSegments(DS,P)  
   	participantData = segmentify(participantSegments, participantData)
@@ -175,17 +172,17 @@ function drawCards(startTime, endTime){
     style("fill-opacity", "0.7").
     style("stroke-opacity", "0.7")
     .on("mouseover", function(d, i){
-     var selectID = "#card" + d.pid+"_"+i
-     d3.select(selectID)
-       .style("fill-opacity", "1.0")
-       .style("stroke-opacity", "1.0")
-     })
+      var selectID = "#card" + d.pid+"_"+i
+      d3.select(selectID)
+        .style("fill-opacity", "1.0")
+        .style("stroke-opacity", "1.0")
+    })
     .on("mouseout",function(d, i){
-     var selectID = "#card" + d.pid+"_"+i
-     d3.select(selectID)
-       .style("fill-opacity", "0.7")
-       .style("stroke-opacity", "0.7")
-     })
+      var selectID = "#card" + d.pid+"_"+i
+      d3.select(selectID)
+        .style("fill-opacity", "0.7")
+        .style("stroke-opacity", "0.7")
+    })
 
 	//background rect
 	card.bg = card.append("rect").

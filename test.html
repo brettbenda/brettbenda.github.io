@@ -52,8 +52,19 @@
 
 <div id="controls" style="position: fixed; top:0; width:auto; background-color: white; border:3px solid navy; z-index:1;">
           <form id="controlForm">
-            Dataset: <input type="text" name="pid" value=1><br>
-            PID: <input type="text" name="dataset" value=1><br>
+            Dataset:<br> 
+            1<input type="radio" name="dataset" value=1 onclick="loadData()"><br>
+            2<input type="radio" name="dataset" value=2 onclick="loadData()"><br>
+            3<input type="radio" name="dataset" value=3 onclick="loadData()"><br>
+            PID:<br>
+            1<input type="radio" name="pid" value=1 onclick="loadData()">
+            2<input type="radio" name="pid" value=2 onclick="loadData()">
+            3<input type="radio" name="pid" value=3 onclick="loadData()"><br>
+            4<input type="radio" name="pid" value=4 onclick="loadData()">
+            5<input type="radio" name="pid" value=5 onclick="loadData()">
+            6<input type="radio" name="pid" value=6 onclick="loadData()"><br>
+            7<input type="radio" name="pid" value=7 onclick="loadData()">
+            8<input type="radio" name="pid" value=8 onclick="loadData()"><br>
             Detailed View: <input type="checkbox" name="detailed" checked onclick="loadData()"><br>
           </form>
           <button onclick="loadData()">Load Data</button><br>
