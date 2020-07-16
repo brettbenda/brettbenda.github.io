@@ -200,19 +200,28 @@ function drawCards(startTime, endTime){
     attr("x",15).
     attr("y",25).
     style("font-weight", "bold").
-    style("text-decoration", "underline").
     text(function(d){
       var segment =  GetSegment(d.number, d.pid, d.dataset)
-  	  return "Segment #" + (d.number+1)// + " [" + segment.start + ", " + segment.end + "] (" + segment.length + ")"
+  	  return "Segment #" + (d.number+1) + " [" + IntToTime(segment.start) + ", " + IntToTime(segment.end) + "]"
   	})
 
+  card.divider = card.append("line")
+        .attr("x1",10)
+        .attr("y1",33)
+        .attr("x2",cardWidth-10)
+        .attr("y2",33)
+        .attr("stroke-width",1)
+        .attr("stroke","grey")
+
   card.text = cardText(card)
+
   card.timeline = timelineElement(card, startTime, endTime);
+  
   if(detailed){
   	
     card.segmentTimeline = segmentTimelineElement(card);  	
 
-    card.divider = card.append("line")
+    card.divider2 = card.append("line")
       .attr("x1",10)
       .attr("y1",100)
       .attr("x2",cardWidth-10)
@@ -220,13 +229,7 @@ function drawCards(startTime, endTime){
       .attr("stroke-width",1)
       .attr("stroke","grey")
 
-    card.divider2 = card.append("line")
-      .attr("x1",10)
-      .attr("y1",33)
-      .attr("x2",cardWidth-10)
-      .attr("y2",33)
-      .attr("stroke-width",1)
-      .attr("stroke","grey")
+    
 
     card.selectionBox = card.append("line")
       .attr("x1",-1)
@@ -667,16 +670,15 @@ function textButton(card, x, y, text, color, func){
 function timelineElement(card, startTime, endTime){
   //timeline stuff
   var element = {}
-  var start = 125
+  var start = 225
   element.sWidth = 10;
   element.clickX1 = -1;
   element.clickX2 = -1;
   var scale = d3.scaleLinear().domain([startTime,endTime]).range([0,cardWidth-10-start])
   var scale2 = d3.scaleLinear().domain([start,cardWidth-10]).range([startTime,endTime])
-  var start = 125
   element.timeLineBG = card.append("path").
     attr("d",function(d,i){
-      var start = 125
+      //var start = 125
       return d3.line()([[start, 20],[cardWidth-10,20]])
     }).
     attr("stroke","lightblue").
@@ -781,7 +783,7 @@ function segmentTimelineElement(card){
         element.clickX1=-1
         element.clickX2=-1
       }
-      })
+    })
 
   element.segmentTimelineBG = card.append("path").
     attr("d", d3.line()([[40,45],[cardWidth-40,45]])).
