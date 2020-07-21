@@ -50,13 +50,13 @@
   <nav class="navbar navbar-expand bg-blue navbar-dark" id="header"></nav>
 
 
-<div id="controls" style="position: fixed; top:0; width:auto; background-color: white; border:3px solid navy; z-index:1;">
+<div id="controls" style="position: fixed; top:0; width:10vw; background-color: white; border:3px solid navy; z-index:1;">
           <form id="controlForm">
-            Dataset:<br> 
+            <b>Dataset:</b><br> 
             1<input type="radio" name="dataset" value=1 checked onclick="loadData()">
             2<input type="radio" name="dataset" value=2 onclick="loadData()">
             3<input type="radio" name="dataset" value=3 onclick="loadData()"><br>
-            PID:<br>
+            <b>PID:</b><br>
             1<input type="radio" name="pid" value=1 checked onclick="loadData()">
             2<input type="radio" name="pid" value=2 onclick="loadData()">
             3<input type="radio" name="pid" value=3 onclick="loadData()"><br>
@@ -65,7 +65,12 @@
             6<input type="radio" name="pid" value=6 onclick="loadData()"><br>
             7<input type="radio" name="pid" value=7 onclick="loadData()">
             8<input type="radio" name="pid" value=8 onclick="loadData()"><br>
+
+            <b>Card Size:</b><br>
+            Width: <input type="number" name="width" oninput="loadData()" value="510" style="width:4em"><br>
+            Height: <input type="number" name="height" oninput="loadData()" value="300"style="width:4em"><br>
             Detailed View: <input type="checkbox" name="detailed" onclick="loadData()"><br>
+            Show Notes: <input type="checkbox" name="notes" onclick="loadData()"><br>
           </form>
           <!-- <button onclick="loadData()">Load Data</button><br> -->
           <button onclick="saveData()">Save Data JSON</button><br>

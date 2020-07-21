@@ -8,11 +8,14 @@ var participantSegments
 var data = []
 var tooltip
 var card
-var cardWidth = 510
+var cardDivs
+var cardField
+var cardWidth = 700
 var cardHeight = 300
 var DS = 1
 var P = 1
 var detailed = true
+var showNotes = true
 var colors = {
   "Doc_open":"crimson",
   "Documents Opened":"crimson",
@@ -45,6 +48,9 @@ Promise.all([
 	json = json2
 	logs = json2[0].interactionLogs
 	segments = json2[0].segments
+  for(var seg of segments){
+    seg.annotation = ""
+  }
 
 	processData();
 
@@ -128,6 +134,9 @@ Promise.all([
   	DS = document.querySelector('input[name="dataset"]:checked').value;
   	P = document.querySelector('input[name="pid"]:checked').value;
   	detailed = document.querySelector('input[name="detailed"]').checked;
+    showNotes = document.querySelector('input[name="notes"]').checked;
+    cardWidth =  document.querySelector('input[name="width"]').value;
+    cardHeight =  document.querySelector('input[name="height"]').value;
   	participantData = logs[DS-1][P-1] 
   	participantSegments = GetSegments(DS,P)  
   	participantData = segmentify(participantSegments, participantData)
@@ -155,16 +164,22 @@ Promise.all([
 function drawCards(startTime, endTime){
 	//draw cards
 	d3.selectAll("#chartArea").remove()
-	d3.select("#chart").append("div").attr("id","chartArea")
+	d3.select("#chart").append("div").attr("id","chartArea").style("overflow", "auto").style("white-space", "nowrap")
 
 	console.log(data)
 
-	card = d3.select("#chartArea").
-  selectAll("card").
-  data(data).
-  enter().
-  append("svg").
-    attr("height", function(d,i){return detailed?cardHeight:cardHeight-80}).
+  cardDivs = d3.select("#chartArea").selectAll("field").data(data).enter().append("div").
+    attr("id",function(d,i){
+      return "cardDiv"+ d.pid + "_" +d.number
+    })
+    .style("margin-bottom", "15px")
+    .style("margin-left", "15px")
+    .style("margin-right", "15px")
+    .style("display", "inline-block")
+
+
+	card = cardDivs.append("svg").
+    attr("height", cardHeight).
     attr("width", cardWidth).
     attr("id",function(d){
      return "card" + d.pid + "_" +d.number
@@ -184,12 +199,32 @@ function drawCards(startTime, endTime){
         .style("stroke-opacity", "0.7")
     })
 
+  if(showNotes){
+    cardField = cardDivs.append("div")
+    cardField.append("p").html("<b>Notes:</b>").attr("class","tooltipP")
+    cardField.append("textarea")
+      .property("value", function(d,i){
+        var seg = GetSegment(d.number, d.pid, d.dataset)
+        return seg.annotation
+      })
+      .style("width", cardWidth)
+      .style("height", "100")
+      .attr("id", function(d,i){return "cardField" + d.pid + "_" +d.number})
+      .on("input",function(d,i){
+        //save notes to seg json as they are written
+        var val = cardDivs.select("#cardField" + d.pid + "_" +d.number).property("value")
+        var seg = GetSegment(d.number, d.pid, d.dataset)
+        seg.annotation = val
+      })
+  }
+  
+
 	//background rect
 	card.bg = card.append("rect").
     attr("x",5).
     attr("y",5).
     attr("rx", 5).
-    attr("height", function(d,i){return detailed?cardHeight-10:cardHeight-80-10}).
+    attr("height", cardHeight-10).
     attr("width",cardWidth-10).
     style("fill","white").
     style("stroke", "navy").
@@ -228,8 +263,6 @@ function drawCards(startTime, endTime){
       .attr("y2",100)
       .attr("stroke-width",1)
       .attr("stroke","grey")
-
-    
 
     card.selectionBox = card.append("line")
       .attr("x1",-1)
@@ -276,7 +309,7 @@ function drawCards(startTime, endTime){
         style("top", (d3.event.pageY - 28) + "px");   
     })  
 
-    card.button = textButton(card, 190,70, "Create from Selection", "lightblue", function(d,i){
+    card.button = textButton(card, (cardWidth/2)-60,70, "Create from Selection", "lightblue", function(d,i){
       var seg = GetSegment(d.number, d.pid, d.dataset)
       var scale = d3.scaleLinear().domain([40,cardWidth-40]).range([seg.start,seg.end])
       var select = d3.select(".selection" + d.pid + "_" +d.number)
@@ -349,7 +382,7 @@ function drawCards(startTime, endTime){
         style("top", (d3.event.pageY - 28) + "px");   
     })
 
-    card.button2 = textButton(card, 475,40, "➡", "royalblue", function(d,i){
+    card.button2 = textButton(card, cardWidth-35,40, "➡", "royalblue", function(d,i){
       if(i==participantSegments.length-1)
         return
       var seg = GetSegment(d.number, d.pid, d.dataset)
@@ -383,7 +416,7 @@ function drawCards(startTime, endTime){
     })   			
   }
 
-  var barY = detailed?280:200
+  var barY = cardHeight-20
 
 	//interaction bars
 	card.search = barElement(card, 15, barY, "Searches", "🔎", function(d){ return 25*(d.local_search_ratio) })
@@ -401,7 +434,7 @@ function drawCards(startTime, endTime){
 
 function cardText(card){
   var element = {}
-  var bulletStartY = detailed?245:170
+  var bulletStartY = cardHeight-55
   element.descriptionText = card.append("text").
     attr("x",15).
     attr("y",function(d,i){
@@ -419,7 +452,7 @@ function cardText(card){
       //d.displayedInfo++
        return text
     }).
-    call(wrap,485)
+    call(wrap,cardWidth-15)
 
 
   //open info
@@ -1052,7 +1085,7 @@ function summarize_segment(segment){
   for(var i=0; i<all_interactions.length; i++){
     //if many things were explored, we do not want to find pattern for all of them.
     if(searches.length >5 || opens.length > 15){
-      descriptions.push("The users searched and explored many documents.")
+      descriptions.push("The user searched and explored many documents.")
       break;
     }else if(searches.length >3 || opens.length > 10){
       descriptions.push("The user searched and explored several documents.")
