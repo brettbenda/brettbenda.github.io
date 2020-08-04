@@ -5,7 +5,7 @@ Promise.all([d3.json("./pictures/pic.json")]).then(
   function(json){
   console.log(json)
   var innerHTML = ""
-  var path = "https://brettbenda.github.io/pictures/Photography/"
+  var path = "./pictures/Photography/"
   var rowStart = "<div class=\"row row-space my-auto\">"
   var colStart = "<div class=\"col-sm-4\">"
     for(var i=0; i<json[0].images.length; i++){
