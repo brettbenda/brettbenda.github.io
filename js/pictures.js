@@ -9,6 +9,7 @@ Promise.all([d3.json("./pictures/pic.json")]).then(
   var rowStart = "<div class=\"row row-space my-auto\">"
   var colStart = "<div class=\"col-sm-4\">"
   var j = 0;
+  shuffleArray(json[0].images);
     for(var i=json[0].images.length-1; i>=0; i--){
         var name = json[0].images[i]
 
@@ -30,3 +31,11 @@ Promise.all([d3.json("./pictures/pic.json")]).then(
     gallery.innerHTML = innerHTML
 })
 
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
