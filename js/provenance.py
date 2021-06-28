@@ -1,6 +1,11 @@
 import json
 import csv
+import sys
 
+##1=use previously made segments, 0=merge to one MEGA segment
+useSinaMethod=0;
+if len(sys.argv)>1:
+	useSinaMethod=sys.argv[1];
 
 ##docs[set#][#]
 docs = []
@@ -34,44 +39,64 @@ with open('ProvSegments/Dataset_3/Documents/Documents_Dataset_3.json', encoding=
 
 #Open log/segment JSON
 for i in range (1,4):
+	#empty sets of interactions and segments
     setlogs = []
     setsegments = []
     for j in range (1,9):
+    	#raw interaction logs
         with open(path1+str(i)+path2+setToString(i)+path3+str(j)+path4) as file:
             file_json = json.load(file)
             setlogs.append(file_json)
 
+        #prepocesses segments
         with open(path1+str(i)+path21+setToString(i)+path3+str(j)+path41) as file:
             reader = csv.DictReader(file)
             csvjson = [json.dumps(d) for d in reader]
             setsegments.append(csvjson);
 
+    #push entire collections
     logs.append(setlogs)
     segments.append(setsegments)
 
 #Create segment JSON, cluster short segments into previous segments
 segment_json = []
-min_segment_length = 180
+min_segment_length = 0
+
+#three data sets
 for _set in range(0,3):
+	#8 participants per set
     for _id in range(0,8):
+
+    	#init values
         current_segment = 0
         new_segment = True;
         segment_start = 0;
         segment_end = 0;
+
+        #empty set
         current_segment_json = []
+
+        #for all segments from the preprocessed set
         for i,segment in enumerate(segments[_set][_id]):
+        	#read current as json
             stringjson = json.loads(segment)
 
-            min_segment_length = float(json.loads(segments[_set][_id][-1])['end'])/24
+            #either use a minimum segment size (to collapose small segments into neighbors)
+            #OR use inf to collapse them all into one segment
+            if(useSinaMethod=="1"):
+                min_segment_length = float(json.loads(segments[_set][_id][-1])['end'])/24
+            else:
+                min_segment_length = 10000000000000000000000000.0
 
+            #get start and and of current
             segment_start = int(float(stringjson['start']))
             segment_end = int(float(stringjson['end']))
 
-            #first segment will always exist, ignore later segments that are short
+            #first segment will always exist, update end if current segment that is short
             if(current_segment!=0 and segment_end-segment_start < min_segment_length):
                 current_segment_json[current_segment-1].update({'end' : segment_end})
-
-            elif(i==len(segments[_set][_id])-1): #save last segment specifically
+			#save last segment specifically
+            elif(i==len(segments[_set][_id])-1): 
                 item = {}
                 item.update({"dataset" : _set+1})
                 item.update({"pid" : _id+1})
@@ -82,7 +107,8 @@ for _set in range(0,3):
                 item.update({"interactionCount" : 0})
                 current_segment_json.append(item)
                 current_segment = current_segment+1
-            else: #save intermediary segment
+        	#save intermediary segment    
+            else: 
                 item = {}
                 item.update({"dataset" : _set+1})
                 item.update({"pid" : _id+1})

@@ -28,7 +28,7 @@ window.onload = function(){
           <a class="text-light" href="https://ufl.edu">University of Florida</a> | \
           <a class="text-light" href="https://cise.ufl.edu">CISE</a> | \
           <a class="text-light" href="https://www.cise.ufl.edu/~eragan/indie.html">IndieLab</a></h6>\
-        <h6 class="text-center mx-auto text-light">© 2020 Brett Benda</h6>\
+        <h6 class="text-center mx-auto text-light">© 2021 Brett Benda</h6>\
       </div>\
     </div>'
 

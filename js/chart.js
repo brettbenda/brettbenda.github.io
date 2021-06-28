@@ -40,9 +40,10 @@ Promise.all([
    console.log(docs)
  })
 
-  Promise.all([
-   d3.json("/js/test.json")
-   ]).then(function(json2){
+//load preprocessed participant data
+Promise.all([
+  d3.json("/js/test.json")
+]).then(function(json2){
 	//unwrap json
 	orignaljson = Object.assign({},json2)
 	json = json2
@@ -52,113 +53,118 @@ Promise.all([
     seg.annotation = ""
   }
 
-	processData();
+  //
+  processData();
 
-
-	var startTime = 0;
-	var endTime = participantSegments[participantSegments.length-1].end
-	console.log(endTime)
-	drawCards(startTime, endTime)
+  var startTime = 0;
+  var endTime = participantSegments[participantSegments.length-1].end
+  
+  console.log(endTime)
+  drawCards(startTime, endTime)
 
 	//add separate tooltip div
 	tooltip = d3.select("body").append("div")
-  .attr("class", "tooltip")
-  .style("opacity", 0)
-
-
-
+    .attr("class", "tooltip")
+    .style("opacity", 0)
 })
 
-  function reload(){
-    segments.sort(function(a,b){return a.dataset-b.dataset || a.pid-b.pid || a.start-b.start})
-    for(var j=0; j<segments.length;j++)
-      segments[j].sid=j
-    console.log(segments)
+function reload(){
+  segments.sort(function(a,b){return a.dataset-b.dataset || a.pid-b.pid || a.start-b.start})
+  for(var j=0; j<segments.length;j++)
+    segments[j].sid=j
+  console.log(segments)
 
-    Promise.all([processData()]).then(function(){
-      var startTime = 0;
-      var endTime = participantSegments[participantSegments.length-1].end
-      console.log(endTime)
-      drawCards(startTime, endTime)
-    })
-  }
-
-  function loadData(){
-    json = Object.assign({},orignaljson)
-    logs = json[0].interactionLogs
-    segments = json[0].segments
-    participantData = []
-    participantSegments = []
-    data=[]
-
-    processData();
-
+  Promise.all([processData()]).then(function(){
     var startTime = 0;
     var endTime = participantSegments[participantSegments.length-1].end
     console.log(endTime)
-
     drawCards(startTime, endTime)
- }
+  })
+}
 
- function saveData(){
-    var obj ={}
-    obj.segments=segments
-    obj.interactions = logs
+function loadData(){
+  json = Object.assign({},orignaljson)
+  logs = json[0].interactionLogs
+  segments = json[0].segments
+  participantData = []
+  participantSegments = []
+  data=[]
 
-  	//Convert JSON Array to string.
-    var json2 = JSON.stringify(obj);
+  processData();
 
-    //Convert JSON string to BLOB.
-    json2 = [json2];
-    var blob1 = new Blob(json2, { type: "text/plain;charset=utf-8" });
+  var startTime = 0;
+  var endTime = participantSegments[participantSegments.length-1].end
+  console.log(endTime)
 
-    //Check the Browser.
-    var isIE = false || !!document.documentMode;
-    if (isIE) {
-      window.navigator.msSaveBlob(blob1, "data.json");
-    } else {
-      var url = window.URL || window.webkitURL;
-      link = url.createObjectURL(blob1);
-      var a = document.createElement("a");
-      a.download = "data.json";
-      a.href = link;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-  }}
+  drawCards(startTime, endTime)
+}
 
-  function processData(){
-    summary = []
-    data=[]
-  	var form = document.getElementById("controlForm")
-  	DS = document.querySelector('input[name="dataset"]:checked').value;
-  	P = document.querySelector('input[name="pid"]:checked').value;
-  	detailed = document.querySelector('input[name="detailed"]').checked;
-    showNotes = document.querySelector('input[name="notes"]').checked;
-    cardWidth =  document.querySelector('input[name="width"]').value;
-    cardHeight =  document.querySelector('input[name="height"]').value;
-  	participantData = logs[DS-1][P-1] 
-  	participantSegments = GetSegments(DS,P)  
-  	participantData = segmentify(participantSegments, participantData)
+function saveData(){
+  var obj ={}
+  obj.segments=segments
+  obj.interactions = logs
+
+	//Convert JSON Array to string.
+  var json2 = JSON.stringify(obj);
+
+  //Convert JSON string to BLOB.
+  json2 = [json2];
+  var blob1 = new Blob(json2, { type: "text/plain;charset=utf-8" });
+
+  //Check the Browser.
+  var isIE = false || !!document.documentMode;
+  if (isIE) {
+    window.navigator.msSaveBlob(blob1, "data.json");
+  } else {
+    var url = window.URL || window.webkitURL;
+    link = url.createObjectURL(blob1);
+    var a = document.createElement("a");
+    a.download = "data.json";
+    a.href = link;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+}
 
 
-  	//Summarize segments, get some more stats
-  	var total_interactions = 0;
-  	for (var i = 0; i<participantData.length; i++){
-  		var summary = summarize_segment(participantData[i])
-  		summary.pid = P;
-  		summary.dataset = DS
-  		summary.number = i
-  		if(summary.interesting)
-  			total_interactions += summary.total_interactions;
-  		data.push(summary)
-  	}
+function processData(){
+  summary = []
+  data=[]
 
-  	var totalSummary = GetAllCounts(data);
-  	//Stats
-  	for(var seg of data){
-  		seg.interaction_rate = Math.max(0,(seg.total_interactions / total_interactions));
-  	}
+  var form = document.getElementById("controlForm")
+  DS = document.querySelector('input[name="dataset"]:checked').value;
+  P = document.querySelector('input[name="pid"]:checked').value;
+  detailed = document.querySelector('input[name="detailed"]').checked;
+  showNotes = document.querySelector('input[name="notes"]').checked;
+  cardWidth =  document.querySelector('input[name="width"]').value;
+  cardHeight =  document.querySelector('input[name="height"]').value;
+  
+  //interactions for current participant
+  participantData = logs[DS-1][P-1] 
+  //get segment times for current participant
+  participantSegments = GetSegments(DS,P) 
+
+  //get interactions grouped by segment
+  participantData = segmentify(participantSegments, participantData)
+
+  //Summarize current segments
+	var total_interactions = 0;
+	for (var i = 0; i<participantData.length; i++){
+		var summary = summarize_segment(participantData[i])
+		summary.pid = P;
+		summary.dataset = DS
+		summary.number = i
+		if(summary.interesting)
+			total_interactions += summary.total_interactions;
+		data.push(summary)
+	}
+
+	var totalSummary = GetAllCounts(data);
+	//Stats
+	for(var seg of data){
+		seg.interaction_rate = Math.max(0,(seg.total_interactions / total_interactions));
+	}
 }
 
 function drawCards(startTime, endTime){
@@ -168,17 +174,19 @@ function drawCards(startTime, endTime){
 
 	console.log(data)
 
+  //add divs for each card, using the loaded data
   cardDivs = d3.select("#chartArea").selectAll("field").data(data).enter().append("div").
-    attr("id",function(d,i){
-      return "cardDiv"+ d.pid + "_" +d.number
-    })
-    .style("margin-bottom", "15px")
-    .style("margin-left", "15px")
-    .style("margin-right", "15px")
-    .style("display", "inline-block")
+  attr("id",function(d,i){
+    return "cardDiv"+ d.pid + "_" +d.number
+  })
+  .style("margin-bottom", "15px")
+  .style("margin-left", "15px")
+  .style("margin-right", "15px")
+  .style("display", "inline-block")
 
 
-	card = cardDivs.append("svg").
+  //add svg to divs
+  card = cardDivs.append("svg").
     attr("height", cardHeight).
     attr("width", cardWidth).
     attr("id",function(d){
@@ -186,31 +194,36 @@ function drawCards(startTime, endTime){
     }).
     style("fill-opacity", "0.7").
     style("stroke-opacity", "0.7")
+    //highlight on hover
     .on("mouseover", function(d, i){
       var selectID = "#card" + d.pid+"_"+i
       d3.select(selectID)
-        .style("fill-opacity", "1.0")
-        .style("stroke-opacity", "1.0")
+      .style("fill-opacity", "1.0")
+      .style("stroke-opacity", "1.0")
     })
+    //back to faded when hover is over
     .on("mouseout",function(d, i){
       var selectID = "#card" + d.pid+"_"+i
       d3.select(selectID)
-        .style("fill-opacity", "0.7")
-        .style("stroke-opacity", "0.7")
+      .style("fill-opacity", "0.7")
+      .style("stroke-opacity", "0.7")
     })
 
+  //shows the annotation notes box if selected
   if(showNotes){
+    //add div and text area
     cardField = cardDivs.append("div")
     cardField.append("p").html("<b>Notes:</b>").attr("class","tooltipP")
     cardField.append("textarea")
-      .property("value", function(d,i){
-        var seg = GetSegment(d.number, d.pid, d.dataset)
-        return seg.annotation
-      })
-      .style("width", cardWidth)
-      .style("height", "100")
-      .attr("id", function(d,i){return "cardField" + d.pid + "_" +d.number})
-      .on("input",function(d,i){
+    //set text to current annotation
+    .property("value", function(d,i){
+      var seg = GetSegment(d.number, d.pid, d.dataset)
+      return seg.annotation
+    })
+    .style("width", cardWidth)
+    .style("height", "100")
+    .attr("id", function(d,i){return "cardField" + d.pid + "_" +d.number})
+    .on("input",function(d,i){
         //save notes to seg json as they are written
         var val = cardDivs.select("#cardField" + d.pid + "_" +d.number).property("value")
         var seg = GetSegment(d.number, d.pid, d.dataset)
@@ -220,62 +233,64 @@ function drawCards(startTime, endTime){
   
 
 	//background rect
-	card.bg = card.append("rect").
-    attr("x",5).
-    attr("y",5).
-    attr("rx", 5).
-    attr("height", cardHeight-10).
-    attr("width",cardWidth-10).
-    style("fill","white").
-    style("stroke", "navy").
-    style("stroke-width", 3)
+	card.bg = card.append("g").attr('label','background').append("rect").
+  attr("x",5).
+  attr("y",5).
+  attr("rx", 5).
+  attr("height", cardHeight-10).
+  attr("width",cardWidth-10).
+  style("fill","white").
+  style("stroke", "navy").
+  style("stroke-width", 3)
 
 	//segment label
-	card.label = card.append("text").
-    attr("x",15).
-    attr("y",25).
-    style("font-weight", "bold").
-    text(function(d){
-      var segment =  GetSegment(d.number, d.pid, d.dataset)
-  	  return "Segment #" + (d.number+1) + " [" + IntToTime(segment.start) + ", " + IntToTime(segment.end) + "]"
-  	})
+	card.label = card.append("g").attr('label','segment_label').append("text").
+  attr("x",15).
+  attr("y",25).
+  style("font-weight", "bold").
+  text(function(d){
+    var segment =  GetSegment(d.number, d.pid, d.dataset)
+    return "Segment #" + (d.number+1) + " [" + IntToTime(segment.start) + ", " + IntToTime(segment.end) + "]"
+  })
 
-  card.divider = card.append("line")
-        .attr("x1",10)
-        .attr("y1",33)
-        .attr("x2",cardWidth-10)
-        .attr("y2",33)
-        .attr("stroke-width",1)
-        .attr("stroke","grey")
+  card.divider = card.append("g").attr('label','segment_divider').append("line")
+  .attr("x1",10)
+  .attr("y1",33)
+  .attr("x2",cardWidth-10)
+  .attr("y2",33)
+  .attr("stroke-width",1)
+  .attr("stroke","grey")
 
   card.text = cardText(card)
 
   card.timeline = timelineElement(card, startTime, endTime);
   
+  //if detailed view, draw timeline and buttons to join
   if(detailed){
   	
     card.segmentTimeline = segmentTimelineElement(card);  	
 
-    card.divider2 = card.append("line")
-      .attr("x1",10)
-      .attr("y1",100)
-      .attr("x2",cardWidth-10)
-      .attr("y2",100)
-      .attr("stroke-width",1)
-      .attr("stroke","grey")
+    card.divider2 = card.append('g').attr('label','segment_divider2').append("line")
+    .attr("x1",10)
+    .attr("y1",100)
+    .attr("x2",cardWidth-10)
+    .attr("y2",100)
+    .attr("stroke-width",1)
+    .attr("stroke","grey")
 
-    card.selectionBox = card.append("line")
-      .attr("x1",-1)
-      .attr("y1",20)
-      .attr("x2",-1)
-      .attr("y2",20)
-      .attr("stroke-width",3)
-      .attr("stroke","darkblue")
-      .style("stroke-opacity","0.0")
-      .attr("class", function(d,i){
-        return "selection" + d.pid + "_" +d.number
-      })
+    card.selectionBox = card.append('g').attr('label','selection_rect').append("line")
+    .attr("x1",-1)
+    .attr("y1",20)
+    .attr("x2",-1)
+    .attr("y2",20)
+    .attr("stroke-width",3)
+    .attr("stroke","darkblue")
+    .style("stroke-opacity","0.0")
+    .attr("class", function(d,i){
+      return "selection" + d.pid + "_" +d.number
+    })
 
+    //merge with previous card
     card.button3 = textButton(card, 10,40, "⬅", "royalblue", function(d,i){
       if(i==0)
         return
@@ -298,17 +313,18 @@ function drawCards(startTime, endTime){
       segments.push(newSeg)
       reload()
     })
-
+    //hover text for previous card button
     card.button3.buttonHB.on("mouseover",function(){
       tooltip.transition().
-        duration(100).
-        style("opacity", 1.0);  
+      duration(100).
+      style("opacity", 1.0);  
 
       tooltip.html("<p class=\"tooltipP\">Merge this segment with the <b>previous</b> segment.</p>").
-        style("left", (d3.event.pageX) + "px").
-        style("top", (d3.event.pageY - 28) + "px");   
+      style("left", (d3.event.pageX) + "px").
+      style("top", (d3.event.pageY - 28) + "px");   
     })  
 
+    //create card from selection
     card.button = textButton(card, (cardWidth/2)-60,70, "Create from Selection", "lightblue", function(d,i){
       var seg = GetSegment(d.number, d.pid, d.dataset)
       var scale = d3.scaleLinear().domain([40,cardWidth-40]).range([seg.start,seg.end])
@@ -372,16 +388,18 @@ function drawCards(startTime, endTime){
 
     })
 
+    //hover text for create card button
     card.button.buttonHB.on("mouseover",function(){
       tooltip.transition().
-        duration(100).
-        style("opacity", 1.0);  
+      duration(100).
+      style("opacity", 1.0);  
 
       tooltip.html("<p class=\"tooltipP\">Create a new segment from the current selection.<br>The remaining unselected time will also be made into their own segments.</p>").
-        style("left", (d3.event.pageX) + "px").
-        style("top", (d3.event.pageY - 28) + "px");   
+      style("left", (d3.event.pageX) + "px").
+      style("top", (d3.event.pageY - 28) + "px");   
     })
 
+    //merge with next segment
     card.button2 = textButton(card, cardWidth-35,40, "➡", "royalblue", function(d,i){
       if(i==participantSegments.length-1)
         return
@@ -405,14 +423,15 @@ function drawCards(startTime, endTime){
 
       reload()
     })  
+    //hover text for next card button
     card.button2.buttonHB.on("mouseover",function(){
       tooltip.transition().
-        duration(100).
-        style("opacity", 1.0);  
+      duration(100).
+      style("opacity", 1.0);  
 
       tooltip.html("<p class=\"tooltipP\">Merge this segment with the <b>next</b> segment.</p>").
-        style("left", (d3.event.pageX) + "px").
-        style("top", (d3.event.pageY - 28) + "px");   
+      style("left", (d3.event.pageX) + "px").
+      style("top", (d3.event.pageY - 28) + "px");   
     })   			
   }
 
@@ -420,13 +439,9 @@ function drawCards(startTime, endTime){
 
 	//interaction bars
 	card.search = barElement(card, 15, barY, "Searches", "🔎", function(d){ return 25*(d.local_search_ratio) })
-
-	card.highlight = barElement(card, 50, barY, "Highlights", "📑", function(d){ return 25*(d.local_highlight_ratio) })
-
+  card.highlight = barElement(card, 50, barY, "Highlights", "📑", function(d){ return 25*(d.local_highlight_ratio) })
 	card.notes = barElement(card, 85, barY, "Notes", "✏", function(d){ return 25*(d.local_note_ratio) })
-
 	card.open = barElement(card, 120, barY, "Documents Opened", "📖", function(d){ return 25*(d.local_open_ratio) })
-
 	card.total = barElement(card, 155, barY, "Total", "Total", function(d){ return 25*(d.interaction_rate) })
 
 
@@ -435,7 +450,7 @@ function drawCards(startTime, endTime){
 function cardText(card){
   var element = {}
   var bulletStartY = cardHeight-55
-  element.descriptionText = card.append("text").
+  element.descriptionText = card.append("g").attr('label','segment_description').append("text").
     attr("x",15).
     attr("y",function(d,i){
       return detailed?120:50
@@ -449,28 +464,28 @@ function cardText(card){
       for(var text2 of d.descriptions)
         text+= text2+"<br> "
 
-      //d.displayedInfo++
-       return text
-    }).
+        //d.displayedInfo++
+        return text
+      }).
     call(wrap,cardWidth-15)
 
 
   //open info
-  element.searchText = card.append("text").
-    attr("x",15).
-    attr("y",function(d,i){
-      return bulletStartY-20*d.displayedInfo
-    }).
-    attr("id", "openText").
-    html(function(d,i){
-      var keys =Object.keys(d.opens)
-      if(keys==0)
-        if(d.displayedInfo==0){
-          d.displayedInfo++
-          return "• No documents were explored."
-        }
-        else
-          return 
+  element.searchText = card.append("g").attr('label','segment_open').append("text").
+  attr("x",15).
+  attr("y",function(d,i){
+    return bulletStartY-20*d.displayedInfo
+  }).
+  attr("id", "openText").
+  html(function(d,i){
+    var keys =Object.keys(d.opens)
+    if(keys==0)
+      if(d.displayedInfo==0){
+        d.displayedInfo++
+        return "• No documents were explored."
+      }
+      else
+        return 
 
       var text = "• The user explored "+ keys.length + " document" + ((keys.length==1)?"":"s") + "."
       d.displayedInfo++
@@ -478,101 +493,101 @@ function cardText(card){
     })
 
   //Note info
-  element.noteText = card.append("text").
-    attr("x",15).
-    attr("y",function(d,i){
-      return bulletStartY-20*d.displayedInfo
-    }).
-    attr("id", "noteText").
-    html(function(d,i){
-      var keys =Object.keys(d.notes)
-      if(keys.length==0)
-        return
+  element.noteText = card.append("g").attr('label','segment_note').append("text").
+  attr("x",15).
+  attr("y",function(d,i){
+    return bulletStartY-20*d.displayedInfo
+  }).
+  attr("id", "noteText").
+  html(function(d,i){
+    var keys =Object.keys(d.notes)
+    if(keys.length==0)
+      return
 
-      var text = "• The user noted "
-      var slicedText = keys[0].slice(0,35)
-      text += "<tspan style=\"font-weight:bold;fill:"+colors["Notes"]+"\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") +"\""+ "</tspan>."
+    var text = "• The user noted "
+    var slicedText = keys[0].slice(0,35)
+    text += "<tspan style=\"font-weight:bold;fill:"+colors["Notes"]+"\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") +"\""+ "</tspan>."
 
-      d.displayedInfo++
+    d.displayedInfo++
 
-      return text
-    }).
-    on("mouseover",function(d,i){
-      tooltip.transition().
-      duration(100).
-      style("opacity", 1.0); 
+    return text
+  }).
+  on("mouseover",function(d,i){
+    tooltip.transition().
+    duration(100).
+    style("opacity", 1.0); 
 
-      tooltip.html(SummaryToolTip(Object.keys(d.notes)[0],"Full Note")).
-      style("left", (d3.event.pageX) + "px").
-      style("top", (d3.event.pageY - 28) + "px");
-    }).
-    on("mouseout",function(d,i){
-      tooltip.transition().
-      duration(100).
-      style("opacity", 0.0); 
-    })
+    tooltip.html(SummaryToolTip(Object.keys(d.notes)[0],"Full Note")).
+    style("left", (d3.event.pageX) + "px").
+    style("top", (d3.event.pageY - 28) + "px");
+  }).
+  on("mouseout",function(d,i){
+    tooltip.transition().
+    duration(100).
+    style("opacity", 0.0); 
+  })
 
   //Highlight info
-  element.highlightText = card.append("text").
-    attr("x",15).
-    attr("y",function(d,i){
-      return bulletStartY-20*d.displayedInfo
-    }).
-    attr("id", "highlightText").
-    html(function(d,i){
-      var keys =Object.keys(d.highlights)
-      if(keys.length==0)
-        return
+  element.highlightText = card.append("g").attr('label','segment_highlight').append("text").
+  attr("x",15).
+  attr("y",function(d,i){
+    return bulletStartY-20*d.displayedInfo
+  }).
+  attr("id", "highlightText").
+  html(function(d,i){
+    var keys =Object.keys(d.highlights)
+    if(keys.length==0)
+      return
 
-      var slicedText = keys[0].slice(0,35)
-      var text = "• The user highlighted " + "<tspan style=\"font-weight:bold;fill:"+colors["Highlight"]+"\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") + "\""+"</tspan>."
+    var slicedText = keys[0].slice(0,35)
+    var text = "• The user highlighted " + "<tspan style=\"font-weight:bold;fill:"+colors["Highlight"]+"\">" + "\""+ slicedText + ((keys[0].length == slicedText.length)?"":"...") + "\""+"</tspan>."
 
-      d.displayedInfo++
+    d.displayedInfo++
 
-      return text
-    }).
-    on("mouseover",function(d,i){
-      tooltip.transition().
-      duration(100).
-      style("opacity", 1.0); 
+    return text
+  }).
+  on("mouseover",function(d,i){
+    tooltip.transition().
+    duration(100).
+    style("opacity", 1.0); 
 
-      tooltip.html(SummaryToolTip(Object.keys(d.highlights)[0],"Full Highlight")).
-      style("left", (d3.event.pageX) + "px").
-      style("top", (d3.event.pageY - 28) + "px");
-    }).
-    on("mouseout",function(d,i){
-      tooltip.transition().
-      duration(100)
-      .style("opacity", 0.0); 
-    })
+    tooltip.html(SummaryToolTip(Object.keys(d.highlights)[0],"Full Highlight")).
+    style("left", (d3.event.pageX) + "px").
+    style("top", (d3.event.pageY - 28) + "px");
+  }).
+  on("mouseout",function(d,i){
+    tooltip.transition().
+    duration(100)
+    .style("opacity", 0.0); 
+  })
 
-    element.searchText = card.append("text").
-      attr("x",15).
-      attr("y",function(d,i){
-        return bulletStartY-20*d.displayedInfo
-      }).
-      attr("id", "searchText").
-      html(function(d,i){
-        var keys =Object.keys(d.searches)
-        if(keys.length==0)
-          return
-        var text = "• The user searched for "
-        for(var i=0; i<(Math.min(3,keys.length)); i++){
-          if(i==(Math.min(3,keys.length)-1) && keys.length!=1)
-            text += "and "
+  element.searchText = card.append("g").attr('label','segment_search').append("text").
+  attr("x",15).
+  attr("y",function(d,i){
+    return bulletStartY-20*d.displayedInfo
+  }).
+  attr("id", "searchText").
+  html(function(d,i){
+    var keys =Object.keys(d.searches)
+    if(keys.length==0)
+      return
+    var text = "• The user searched for "
+    for(var i=0; i<(Math.min(3,keys.length)); i++){
+      if(i==(Math.min(3,keys.length)-1) && keys.length!=1)
+        text += "and "
 
-          text += "<tspan style=\"font-weight:bold;fill:"+colors["Search"]+"\">" +keys[i]+"</tspan>"
+      text += "<tspan style=\"font-weight:bold;fill:"+colors["Search"]+"\">" +keys[i]+"</tspan>"
 
-          if(i!=(Math.min(3,keys.length)-1))
-            text+=", "
-        }
-        d.displayedInfo++
-        text += "."
-        return text
-      })
+      if(i!=(Math.min(3,keys.length)-1))
+        text+=", "
+    }
+    d.displayedInfo++
+    text += "."
+    return text
+  })
 
-    return element
-  }
+  return element
+}
 
 
 //Arguments: The svg element to draw the bar on, x location, y location, text label, function to determine size of bar
@@ -582,127 +597,132 @@ function barElement(card, x, y, text, symbol, sizefunc){
 	unselectBar = "royalblue"
 	unselectBG = "lightblue"
 
+  card = card.append("g").attr('label','bar_'+text)
+
 	element.bar = card.append("line").
-    attr("x1",x).
-    attr("y1",y+5).
-    attr("x2",x+25).
-    attr("y2",y+5).
-    attr("stroke-width",5).
-    attr("stroke-opacity","0.5").
-    attr("class", "barBar"+text.replace(/\s+/g, '')).
-    style("stroke", colors[text])
+  attr("x1",x).
+  attr("y1",y+5).
+  attr("x2",x+25).
+  attr("y2",y+5).
+  attr("stroke-width",5).
+  attr("stroke-opacity","0.5").
+  attr("class", "barBar"+text.replace(/\s+/g, '')).
+  style("stroke", colors[text])
 
   element.bg = card.append("line").
-      attr("x1",x).
-      attr("y1",y+5).
-      attr("x2",function(d,i){return x+sizefunc(d)}).
-      attr("y2",y+5).
-      attr("stroke-width",5).
-      attr("class", "barBG"+text.replace(/\s+/g, '')).
-      style("stroke", colors[text])
+  attr("x1",x).
+  attr("y1",y+5).
+  attr("x2",function(d,i){return x+sizefunc(d)}).
+  attr("y2",y+5).
+  attr("stroke-width",5).
+  attr("class", "barBG"+text.replace(/\s+/g, '')).
+  style("stroke", colors[text])
 
   element.text = card.append("text").
-    attr("x",x).
-    attr("y",y-5).
-    style("user-select","none").
-    html(symbol).
-    style("font-size", function(){return (text=="Total"?12:18)}).
-    call(wrap, 385)
+  attr("x",x).
+  attr("y",y-5).
+  style("user-select","none").
+  html(symbol).
+  style("font-size", function(){return (text=="Total"?12:18)}).
+  call(wrap, 385)
 
 	//invisible box over bar and lable, to handle interactions for both rects of the bar
 	element.selectionArea = card.append("rect").
-    attr("x",x).
-    attr("y",y-25).
-    attr("height", 25+10).
-    attr("width",25).
-    attr("class", "selectionArea"+text.replace(/\s+/g, '')).
-    style("opacity", 0).
-    on("mouseover",function(d,i){
-      var selectID = "#card" + d.pid+"_"+i
+  attr("x",x).
+  attr("y",y-25).
+  attr("height", 25+10).
+  attr("width",25).
+  attr("class", "selectionArea"+text.replace(/\s+/g, '')).
+  style("opacity", 0).
+  on("mouseover",function(d,i){
+    var selectID = "#card" + d.pid+"_"+i
 
-      d3.select(selectID).select(".barBar"+text.replace(/\s+/g, '')).
-        style("fill", colors[text]).
-        style("fill-opacity", "0.7")
+    d3.select(selectID).select(".barBar"+text.replace(/\s+/g, '')).
+    style("fill", colors[text]).
+    style("fill-opacity", "0.7")
 
-      d3.select(selectID).selectAll(".barBG"+text.replace(/\s+/g, '')).
-        style("fill", colors["barBG"]).
-        style("fill-opacity", "0.7")
+    d3.select(selectID).selectAll(".barBG"+text.replace(/\s+/g, '')).
+    style("fill", colors["barBG"]).
+    style("fill-opacity", "0.7")
 
-      tooltip.transition().
-        duration(100).
-        style("opacity", 1.0);	
+    tooltip.transition().
+    duration(100).
+    style("opacity", 1.0);	
 
-      tooltip.html(BarToolTipText(d,text)).
-        style("left", (d3.event.pageX) + "px").
-        style("top", (d3.event.pageY - 28) + "px");		
-    }).
-    on("mouseout",function(d,i){
-      var selectID = "#card" + d.pid+"_"+i
+    tooltip.html(BarToolTipText(d,text)).
+      style("left", (d3.event.pageX) + "px").
+      style("top", (d3.event.pageY - 50) + "px");		
+  }).
+  on("mouseout",function(d,i){
+    var selectID = "#card" + d.pid+"_"+i
 
-      d3.select(selectID).selectAll(".barBar"+text.replace(/\s+/g, '')).
-        style("fill", colors[text]).
-        style("fill-opacity", null)
+    d3.select(selectID).selectAll(".barBar"+text.replace(/\s+/g, '')).
+    style("fill", colors[text]).
+    style("fill-opacity", null)
 
-      d3.select(selectID).selectAll(".barBG"+text.replace(/\s+/g, '')).
-        style("fill", colors["barBG"]).
-        style("fill-opacity", null)
+    d3.select(selectID).selectAll(".barBG"+text.replace(/\s+/g, '')).
+    style("fill", colors["barBG"]).
+    style("fill-opacity", null)
 
 
-      tooltip.transition().
-        duration(100).
-        style("opacity", 0);
-    }).
-    on("mousemove",function(){
-      tooltip.style("left", (d3.event.pageX) + "px")   
-        .style("top", (d3.event.pageY - 28) + "px");
+    tooltip.transition().
+    duration(100).
+    style("opacity", 0);
+  }).
+  on("mousemove",function(){
+    tooltip.style("left", (d3.event.pageX) + "px")   
+    .style("top", (d3.event.pageY - 50) + "px");
   })
 
   return element
-
 }
 
 function textButton(card, x, y, text, color, func){
 	var element = {}
+  card = card.append("g").attr('label','button_'+text)
+
   element.button = card.append("rect")
-    .attr("x",x)
-    .attr("y",y)
-    .attr("width",function(){return (text=="Create from Selection")?120:25})
-    .attr("height",25)
-    .attr("fill",color)
+  .attr("x",x)
+  .attr("y",y)
+  .attr("width",function(){return (text=="Create from Selection")?120:25})
+  .attr("height",25)
+  .attr("fill",color)
 
   element.text = card.append("text").
-    attr("x",x+2).
-    attr("y",y+18).
-    style("user-select","none").
-    text(text).
-    style("font-size", function(){return (text=="Create from Selection")?12:16}).
-    call(wrap, 385)
+  attr("x",x+2).
+  attr("y",y+18).
+  style("user-select","none").
+  text(text).
+  style("font-size", function(){return (text=="Create from Selection")?12:16}).
+  call(wrap, 385)
 
   element.buttonHB = card.append("rect")
-    .attr("x",x)
-    .attr("y",y)
-    .attr("width",function(){return (text=="Create from Selection")?120:25})
-    .attr("height",25)
-    .attr("opacity",0)
-    .on("mousedown", func)
-    .on("mouseout",function(d,i){
+  .attr("x",x)
+  .attr("y",y)
+  .attr("width",function(){return (text=="Create from Selection")?120:25})
+  .attr("height",25)
+  .attr("opacity",0)
+  .on("mousedown", func)
+  .on("mouseout",function(d,i){
 
-      tooltip.transition().
-        duration(100).
-        style("opacity", 0);
-    }).
-    on("mousemove",function(){
-      tooltip.style("left", (d3.event.pageX) + "px")   
-        .style("top", (d3.event.pageY - 28) + "px");
+    tooltip.transition().
+    duration(100).
+    style("opacity", 0);
+  }).
+  on("mousemove",function(){
+    tooltip.style("left", (d3.event.pageX) + "px")   
+    .style("top", (d3.event.pageY - 28) + "px");
   })
 
-    return element
+  return element
 }
 
 //draws the timeline element on the card
 function timelineElement(card, startTime, endTime){
   //timeline stuff
-  var element = {}
+  var element = {}  
+  card = card.append("g").attr('label','global_timeline')
+
   var start = 225
   element.sWidth = 10;
   element.clickX1 = -1;
@@ -710,52 +730,52 @@ function timelineElement(card, startTime, endTime){
   var scale = d3.scaleLinear().domain([startTime,endTime]).range([0,cardWidth-10-start])
   var scale2 = d3.scaleLinear().domain([start,cardWidth-10]).range([startTime,endTime])
   element.timeLineBG = card.append("path").
-    attr("d",function(d,i){
+  attr("d",function(d,i){
       //var start = 125
       return d3.line()([[start, 20],[cardWidth-10,20]])
     }).
-    attr("stroke","lightblue").
-    attr("stroke-width", 15).
-    attr('pointer-events', 'visibleStroke')
+  attr("stroke","lightblue").
+  attr("stroke-width", 15).
+  attr('pointer-events', 'visibleStroke')
 
   element.timeLineBox = card.append("path").
-    attr("d",function(d,i){
-      var seg = GetSegment(d.number, d.pid, d.dataset)
-      console.log(startTime)
-      return d3.line()([[start+scale(seg.start), 20],[start+scale(seg.end),20]])
-    }).
-    attr("stroke","royalblue").
-    attr("stroke-width", 20).
-    attr('pointer-events', 'visibleStroke')
+  attr("d",function(d,i){
+    var seg = GetSegment(d.number, d.pid, d.dataset)
+    console.log(startTime)
+    return d3.line()([[start+scale(seg.start), 20],[start+scale(seg.end),20]])
+  }).
+  attr("stroke","royalblue").
+  attr("stroke-width", 20).
+  attr('pointer-events', 'visibleStroke')
 
   element.timeLineHitbox = card.append("path").
-    attr("d",function(d,i){
-      return d3.line()([[start, 20],[cardWidth-10,20]])
-    }).
-    attr("stroke","darkSeaGreen").
-    attr("stroke-width", 20).
-    attr("stroke-opacity",0).
-    attr('pointer-events', 'visibleStroke').
-    on("mouseover",function(d,i){
-      var seg = GetSegment(d.number, d.pid, d.dataset)
-      tooltip.transition().
-        duration(100).
-        style("opacity", 1.0); 
+  attr("d",function(d,i){
+    return d3.line()([[start, 20],[cardWidth-10,20]])
+  }).
+  attr("stroke","darkSeaGreen").
+  attr("stroke-width", 20).
+  attr("stroke-opacity",0).
+  attr('pointer-events', 'visibleStroke').
+  on("mouseover",function(d,i){
+    var seg = GetSegment(d.number, d.pid, d.dataset)
+    tooltip.transition().
+    duration(100).
+    style("opacity", 1.0); 
 
-      tooltip.html(TimeToolTip(seg)).
-        style("left", (d3.event.pageX) + "px").
-        style("top", (d3.event.pageY - 28) + "px");
-    }).
-    on("mouseout",function(d,i){
-      tooltip.transition().
-        duration(100).
-        style("opacity", 0.0); 
-    }).
-    on("mousemove",function(d,i){
-      tooltip.style("left", (d3.event.pageX) + "px").
-        style("top", (d3.event.pageY - 28) + "px");
+    tooltip.html(TimeToolTip(seg)).
+    style("left", (d3.event.pageX) + "px").
+    style("top", (d3.event.pageY - 28) + "px");
+  }).
+  on("mouseout",function(d,i){
+    tooltip.transition().
+    duration(100).
+    style("opacity", 0.0); 
+  }).
+  on("mousemove",function(d,i){
+    tooltip.style("left", (d3.event.pageX) + "px").
+    style("top", (d3.event.pageY - 28) + "px");
 
-    })
+  })
 
   return element;
 } 
@@ -763,34 +783,35 @@ function timelineElement(card, startTime, endTime){
 //adds a segment timeline to each card with all interactions presented.
 function segmentTimelineElement(card){ 
   var element = {}
+  card = card.append("g").attr('label','segment_timeline')
   element.sWidth = 10;
   element.clickX1 = -1;
   element.clickX2 = -1;
 
   element.segmentSelectionBG = card.append("path").
-    attr("d", d3.line()([[40,60],[cardWidth-40,60]])).
-    attr("stroke","lightgrey").
-    attr("stroke-width", 10)
-    .on("mousemove",function(d,i){
-      tooltip.style("left", (d3.event.pageX) + "px").
-      style("top", (d3.event.pageY - 28) + "px");
+  attr("d", d3.line()([[40,60],[cardWidth-40,60]])).
+  attr("stroke","lightgrey").
+  attr("stroke-width", 10)
+  .on("mousemove",function(d,i){
+    tooltip.style("left", (d3.event.pageX) + "px").
+    style("top", (d3.event.pageY - 28) + "px");
 
-      var select = d3.select(".selection" + d.pid + "_" +d.number)      
+    var select = d3.select(".selection" + d.pid + "_" +d.number)      
       //snap to mouse when selection and area
       select.attr("x2", function(d,i){
         if(element.clickX1 != -1 && element.clickX2==-1){
-          return (event.offsetX+20)
+          return (event.offsetX)
         }else
-          return select.attr("x2")
-        })
+        return select.attr("x2")
+      })
     }).
-    on("mousedown",function(d,i){
-      var seg = GetSegment(d.number, d.pid, d.dataset)
-      var scale = d3.scaleLinear().domain([40,cardWidth-40]).range([seg.start,seg.end])
-      var select = d3.select(".selection" + d.pid + "_" +d.number)
+  on("mousedown",function(d,i){
+    var seg = GetSegment(d.number, d.pid, d.dataset)
+    var scale = d3.scaleLinear().domain([40,cardWidth-40]).range([seg.start,seg.end])
+    var select = d3.select(".selection" + d.pid + "_" +d.number)
       //log first click loc
       if(element.clickX1 == -1){
-        element.clickX1 = event.offsetX+20
+        element.clickX1 = event.offsetX
         select
         .attr("x1", element.clickX1)
         .attr("x2", element.clickX1)
@@ -802,7 +823,7 @@ function segmentTimelineElement(card){
       }
       //handle second click
       else if(element.clickX2 == -1){ 
-        element.clickX2 = event.offsetX+20
+        element.clickX2 = event.offsetX
         select.attr("x2",element.clickX2)
 
         //swap if x1 < x2
@@ -824,10 +845,10 @@ function segmentTimelineElement(card){
     attr("stroke-width", 3)
 
   element.segmentTimelineBG = card.append("g").
-    html(function(d,i){
-      var html = ""
-      var seg = GetSegment(d.number, d.pid, d.dataset)
-      var scale = d3.scaleLinear().domain([seg.start,seg.end]).range([40,cardWidth-40])
+  html(function(d,i){
+    var html = ""
+    var seg = GetSegment(d.number, d.pid, d.dataset)
+    var scale = d3.scaleLinear().domain([seg.start,seg.end]).range([40,cardWidth-40])
 
       //first draw reading
       for(var j=0; j<d.all_interactions.length;j++){
@@ -861,11 +882,11 @@ function segmentTimelineElement(card){
         //positioning
         switch(int.InteractionType){
           default:
-            x1 = scale(int.time/10)
-            x2 = scale(int.time/10)
-            y1 = 45-7.5
-            y2 = 45+7.5
-            stroke = int.InteractionType=="Doc_open"?2:4
+          x1 = scale(int.time/10)
+          x2 = scale(int.time/10)
+          y1 = 45-7.5
+          y2 = 45+7.5
+          stroke = int.InteractionType=="Doc_open"?2:4
         }                    
 
         var arg = "\""+d.number+"\",\""+j+"\""
@@ -876,7 +897,7 @@ function segmentTimelineElement(card){
     })
 
   return element
-  }
+}
 
 //get html for action bar tooltips
 function BarToolTipText(d, type){
@@ -956,27 +977,27 @@ function segTimelineOver(sid, number){
     text2 = "<p class=\"tooltipP\"><b>"+time+"-"+IntToTime((int.time+int.duration)/10)+"</b> ("+IntToTime(int.duration/10)+")<br>"+text+"</p>"
 
   tooltip.transition().
-    duration(100).
-    style("opacity", 1.0); 
+  duration(100).
+  style("opacity", 1.0); 
 
   tooltip.html(text2).
-    style("left", (event.pageX) + "px").
-    style("top", (event.pageY - 28) + "px");
+  style("left", (event.pageX) + "px").
+  style("top", (event.pageY - 28) + "px");
 }
 
 function segTimelineOut(){
   tooltip.transition().
-    duration(100).
-    style("opacity", 0); 
+  duration(100).
+  style("opacity", 0); 
 }
 
 function segTimelineMove(){
   tooltip.style("left", (event.pageX) + "px").
-    style("top", (event.pageY - 28) + "px");
+  style("top", (event.pageY - 28) + "px");
 }
 
 
-//Argument: a participant interaction json object
+//Argument: participant segment times, participant interactions
 //Result: 	an array of interaction json objects regrouped by segment
 function segmentify(segments, interactions){
 	var segmented_data = []
@@ -1221,29 +1242,29 @@ function count(arr){
 function TextToValue(d, type){
 	var data
 	switch(type){
-	case "Searches":
-    data = d.searches
-    break;
-  case "Highlights": 
-    data =  d.highlights
-    break;
-  case "Notes":
-    data =  d.notes
-    break;
-  case "Documents Opened":
-    data =  d.opens
-    break;
-  case "Total":
-    return d.total_interactions
-    break;
-  }
+   case "Searches":
+   data = d.searches
+   break;
+   case "Highlights": 
+   data =  d.highlights
+   break;
+   case "Notes":
+   data =  d.notes
+   break;
+   case "Documents Opened":
+   data =  d.opens
+   break;
+   case "Total":
+   return d.total_interactions
+   break;
+ }
 
-  var key = Object.keys(data)
-  var sum = 0;
-  for(var i=0; i<key.length;i++){
-    sum+=data[key[i]]
-  }
-  return sum
+ var key = Object.keys(data)
+ var sum = 0;
+ for(var i=0; i<key.length;i++){
+  sum+=data[key[i]]
+}
+return sum
 }
 
 //links segments and interactions
@@ -1255,7 +1276,8 @@ function GetSegment(sid, pid, dataset){
 	}
 }
 
-//returns all segments belonging to a participant
+//dataset = 1-3, pid = 1-9
+//returns all segments beloning to a participant from one of the datasets
 function GetSegments(dataset,pid){
 	var segments2 = []
 	for(var seg of segments){
@@ -1332,17 +1354,17 @@ function wrap(text, width) {
 }
 
 function saveSVG(svgEl, name) {
-    svgEl.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    var svgData = svgEl.outerHTML;
-    var preface = '<?xml version="1.0" standalone="no"?>\r\n';
-    var svgBlob = new Blob([preface, svgData], {type:"image/svg+xml;charset=utf-8"});
-    var svgUrl = URL.createObjectURL(svgBlob);
-    var downloadLink = document.createElement("a");
-    downloadLink.href = svgUrl;
-    downloadLink.download = name;
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
+  svgEl.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  var svgData = svgEl.outerHTML;
+  var preface = '<?xml version="1.0" standalone="no"?>\r\n';
+  var svgBlob = new Blob([preface, svgData], {type:"image/svg+xml;charset=utf-8"});
+  var svgUrl = URL.createObjectURL(svgBlob);
+  var downloadLink = document.createElement("a");
+  downloadLink.href = svgUrl;
+  downloadLink.download = name;
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
 }
 
 function saveSVGS(){
